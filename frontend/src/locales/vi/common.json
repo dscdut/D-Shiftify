@@ -1,0 +1,21 @@
+{
+  "common": {
+    "language": "Ngôn ngữ",
+    "theme": "Giao diện",
+    "light": "Sáng",
+    "dark": "Tối",
+    "system": "Hệ thống",
+    "errors": {
+      "general": "Đã xảy ra lỗi",
+      "notFound": "Không tìm thấy",
+      "unauthorized": "Không được phép",
+      "forbidden": "Bị từ chối"
+    },
+    "validation": {
+      "required": "{{field}} là bắt buộc",
+      "email": "Vui lòng nhập địa chỉ email hợp lệ",
+      "minLength": "{{field}} phải có ít nhất {{min}} ký tự",
+      "maxLength": "{{field}} không được vượt quá {{max}} ký tự"
+    }
+  }
+}

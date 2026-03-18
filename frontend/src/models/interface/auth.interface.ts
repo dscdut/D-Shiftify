@@ -1,0 +1,50 @@
+export interface APIResponse<T> {
+  data: T
+  message: string
+  status: number
+  success?: boolean
+}
+
+export interface LoginApiResponse {
+  data: LoginResponse
+  message: string
+}
+
+export interface LoginResponse {
+  user: { id: string; name: string; email: string; role: string }
+  access_token: string
+  refresh_token: string
+}
+
+// define the Account interface
+export interface Account {
+  email?: string
+  password?: string
+  confirmPassword?: string
+  name?: string
+  phone?: string
+}
+
+// define the RegisterReponse interface
+export interface RegisterReponse {
+  name: string
+  email: string
+  password: string
+  confirmPassword: string
+  phone?: string
+}
+
+export interface VerifyEmailReq {
+  email: string
+  verificationCode: string
+}
+
+export interface VerifyEmailRes {
+  message: string
+}
+
+export interface RememberMeData {
+  email: string
+  password: string
+  isRemembered: boolean
+}

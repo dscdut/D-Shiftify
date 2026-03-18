@@ -1,0 +1,21 @@
+{
+  "common": {
+    "language": "Language",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "errors": {
+      "general": "Something went wrong",
+      "notFound": "Not Found",
+      "unauthorized": "Unauthorized",
+      "forbidden": "Forbidden"
+    },
+    "validation": {
+      "required": "{{field}} is required",
+      "email": "Please enter a valid email",
+      "minLength": "{{field}} must be at least {{min}} characters",
+      "maxLength": "{{field}} must not exceed {{max}} characters"
+    }
+  }
+}
