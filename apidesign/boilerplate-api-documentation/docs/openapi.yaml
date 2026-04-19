@@ -652,6 +652,15 @@ paths:
                     type: string
                     format: date-time
                     example: "2024-04-15T15:30:00Z"
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban can dang nhap de cap nhat thong tin" }
         "403":
           description: Forbidden (Khong co quyen sua tin nay)
           content:
@@ -661,10 +670,24 @@ paths:
                 properties:
                   status: { type: string, example: "error" }
                   message: { type: string, example: "Ban khong co quyen chinh sua tin dang nay" }
-        "401":
-          description: Unauthorized
         "404":
-          description: Not Found
+          description: Khong tim thay tin tuyen dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Tin tuyen dung khong ton tai hoac da bi xoa" }
+        "500":
+          description: Loi he thong ben trong
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Co loi xay ra tu phia may chu. Vui long thu lai sau" }
     delete:
       tags:
         - Job
@@ -683,7 +706,7 @@ paths:
             example: "job-uuid-123"
       responses:
         "200":
-          description: Thanh cong
+          description: Xoa hoac dong tin tuyen dung thanh cong
           content:
             application/json:
               schema:
@@ -697,11 +720,43 @@ paths:
                     example: "success"
                   message:
                     type: string
-                    example: "Da dong tin tuyen dung thanh cong"
+                    example: "Da xoa tin tuyen dung thanh cong"
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Phien dang nhap het han hoac khong hop le" }
         "403":
-          description: Forbidden
+          description: Khong co quyen xoa tin nay (Khong phai chu so huu)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen xoa tin tuyen dung nay" }
         "404":
-          description: Not Found
+          description: Khong tim thay tin tuyen dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Tin tuyen dung khong ton tai hoac da bi xoa" }
+        "500":
+          description: Loi he thong ben trong
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Co loi xay ra tu phia may chu. Vui long thu lai sau" }
 components:
   securitySchemes:
     bearerAuth:
