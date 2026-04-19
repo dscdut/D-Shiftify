@@ -30,72 +30,118 @@ paths:
                 type: object
                 required:
                   - status
+                  - message
                   - data
                 properties:
                   status:
                     type: string
                     example: "success"
+                  message:
+                    type: string
+                    example: "Profile retrieved successfully"
                   data:
                     type: object
-                    required:
-                      - id
-                      - full_name
-                      - dob
-                      - gender
-                      - phone
-                      - disability_status
-                      - created_at
-                      - devices
                     properties:
-                      id:
-                        type: string
-                        format: uuid
-                        example: "uuid-profile"
-                      full_name:
-                        type: string
-                        example: "Nguyen Van A"
-                      dob:
-                        type: string
-                        format: date
-                        example: "1995-05-20"
-                      gender:
-                        type: string
-                        enum: [Male, Female, Other]
-                        example: "Male"
-                      phone:
-                        type: string
-                        example: "0987654321"
-                      disability_status:
-                        type: string
-                        example: "Khiếm thị nhẹ"
-                      created_at:
-                        type: string
-                        format: date-time
-                        example: "2023-10-01T08:00:00Z"
+                      id: { type: string, format: uuid, example: "uuid-profile" }
+                      full_name: { type: string, example: "Nguyen Van A" }
+                      dob: { type: string, example: "1995-05-20" }
+                      gender: { type: string, example: "Male" }
+                      phone: { type: string, example: "0987654321" }
+                      disability_status: { type: string, example: "Khiếm thị nhẹ" }
+                      created_at: { type: string, example: "2023-10-01T08:00:00Z" }
                       devices:
                         type: array
                         items:
                           type: object
-                          required:
-                            - id
-                            - name
                           properties:
-                            id:
-                              type: string
-                              example: "uuid-device-1"
-                            name:
-                              type: string
-                              example: "Máy đọc màn hình (Screen Reader)"
+                            id: { type: string, example: "uuid-device-1" }
+                            name: { type: string, example: "Máy đọc màn hình (Screen Reader)" }
         "401":
-          description: Unauthorized - Invalid or missing token
+          description: Unauthorized
           content:
             application/json:
               schema:
                 type: object
                 properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
+    patch:
+      tags:
+        - profile
+      summary: Chỉnh sửa thông tin của user hiện tại
+      operationId: updateCurrentUserProfile
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Thông tin hồ sơ cần cập nhật
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                full_name: { type: string, example: "Nguyễn Văn A" }
+                dob: { type: string, format: date, example: "1998-10-15" }
+                gender: { type: string, example: "Nam" }
+                phone: { type: string, example: "0912345678" }
+                disability_status: { type: string, example: "Khuyết tật vận động nhẹ" }
+                device_ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  example: ["uuid-device-1", "uuid-device-3"]
+      responses:
+        "200":
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
                   status:
                     type: string
-                    example: "error"
+                    example: "success"
                   message:
                     type: string
-                    example: "Unauthenticated"
+                    example: "Cập nhật hồ sơ thành công"
+                  data:
+                    type: object
+                    properties:
+                      id: { type: string, format: uuid, example: "uuid-profile" }
+                      full_name: { type: string, example: "Nguyễn Văn A" }
+                      dob: { type: string, example: "1998-10-15" }
+                      gender: { type: string, example: "Nam" }
+                      phone: { type: string, example: "0912345678" }
+                      disability_status: { type: string, example: "Khuyết tật vận động nhẹ" }
+                      devices:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id: { type: string, example: "uuid-device-1" }
+                            name: { type: string, example: "Xe lăn tay" }
+                            # (Thêm ví dụ record 2 cho giống ảnh)
+                        example: 
+                          - { id: "uuid-device-1", name: "Xe lăn tay" }
+                          - { id: "uuid-device-3", name: "Nẹp chân hỗ trợ" }
+                      updated_at: { type: string, format: date-time, example: "2024-05-20T10:30:00Z" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
