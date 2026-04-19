@@ -21,165 +21,428 @@ tags:
   - name: payment
     description: Operations about payment
 paths:
-  /auth/login:
+  /auth/v1/login:
     post:
       tags:
         - authentication
+      summary: User login
+      description: Authenticate a user and return access and refresh tokens.
       operationId: login
       requestBody:
-        description: default email and password, seeded in the database
+        description: User credentials
         required: true
         content:
           application/json:
             schema:
               type: object
-              properties:
-                email:
-                  type: string
-                  example: user@gmail.com
-                password:
-                  type: string
-                  example: Password123
               required:
                 - email
                 - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                  description: Registered email address.
+                password:
+                  type: string
+                  format: password
+                  example: SecurePassword123
+                  description: User's account password.
       responses:
         "200":
-          description: The user is authenticated, and an access token is returned.
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: User logged in successfully
+                  data:
+                    type: object
+                    required:
+                      - access_token
+                      - refresh_token
+                      - expires_in
+                      - user
+                    properties:
+                      access_token:
+                        type: string
+                        description: JWT token for authenticated requests.
+                        example: "eyJhbGci..."
+                      refresh_token:
+                        type: string
+                        description: Token used to obtain a new access token.
+                        example: "def456..."
+                      expires_in:
+                        type: integer
+                        description: Expiration time of access token in seconds.
+                        example: 3600
+                      user:
+                        type: object
+                        required:
+                          - id
+                          - email
+                          - role
+                          - full_name
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            example: "550e8400-e29b-41d4-a716-446655440000"
+                          email:
+                            type: string
+                            example: user@example.com
+                          role:
+                            type: string
+                            example: candidate
+                          full_name:
+                            type: string
+                            example: Nguyen Van A
+        "400":
+          description: Validation Error
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  access_token:
+                  status:
                     type: string
-                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-                required:
-                  - access_token
-        "400":
-          description: "Return this response if one of the following error occurs: 104"
-          content:
-            application/json:
-              examples:
-                error_104_example:
-                  value:
-                    error_code: 104
-                    message: Invalid syntax
-                    details:
-                      [
-                        The email field is required,
-                        The password field is required,
-                      ]
+                    example: "error"
+                  message:
+                    type: string
+                    example: Email and password are required
         "401":
-          description: "Return this response if one of the following error occurs: 102"
+          description: Unauthorized - Invalid credentials
           content:
             application/json:
-              examples:
-                error_102_example:
-                  $ref: "#/components/examples/error_102_example"
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: Invalid email or password
         "500":
-          description: "Return this response if one of the following error occurs: 103, 117, 118, 119"
+          description: Internal Server Error
           content:
             application/json:
-              examples:
-                error_103_example:
-                  $ref: "#/components/examples/error_103_example"
-  /auth/register:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: Server error during authentication
+  /auth/v1/register:
     post:
       tags:
         - authentication
+      summary: Register a new account
+      description: |
+        Endpoint for creating a new user account. 
+        Supports various roles: candidate, recruiter, training_center, and admin.
       operationId: register
       requestBody:
+        description: User registration details
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - email
+                - phone
+                - password
+                - role
+                - full_name
               properties:
-                full_name:
-                  type: string
-                  example: Pham Tien
-                  description: |-
-                    ^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$
-                    (Starts with one or more letters,
-                    allows for characters like spaces,
-                    hyphens, apostrophes, commas,
-                    and periods within the name,
-                    and does not allow trailing spaces)
                 email:
                   type: string
-                  example: user@gmail.com
-                  description: |-
-                    ^.*@.*\.(com|net|org)$
-                    (The email address must contain at least one character before and after the '@' symbol,
-                    and end with an extension like .com, .net, .org.)
+                  format: email
+                  example: user@example.com
+                  description: "Unique email address for registration."
+                phone:
+                  type: string
+                  example: "0987654321"
+                  description: "User phone number. Must be unique."
                 password:
                   type: string
-                  example: Password123
-                  description: |-
-                    ^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$
-                     (Minimum eight characters, at least one letter(uppercase or lowercase) and one number)
-                confirm_password:
+                  format: password
+                  example: SecurePassword123
+                  description: "Minimum 8 characters, at least one uppercase, one lowercase, and one number."
+                role:
                   type: string
-                  example: Password123
-              required:
-                - full_name
-                - email
-                - password
-                - confirm_password
+                  enum: [candidate, recruiter, training_center, admin]
+                  example: candidate
+                  description: "The intended role of the user within the platform."
+                full_name:
+                  type: string
+                  example: Nguyen Van A
+                  description: "Full legal name of the user."
       responses:
-        "201":
-          description: User registered successfully. Email and full_name are returned.
+        "200":
+          description: User registered successfully
           content:
             application/json:
               schema:
-                properties:
-                  id:
-                    type: integer
-                    example: 1
-                  full_name:
-                    type: string
-                    example: Pham Tien
-                  email:
-                    type: string
-                    example: user@gmail.com
+                type: object
                 required:
-                  - id
-                  - full_name
-                  - email
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: User registered successfully
+                  data:
+                    type: object
+                    required:
+                      - user_id
+                      - email
+                      - role
+                    properties:
+                      user_id:
+                        type: string
+                        format: uuid
+                        example: "550e8400-e29b-41d4-a716-446655440000"
+                      email:
+                        type: string
+                        example: user@example.com
+                      role:
+                        type: string
+                        example: candidate
         "400":
-          description: "Return this response if one of the following error occurs: 104"
+          description: Validation Error (Invalid format or missing fields)
           content:
             application/json:
-              examples:
-                error_104_example:
-                  value:
-                    error_code: 104
-                    message: Invalid syntax
-                    details: [
-                        "Missing required email field",
-                        "Missing required full_name field",
-                        "Invalid full_name field format: Starts with one or more letters, allows for characters like spaces, hyphens, apostrophes, commas, periods within the name, does not allow trailing spaces",
-                        "Invalid email field format: The email address must contain at least one character before and after the '@' symbol and end with an extension like .com, .net, .org.",
-                        "Invalid password field format: The length of the string must be between 7 and 50 characters.
-                        It must contain at least one digit.
-                        It must contain at least one uppercase letter ",
-                        "Password and confirm password do not match",
-                      ]
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: Validation failed
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                    example: ["Email is invalid", "Password must be at least 8 characters"]
         "409":
-          description: "Return this response if one of the following error occurs: 108"
+          description: Conflict (Email or Phone already exists)
           content:
             application/json:
-              examples:
-                error_108_example:
-                  $ref: "#/components/examples/error_108_example"
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: User already exists
         "500":
-          description: "Return this response if one of the following error occurs: 103, 117, 118, 119"
+          description: Internal Server Error
           content:
             application/json:
-              examples:
-                error_103_example:
-                  $ref: "#/components/examples/error_103_example"
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: Internal server error occurred
+  /auth/v1/refresh:
+    post:
+      tags:
+        - authentication
+      summary: Refresh authentication tokens
+      description: Get a new access token using a valid refresh token.
+      operationId: refreshTokens
+      requestBody:
+        description: Refresh token payload
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refresh_token
+              properties:
+                refresh_token:
+                  type: string
+                  example: "def456..."
+                  description: "The refresh token provided during login."
+      responses:
+        "200":
+          description: Tokens refreshed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  data:
+                    type: object
+                    required:
+                      - access_token
+                      - refresh_token
+                    properties:
+                      access_token:
+                        type: string
+                        example: "new-eyJhbGci..."
+                      refresh_token:
+                        type: string
+                        example: "new-def456..."
+        "401":
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: Refresh token is invalid or expired
+  /auth/v1/forgot-password:
+    post:
+      tags:
+        - authentication
+      summary: Request password reset
+      description: |
+        Endpoint to request a password reset code. 
+        A code or link will be sent to the provided email if it exists in the system.
+      operationId: forgotPassword
+      requestBody:
+        description: Registered user email
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                  description: "The email address associated with the account."
+      responses:
+        "200":
+          description: Reset code sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "The code has been sent to your email. Please check the email box!"
+        "404":
+          description: Email not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: Email address not found
+  /auth/v1/reset-password:
+    post:
+      tags:
+        - authentication
+      summary: Reset user password
+      description: Update the password for an account using a valid reset token.
+      operationId: resetPassword
+      requestBody:
+        description: Token and new password details
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+                - new_password
+              properties:
+                token:
+                  type: string
+                  example: "reset-token-from-email"
+                  description: "The reset token received via email."
+                new_password:
+                  type: string
+                  format: password
+                  example: "NewSecurePassword123"
+                  description: "The new password for the account."
+      responses:
+        "200":
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Mật khẩu đã được thay đổi thành công. Bạn có thể đăng nhập ngay bây giờ."
+        "400":
+          description: Invalid token or password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: "Mã xác thực không hợp lệ hoặc mật khẩu không đúng yêu cầu."
   /users:
     get:
       tags:
