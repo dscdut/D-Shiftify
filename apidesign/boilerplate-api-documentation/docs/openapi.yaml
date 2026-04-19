@@ -236,6 +236,77 @@ paths:
                 properties:
                   status: { type: string, example: "error" }
                   message: { type: string, example: "Unauthenticated" }
+  /profile/v1/voice-logs:
+    post:
+      tags:
+        - profile
+      summary: Lưu nhật ký sử dụng giọng nói (STT/TTS)
+      operationId: createVoiceLog
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Thông tin nhật ký giọng nói
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - type
+                - source
+                - reference_id
+                - status
+              properties:
+                type:
+                  type: string
+                  enum: [stt, tts]
+                  description: Loại xử lý giọng nói
+                  example: "stt"
+                source:
+                  type: string
+                  enum: [cv, chat, job, system]
+                  description: Nguồn gọi xử lý
+                  example: "cv"
+                reference_id:
+                  type: string
+                  format: uuid
+                  example: "uuid-reference-id"
+                status:
+                  type: integer
+                  example: 200
+      responses:
+        "201":
+          description: Log created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Voice log saved successfully"
+                  data:
+                    type: object
+                    properties:
+                      id: { type: string, format: uuid, example: "uuid-log-new" }
+                      user_id: { type: string, format: uuid, example: "uuid-user" }
+                      created_at: { type: string, format: date-time, example: "2024-05-20T10:00:00Z" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
 components:
   securitySchemes:
     bearerAuth:
