@@ -450,6 +450,71 @@ paths:
                 properties:
                   status: { type: string, example: "error" }
                   message: { type: string, example: "Unauthenticated" }
+    get:
+      tags:
+        - Job
+      summary: Lấy danh sách công việc (Dành cho ứng viên)
+      operationId: getJobs
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+          description: Trang hiện tại
+        - name: limit
+          in: query
+          schema: { type: integer, default: 10 }
+          description: Số lượng bản ghi trên mỗi trang
+        - name: search
+          in: query
+          schema: { type: string }
+          description: Tìm kiếm theo tiêu đề công việc
+        - name: job_type
+          in: query
+          schema: { type: string }
+          description: Bộ lọc theo loại hình công việc (Full-time, Part-time,...)
+        - name: min_salary
+          in: query
+          schema: { type: integer }
+          description: Bộ lọc theo mức lương tối thiểu
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - total
+                  - page
+                  - limit
+                  - data
+                properties:
+                  total: { type: integer, example: 150 }
+                  page: { type: integer, example: 1 }
+                  limit: { type: integer, example: 10 }
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, format: uuid, example: "job-uuid-123" }
+                        title: { type: string, example: "Nhân viên Chăm sóc khách hàng" }
+                        company_name: { type: string, example: "Công ty ABC" }
+                        logo_url: { type: string, example: "https://example.com/logo.png" }
+                        location: { type: string, example: "Đà Nẵng" }
+                        salary_range: { type: string, example: "7tr - 12tr" }
+                        created_at: { type: string, format: date-time, example: "2024-04-15T08:00:00Z" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
 components:
   securitySchemes:
     bearerAuth:
