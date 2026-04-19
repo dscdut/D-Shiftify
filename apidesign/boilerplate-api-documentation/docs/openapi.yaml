@@ -138,6 +138,53 @@ paths:
                 properties:
                   status: { type: string, example: "error" }
                   message: { type: string, example: "Unauthenticated" }
+    delete:
+      tags:
+        - profile
+      summary: Xóa tài khoản
+      operationId: deleteCurrentUserAccount
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Xác nhận mật khẩu để xóa tài khoản
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - password
+              properties:
+                password:
+                  type: string
+                  format: password
+                  example: "ConfirmPasswordToVerify"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Tài khoản của bạn đã được vô hiệu hóa."
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
   /profile/v1/me/devices:
     post:
       tags:
