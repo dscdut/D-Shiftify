@@ -47,7 +47,7 @@ paths:
                       dob: { type: string, example: "1995-05-20" }
                       gender: { type: string, example: "Male" }
                       phone: { type: string, example: "0987654321" }
-                      disability_status: { type: string, example: "Khiếm thị nhẹ" }
+                      disability_status: { type: string, example: "Khiem thi nhe" }
                       created_at: { type: string, example: "2023-10-01T08:00:00Z" }
                       devices:
                         type: array
@@ -55,7 +55,7 @@ paths:
                           type: object
                           properties:
                             id: { type: string, example: "uuid-device-1" }
-                            name: { type: string, example: "Máy đọc màn hình (Screen Reader)" }
+                            name: { type: string, example: "May doc man hinh (Screen Reader)" }
         "401":
           description: Unauthorized
           content:
@@ -68,23 +68,23 @@ paths:
     patch:
       tags:
         - profile
-      summary: Chỉnh sửa thông tin của user hiện tại
+      summary: Chinh sua thong tin cua user hien tai
       operationId: updateCurrentUserProfile
       security:
         - bearerAuth: []
       requestBody:
-        description: Thông tin hồ sơ cần cập nhật
+        description: Thong tin ho so can cap nhat
         required: true
         content:
           application/json:
             schema:
               type: object
               properties:
-                full_name: { type: string, example: "Nguyễn Văn A" }
+                full_name: { type: string, example: "Nguyen Van A" }
                 dob: { type: string, format: date, example: "1998-10-15" }
                 gender: { type: string, example: "Nam" }
                 phone: { type: string, example: "0912345678" }
-                disability_status: { type: string, example: "Khuyết tật vận động nhẹ" }
+                disability_status: { type: string, example: "Khuyet tat van dong nhe" }
                 device_ids:
                   type: array
                   items:
@@ -93,7 +93,7 @@ paths:
                   example: ["uuid-device-1", "uuid-device-3"]
       responses:
         "200":
-          description: Cập nhật thành công
+          description: Cap nhat thanh cong
           content:
             application/json:
               schema:
@@ -108,26 +108,26 @@ paths:
                     example: "success"
                   message:
                     type: string
-                    example: "Cập nhật hồ sơ thành công"
+                    example: "Cap nhat ho so thanh cong"
                   data:
                     type: object
                     properties:
                       id: { type: string, format: uuid, example: "uuid-profile" }
-                      full_name: { type: string, example: "Nguyễn Văn A" }
+                      full_name: { type: string, example: "Nguyen Van A" }
                       dob: { type: string, example: "1998-10-15" }
                       gender: { type: string, example: "Nam" }
                       phone: { type: string, example: "0912345678" }
-                      disability_status: { type: string, example: "Khuyết tật vận động nhẹ" }
+                      disability_status: { type: string, example: "Khuyet tat van dong nhe" }
                       devices:
                         type: array
                         items:
                           type: object
                           properties:
                             id: { type: string, example: "uuid-device-1" }
-                            name: { type: string, example: "Xe lăn tay" }
+                            name: { type: string, example: "Xe lan tay" }
                         example: 
-                          - { id: "uuid-device-1", name: "Xe lăn tay" }
-                          - { id: "uuid-device-3", name: "Nẹp chân hỗ trợ" }
+                          - { id: "uuid-device-1", name: "Xe lan tay" }
+                          - { id: "uuid-device-3", name: "Nep chan ho tro" }
                       updated_at: { type: string, format: date-time, example: "2024-05-20T10:30:00Z" }
         "401":
           description: Unauthorized
@@ -141,12 +141,12 @@ paths:
     delete:
       tags:
         - profile
-      summary: Xóa tài khoản
+      summary: Xoa tai khoan
       operationId: deleteCurrentUserAccount
       security:
         - bearerAuth: []
       requestBody:
-        description: Xác nhận mật khẩu để xóa tài khoản
+        description: Xac nhan mat khau de xoa tai khoan
         required: true
         content:
           application/json:
@@ -175,7 +175,7 @@ paths:
                     example: "success"
                   message:
                     type: string
-                    example: "Tài khoản của bạn đã được vô hiệu hóa."
+                    example: "Tai khoan cua ban da duoc vo hieu hoa."
         "401":
           description: Unauthorized
           content:
@@ -189,12 +189,12 @@ paths:
     post:
       tags:
         - profile
-      summary: Thêm thiết bị vào profile của user
+      summary: Them thiet bi vao profile cua user
       operationId: addDevicesToProfile
       security:
         - bearerAuth: []
       requestBody:
-        description: Danh sách ID thiết bị cần thêm
+        description: Danh sach ID thiet bi can them
         required: true
         content:
           application/json:
@@ -239,7 +239,7 @@ paths:
     get:
       tags:
         - profile
-      summary: Lấy danh sách tất cả các thiết bị hỗ trợ có sẵn trong hệ thống
+      summary: Lay danh sach tat ca cac thiet bi ho tro co san trong he thong
       operationId: getAssistiveDevices
       security:
         - bearerAuth: []
@@ -260,7 +260,7 @@ paths:
                     example: "success"
                   message:
                     type: string
-                    example: "Danh sách thiết bị hỗ trợ"
+                    example: "Danh sach thiet bi ho tro"
                   data:
                     type: array
                     items:
@@ -270,10 +270,10 @@ paths:
                         - name
                       properties:
                         id: { type: string, format: uuid, example: "uuid1" }
-                        name: { type: string, example: "Xe lăn điện" }
+                        name: { type: string, example: "Xe lan dien" }
                     example:
-                      - { id: "uuid1", name: "Xe lăn điện" }
-                      - { id: "uuid2", name: "Máy trợ thính" }
+                      - { id: "uuid1", name: "Xe lan dien" }
+                      - { id: "uuid2", name: "May tro thinh" }
         "401":
           description: Unauthorized
           content:
@@ -287,12 +287,12 @@ paths:
     post:
       tags:
         - profile
-      summary: Lưu nhật ký sử dụng giọng nói (STT/TTS)
+      summary: Luu nhat ky su dung giong noi (STT/TTS)
       operationId: createVoiceLog
       security:
         - bearerAuth: []
       requestBody:
-        description: Thông tin nhật ký giọng nói
+        description: Thong tin nhat ky giong noi
         required: true
         content:
           application/json:
@@ -307,12 +307,12 @@ paths:
                 type:
                   type: string
                   enum: [stt, tts]
-                  description: Loại xử lý giọng nói
+                  description: Loai xu ly giong noi
                   example: "stt"
                 source:
                   type: string
                   enum: [cv, chat, job, system]
-                  description: Nguồn gọi xử lý
+                  description: Nguon goi xu ly
                   example: "cv"
                 reference_id:
                   type: string
