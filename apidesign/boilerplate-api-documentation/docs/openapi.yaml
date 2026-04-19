@@ -429,7 +429,7 @@ paths:
                     example: "success"
                   message:
                     type: string
-                    example: "Mật khẩu đã được thay đổi thành công. Bạn có thể đăng nhập ngay bây giờ."
+                    example: "Mat khau da duoc thay doi thanh cong. Ban co the dang nhap ngay bay gio."
         "400":
           description: Invalid token or password
           content:
@@ -442,7 +442,7 @@ paths:
                     example: "error"
                   message:
                     type: string
-                    example: "Mã xác thực không hợp lệ hoặc mật khẩu không đúng yêu cầu."
+                    example: "Ma xac thuc khong hop le hoac mat khau khong dung yeu cau."
   /users:
     get:
       tags:
