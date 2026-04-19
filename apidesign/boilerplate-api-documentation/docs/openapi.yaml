@@ -73,8 +73,22 @@ paths:
                         example: "2024-04-15T20:00:00Z"
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban can dang nhap de nop don ung tuyen" }
         "404":
           description: Not Found (Khong tim thay Job hoac CV)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay cong viec hoac ho so ung tuyen" }
     get:
       tags:
         - Application
@@ -154,8 +168,22 @@ paths:
                           example: "applied"
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de xem danh sach ung tuyen" }
         "403":
           description: Forbidden (Khong co quyen xem danh sach cua job nay)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen xem danh sach ung vien cho cong viec nay" }
   /api/v1/applications/{id}:
     patch:
       tags:
@@ -211,10 +239,31 @@ paths:
                     example: "2024-04-15T21:00:00Z"
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban can dang nhap de cap nhat trang thai" }
         "403":
           description: Forbidden (Khong co quyen cap nhat don nay)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen thay doi trang thai don ung tuyen nay" }
         "404":
           description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay don ung tuyen" }
   /api/v1/matches/jobs:
     get:
       tags:
@@ -264,6 +313,13 @@ paths:
                           example: "Phu hop 4/5 ky nang yeu cau va vi tri gan noi o cua ban"
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban can dang nhap de nhan goi y viec lam" }
   /api/v1/matches/candidates/{job_id}:
     get:
       tags:
@@ -327,10 +383,31 @@ paths:
                           example: "Can ho tro thiet ke giao dien tuong phan cao"
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de xem goi y ung vien" }
         "403":
           description: Forbidden (Khong phai chu so huu Job nay)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen xem goi y ung vien cho cong viec nay" }
         "404":
           description: Job khong ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay cong viec yeu cau" }
 components:
   securitySchemes:
     bearerAuth:
