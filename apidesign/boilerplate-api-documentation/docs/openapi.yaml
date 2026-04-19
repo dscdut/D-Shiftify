@@ -145,6 +145,107 @@ paths:
                 properties:
                   status: { type: string, example: "error" }
                   message: { type: string, example: "Unauthenticated" }
+  /api/v1/cvs/{id}:
+    get:
+      tags:
+        - CV
+      summary: Lấy chi tiết một CV
+      operationId: getCVById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID của CV cần lấy chi tiết
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "8e5e9334-..."
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Chi tiết CV"
+                  data:
+                    type: object
+                    required:
+                      - id
+                      - profile
+                      - job_type
+                      - work_mode
+                      - mobility
+                      - expected_job
+                      - updated_at
+                    properties:
+                      id: { type: string, format: uuid, example: "8e5e9334-..." }
+                      profile:
+                        type: object
+                        properties:
+                          full_name: { type: string, example: "Phạm Hoàng Vũ" }
+                          disability_status: { type: string, example: "Khiếm thính nhẹ" }
+                      job_type: { type: string, example: "Full-time" }
+                      work_mode: { type: string, example: "Remote" }
+                      mobility: { type: string, example: "Sử dụng xe lăn" }
+                      expected_job: { type: string, example: "Nhân viên nhập liệu" }
+                      conditions:
+                        type: object
+                        properties:
+                          prefer_near_home: { type: boolean, example: true }
+                          prefer_low_traffic: { type: boolean, example: true }
+                          prefer_good_company: { type: boolean, example: true }
+                      experiences:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            description: { type: string, example: "Thực tập sinh tại The Code Origin" }
+                            working_time: { type: string, example: "3 tháng" }
+                      skills:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id: { type: string, example: "uuid-1" }
+                            name: { type: string, example: "Node.js" }
+                            type: { type: string, example: "hard" }
+                      certificates:
+                        type: array
+                        items:
+                          type: string
+                        example: ["Chứng chỉ Tin học văn phòng A"]
+                      updated_at: { type: string, format: date-time, example: "2024-04-15T10:00:00Z" }
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Không tìm thấy CV" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
 components:
   securitySchemes:
     bearerAuth:
