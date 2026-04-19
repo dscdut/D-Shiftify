@@ -97,6 +97,54 @@ paths:
                 properties:
                   status: { type: string, example: "error" }
                   message: { type: string, example: "Unauthenticated" }
+    get:
+      tags:
+        - CV
+      summary: Lấy danh sách CV của ứng viên hiện tại
+      operationId: getMyCVs
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Danh sách CV đã tạo"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - expected_job
+                        - job_type
+                        - created_at
+                      properties:
+                        id: { type: string, format: uuid, example: "8e5e9334-..." }
+                        expected_job: { type: string, example: "Nhân viên nhập liệu" }
+                        job_type: { type: string, example: "Full-time" }
+                        created_at: { type: string, format: date-time, example: "2024-04-15T12:00:00Z" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
 components:
   securitySchemes:
     bearerAuth:
