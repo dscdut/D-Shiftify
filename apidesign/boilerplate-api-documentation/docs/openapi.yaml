@@ -382,6 +382,74 @@ paths:
                 properties:
                   status: { type: string, example: "error" }
                   message: { type: string, example: "Unauthenticated" }
+  /api/v1/jobs:
+    post:
+      tags:
+        - Job
+      summary: Nhà tuyển dụng đăng tin tuyển dụng mới
+      operationId: createJob
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - job_type
+                - work_mode
+                - location
+                - description
+              properties:
+                title: { type: string, example: "Nhân viên Chăm sóc khách hàng" }
+                job_type: { type: string, example: "Full-time" }
+                work_mode: { type: string, example: "Hybrid" }
+                experience_required: { type: string, example: "Không yêu cầu kinh nghiệm" }
+                salary_min: { type: integer, example: 7000000 }
+                salary_max: { type: integer, example: 12000000 }
+                location: { type: string, example: "Quận Hải Châu, Đà Nẵng" }
+                working_time: { type: string, example: "08:00 - 17:30" }
+                description: { type: string, example: "Ưu tiên ứng viên có khả năng giao tiếp tốt, hỗ trợ người khiếm thính..." }
+                skills:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      skill_id: { type: string, format: uuid, example: "uuid-skill-1" }
+                      is_required: { type: boolean, example: true }
+      responses:
+        "201":
+          description: Đăng tin thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - job_id
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Đăng tin tuyển dụng thành công"
+                  job_id:
+                    type: string
+                    format: uuid
+                    example: "job-uuid-123"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
 components:
   securitySchemes:
     bearerAuth:
