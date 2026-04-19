@@ -75,6 +75,87 @@ paths:
           description: Unauthorized
         "404":
           description: Not Found (Không tìm thấy Job hoặc CV)
+    get:
+      tags:
+        - Application
+      summary: Recruiter xem danh sách người ứng tuyển
+      operationId: getApplications
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: job_id
+          in: query
+          required: true
+          description: Lọc danh sách ứng tuyển theo ID công việc
+          schema:
+            type: string
+            format: uuid
+            example: "uuid-job-789"
+        - name: status
+          in: query
+          description: Lọc theo trạng thái ứng tuyển (applied, interviewing, accepted, rejected)
+          schema:
+            type: string
+            example: "applied"
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - total
+                  - data
+                properties:
+                  total:
+                    type: integer
+                    example: 5
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - candidate
+                        - cv_summary
+                        - applied_at
+                        - status
+                      properties:
+                        candidate:
+                          type: object
+                          properties:
+                            full_name: { type: string, example: "Phạm Hoàng Vũ" }
+                            phone: { type: string, example: "0123456789" }
+                            avatar_url: { type: string, example: "https://..." }
+                        cv_summary:
+                          type: object
+                          properties:
+                            expected_job: { type: string, example: "Backend Developer" }
+                            skills: 
+                              type: array
+                              items: { type: string }
+                              example: ["Node.js", "PostgreSQL"]
+                        applied_at:
+                          type: string
+                          format: date-time
+                          example: "2024-04-15T20:00:00Z"
+                        status:
+                          type: string
+                          example: "applied"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (Không có quyền xem danh sách của job này)
 components:
   securitySchemes:
     bearerAuth:
