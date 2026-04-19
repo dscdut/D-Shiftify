@@ -665,6 +665,43 @@ paths:
           description: Unauthorized
         "404":
           description: Not Found
+    delete:
+      tags:
+        - Job
+      summary: Xóa/Đóng tin tuyển dụng
+      operationId: deleteJob
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID của công việc cần xóa/đóng
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "job-uuid-123"
+      responses:
+        "200":
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Đã đóng tin tuyển dụng thành công"
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
 components:
   securitySchemes:
     bearerAuth:
