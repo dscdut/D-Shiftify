@@ -603,6 +603,68 @@ paths:
                 properties:
                   status: { type: string, example: "error" }
                   message: { type: string, example: "Unauthenticated" }
+    patch:
+      tags:
+        - Job
+      summary: Cập nhật thông tin công việc
+      operationId: updateJob
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID của công việc cần cập nhật
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "job-uuid-123"
+      requestBody:
+        description: Các trường cần cập nhật (Partial Update)
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string, example: "Nhân viên Chăm sóc khách hàng (Update)" }
+                salary_max: { type: integer, example: 15000000 }
+                description: { type: string, example: "Cập nhật thêm quyền lợi: Hỗ trợ ăn trưa..." }
+                # Bổ sung các trường khác có thể update nếu cần
+      responses:
+        "200":
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - updated_at
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Cập nhật thông tin thành công"
+                  updated_at:
+                    type: string
+                    format: date-time
+                    example: "2024-04-15T15:30:00Z"
+        "403":
+          description: Forbidden (Không có quyền sửa tin này)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Bạn không có quyền chỉnh sửa tin đăng này" }
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
 components:
   securitySchemes:
     bearerAuth:
