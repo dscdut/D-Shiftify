@@ -246,6 +246,91 @@ paths:
                 properties:
                   status: { type: string, example: "error" }
                   message: { type: string, example: "Unauthenticated" }
+    patch:
+      tags:
+        - CV
+      summary: Cập nhật thông tin CV
+      operationId: updateCV
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID của CV cần cập nhật
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "8e5e9334-..."
+      requestBody:
+        description: Thông tin CV cần cập nhật (hỗ trợ cập nhật từng phần)
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                expected_job: { type: string, example: "Senior Backend Developer" }
+                work_mode: { type: string, example: "Hybrid" }
+                conditions:
+                  type: object
+                  properties:
+                    prefer_near_home: { type: boolean, example: false }
+                experiences:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      description: { type: string }
+                      working_time: { type: string }
+                skills:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                certificates:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - updated_at
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Cập nhật CV thành công"
+                  updated_at:
+                    type: string
+                    format: date-time
+                    example: "2024-04-15T10:00:00Z"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Không tìm thấy CV" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
 components:
   securitySchemes:
     bearerAuth:
