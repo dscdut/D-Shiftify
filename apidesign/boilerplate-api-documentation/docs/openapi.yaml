@@ -125,11 +125,60 @@ paths:
                           properties:
                             id: { type: string, example: "uuid-device-1" }
                             name: { type: string, example: "Xe lăn tay" }
-                            # (Thêm ví dụ record 2 cho giống ảnh)
                         example: 
                           - { id: "uuid-device-1", name: "Xe lăn tay" }
                           - { id: "uuid-device-3", name: "Nẹp chân hỗ trợ" }
                       updated_at: { type: string, format: date-time, example: "2024-05-20T10:30:00Z" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
+  /profile/v1/me/devices:
+    post:
+      tags:
+        - profile
+      summary: Thêm thiết bị vào profile của user
+      operationId: addDevicesToProfile
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Danh sách ID thiết bị cần thêm
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - device_ids
+              properties:
+                device_ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  example: ["uuid1", "uuid2"]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Add devices successfully"
         "401":
           description: Unauthorized
           content:
