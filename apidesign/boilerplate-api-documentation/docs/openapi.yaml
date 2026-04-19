@@ -156,6 +156,65 @@ paths:
           description: Unauthorized
         "403":
           description: Forbidden (Không có quyền xem danh sách của job này)
+  /api/v1/applications/{id}:
+    patch:
+      tags:
+        - Application
+      summary: Cập nhật trạng thái ứng tuyển (Duyệt/Từ chối)
+      operationId: updateApplicationStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID của đơn ứng tuyển cần cập nhật
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "uuid-app-001"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  description: Trạng thái mới của đơn ứng tuyển
+                  enum: [applied, interviewing, accepted, rejected]
+                  example: "accepted"
+      responses:
+        "200":
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - updated_at
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Đã cập nhật trạng thái ứng tuyển thành công"
+                  updated_at:
+                    type: string
+                    format: date-time
+                    example: "2024-04-15T21:00:00Z"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (Không có quyền cập nhật đơn này)
+        "404":
+          description: Not Found
 components:
   securitySchemes:
     bearerAuth:
