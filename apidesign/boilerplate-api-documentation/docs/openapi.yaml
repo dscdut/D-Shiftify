@@ -1,487 +1,83 @@
 openapi: 3.1.0
 info:
-  title: Template Swagger API Documentation
+  title: Shiftify API Documentation
   description: |-
-    API documentation for the template projects, created by GDSC-DUT. This documentation offers detailed insights into the common API endpoints used across all templates.
+    Hệ thống quản lý tin tuyển dụng và CV dành cho người yếu thế.
   contact:
     email: contact@gdsc.dev
   version: 1.0.0
-externalDocs:
-  description: Find out more about Swagger
-  url: http://swagger.io
 servers:
   - url: http://localhost:3000
-tags:
-  - name: authentication
-    description: Operations about authentication
-  - name: users
-    description: Operations about user
-  - name: admin
-    description: Operations about admin
-  - name: payment
-    description: Operations about payment
 paths:
-  /auth/login:
+  /api/v1/applications:
     post:
       tags:
-        - authentication
-      operationId: login
+        - Application
+      summary: Ứng viên nộp đơn vào công việc
+      operationId: applyJob
+      security:
+        - bearerAuth: []
       requestBody:
-        description: default email and password, seeded in the database
         required: true
         content:
           application/json:
             schema:
               type: object
-              properties:
-                email:
-                  type: string
-                  example: user@gmail.com
-                password:
-                  type: string
-                  example: Password123
               required:
-                - email
-                - password
+                - job_id
+                - cv_id
+              properties:
+                job_id:
+                  type: string
+                  format: uuid
+                  example: "uuid-job-789"
+                cv_id:
+                  type: string
+                  format: uuid
+                  example: "uuid-cv-456"
       responses:
-        "200":
-          description: The user is authenticated, and an access token is returned.
+        "201":
+          description: Nộp đơn thành công
           content:
             application/json:
               schema:
                 type: object
-                properties:
-                  access_token:
-                    type: string
-                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
                 required:
-                  - access_token
-        "400":
-          description: "Return this response if one of the following error occurs: 104"
-          content:
-            application/json:
-              examples:
-                error_104_example:
-                  value:
-                    error_code: 104
-                    message: Invalid syntax
-                    details:
-                      [
-                        The email field is required,
-                        The password field is required,
-                      ]
-        "401":
-          description: "Return this response if one of the following error occurs: 102"
-          content:
-            application/json:
-              examples:
-                error_102_example:
-                  $ref: "#/components/examples/error_102_example"
-        "500":
-          description: "Return this response if one of the following error occurs: 103, 117, 118, 119"
-          content:
-            application/json:
-              examples:
-                error_103_example:
-                  $ref: "#/components/examples/error_103_example"
-  /auth/register:
-    post:
-      tags:
-        - authentication
-      operationId: register
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                full_name:
-                  type: string
-                  example: Pham Tien
-                  description: |-
-                    ^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$
-                    (Starts with one or more letters,
-                    allows for characters like spaces,
-                    hyphens, apostrophes, commas,
-                    and periods within the name,
-                    and does not allow trailing spaces)
-                email:
-                  type: string
-                  example: user@gmail.com
-                  description: |-
-                    ^.*@.*\.(com|net|org)$
-                    (The email address must contain at least one character before and after the '@' symbol,
-                    and end with an extension like .com, .net, .org.)
-                password:
-                  type: string
-                  example: Password123
-                  description: |-
-                    ^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$
-                     (Minimum eight characters, at least one letter(uppercase or lowercase) and one number)
-                confirm_password:
-                  type: string
-                  example: Password123
-              required:
-                - full_name
-                - email
-                - password
-                - confirm_password
-      responses:
-        "201":
-          description: User registered successfully. Email and full_name are returned.
-          content:
-            application/json:
-              schema:
-                properties:
-                  id:
-                    type: integer
-                    example: 1
-                  full_name:
-                    type: string
-                    example: Pham Tien
-                  email:
-                    type: string
-                    example: user@gmail.com
-                required:
-                  - id
-                  - full_name
-                  - email
-        "400":
-          description: "Return this response if one of the following error occurs: 104"
-          content:
-            application/json:
-              examples:
-                error_104_example:
-                  value:
-                    error_code: 104
-                    message: Invalid syntax
-                    details: [
-                        "Missing required email field",
-                        "Missing required full_name field",
-                        "Invalid full_name field format: Starts with one or more letters, allows for characters like spaces, hyphens, apostrophes, commas, periods within the name, does not allow trailing spaces",
-                        "Invalid email field format: The email address must contain at least one character before and after the '@' symbol and end with an extension like .com, .net, .org.",
-                        "Invalid password field format: The length of the string must be between 7 and 50 characters.
-                        It must contain at least one digit.
-                        It must contain at least one uppercase letter ",
-                        "Password and confirm password do not match",
-                      ]
-        "409":
-          description: "Return this response if one of the following error occurs: 108"
-          content:
-            application/json:
-              examples:
-                error_108_example:
-                  $ref: "#/components/examples/error_108_example"
-        "500":
-          description: "Return this response if one of the following error occurs: 103, 117, 118, 119"
-          content:
-            application/json:
-              examples:
-                error_103_example:
-                  $ref: "#/components/examples/error_103_example"
-  /users:
-    get:
-      tags:
-        - users
-      operationId: get_users
-      parameters:
-        - $ref: "#/components/parameters/page_size_param"
-        - $ref: "#/components/parameters/page_param"
-      responses:
-        "200":
-          description: A paginated list of users
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/paginated_total"
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/user_info"
-                required:
+                  - status
+                  - message
                   - data
-        "400":
-          description: "Return this response if one of the following error occurs: 104"
-          content:
-            application/json:
-              examples:
-                error_104_example:
-                  value:
-                    error_code: 104
-                    message: Invalid syntax
-                    details:
-                      [
-                        The invalid parameter is passed to the page. The 'page' parameter must be a number greater than 0,
-                        The invalid parameter is passed to the page_size. The 'page_size' parameter must be a number greater than 0,
-                      ]
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Nộp đơn ứng tuyển thành công"
+                  data:
+                    type: object
+                    required:
+                      - application_id
+                      - status
+                      - created_at
+                    properties:
+                      application_id:
+                        type: string
+                        format: uuid
+                        example: "uuid-app-001"
+                      status:
+                        type: string
+                        example: "applied"
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: "2024-04-15T20:00:00Z"
         "401":
-          description: "Return this response if one of the following error occurs: 116"
-          content:
-            application/json:
-              examples:
-                error_116_example:
-                  $ref: "#/components/examples/error_116_example"
+          description: Unauthorized
         "404":
-          description: "Return this response if one of the following error occurs: 115"
-          content:
-            application/json:
-              examples:
-                error_115_example:
-                  value:
-                    error_code: 115
-                    message: The resource does not exist
-                    details: [Path does not exist]
-        "500":
-          description: "Return this response if one of the following error occurs: 103, 117, 118, 119"
-          content:
-            application/json:
-              examples:
-                error_103_example:
-                  $ref: "#/components/examples/error_103_example"
-    put:
-      tags:
-        - users
-      operationId: update_user
-      description: Users can edit their own information
-      parameters:
-        - in: body
-          name: data
-          required: true
-          description: User information data to be updated
-          schema:
-            type: object
-            properties:
-              full_name:
-                type: string
-                example: Pham Tien
-                description: |-
-                  ^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$
-                  (Starts with one or more letters,
-                  allows for characters like spaces,
-                  hyphens, apostrophes, commas,
-                  and periods within the name,
-                  and does not allow trailing spaces)
-              email:
-                type: string
-                example: user@gmail.com
-                description: |-
-                  ^.*@.*\.(com|net|org)$
-                  (The email address must contain at least one character before and after the '@' symbol,
-                  and end with an extension like .com, .net, .org.)
-            required:
-              - full_name
-              - email
-      responses:
-        "200":
-          description: User information updated successfully.
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/user_info"
-        "400":
-          description: "Return this response if one of the following error occurs: 104"
-          content:
-            application/json:
-              examples:
-                error_104_example:
-                  value:
-                    error_code: 104
-                    message: Invalid syntax
-                    details:
-                      [
-                        "Missing required email field",
-                        "Missing required full_name field",
-                        "Invalid full_name field format: Starts with one or more letters, allows for characters like spaces, hyphens, apostrophes, commas, periods within the name, does not allow trailing spaces",
-                        "Invalid email field format: The email address must contain at least one character before and after the '@' symbol and end with an extension like .com, .net, .org.",
-                      ]
-        "401":
-          description: "Return this response if one of the following error occurs: 116"
-          content:
-            application/json:
-              examples:
-                error_116_example:
-                  $ref: "#/components/examples/error_116_example"
-        "409":
-          description: "Return this response if one of the following error occurs: 108"
-          content:
-            application/json:
-              examples:
-                error_108_example:
-                  $ref: "#/components/examples/error_108_example"
-        "500":
-          description: "Return this response if one of the following error occurs: 103, 117, 118, 119"
-          content:
-            application/json:
-              examples:
-                error_103_example:
-                  $ref: "#/components/examples/error_103_example"
-  admin/users/{id}:
-    delete:
-      tags:
-        - admin
-      operationId: delete_user
-      parameters:
-        - in: path
-          name: id
-          required: true
-          description: The ID of the user to delete information.
-          schema:
-            type: integer
-            example: 123
-      responses:
-        "204":
-          description: User information deleted successfully
-        "400":
-          description: "Return this response if one of the following error occurs: 104"
-          content:
-            application/json:
-              examples:
-                error_104_example:
-                  value:
-                    error_code: 104
-                    message: Invalid syntax
-                    details:
-                      [
-                        The provided user ID is in an invalid format. The ID must be a number greater than 0,
-                      ]
-        "401":
-          description: "Return this response if one of the following error occurs: 116"
-          content:
-            application/json:
-              examples:
-                error_116_example:
-                  $ref: "#/components/examples/error_116_example"
-        "403":
-          description: "Return this response if one of the following error occurs: 113"
-          content:
-            application/json:
-              examples:
-                error_113_example:
-                  $ref: "#/components/examples/error_113_example"
-        "404":
-          description: "Return this response if one of the following error occurs: 115"
-          content:
-            application/json:
-              examples:
-                error_115_example:
-                  value:
-                    error_code: 115
-                    message: The resource does not exist
-                    details: [The user Id does not exits]
-        "500":
-          description: "Return this response if one of the following error occurs: 103, 117, 118, 119"
-          content:
-            application/json:
-              examples:
-                error_103_example:
-                  $ref: "#/components/examples/error_103_example"
-    put:
-      tags:
-        - admin
-      operationId: update_user
-      description: The admin can edit user information
-      parameters:
-        - in: path
-          name: id
-          required: true
-          description: The ID of the user to update information
-          schema:
-            type: integer
-            example: 123
-        - in: body
-          name: data
-          required: true
-          description: User information data to be updated
-          schema:
-            type: object
-            properties:
-              full_name:
-                type: string
-                example: Pham Tien
-                description: |-
-                  ^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$
-                  (Starts with one or more letters,
-                  allows for characters like spaces,
-                  hyphens, apostrophes, commas,
-                  and periods within the name,
-                  and does not allow trailing spaces)
-              email:
-                type: string
-                example: user@gmail.com
-                description: |-
-                  ^.*@.*\.(com|net|org)$
-                  (The email address must contain at least one character before and after the '@' symbol,
-                  and end with an extension like .com, .net, .org.)
-              role_id:
-                type: integer
-                example: 2
-            required:
-              - full_name
-              - email
-              - role_id
-      responses:
-        "200":
-          description: User information updated successfully.
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/user_info"
-        "400":
-          description: "Return this response if one of the following error occurs: 104"
-          content:
-            application/json:
-              examples:
-                error_104_example:
-                  value:
-                    error_code: 104
-                    message: Invalid syntax
-                    details:
-                      [
-                        "Missing required email field",
-                        "Missing required full_name field",
-                        "Missing required role_id field",
-                        "Invalid full_name field format: Starts with one or more letters, allows for characters like spaces, hyphens, apostrophes, commas, periods within the name, does not allow trailing spaces",
-                        "Invalid email field format: The email address must contain at least one character before and after the '@' symbol and end with an extension like .com, .net, .org.",
-                        "The provided user ID is in an invalid format. The ID must be a number greater than 0",
-                        "Role with the provided ID does not exist",
-                      ]
-        "401":
-          description: "Return this response if one of the following error occurs: 116"
-          content:
-            application/json:
-              examples:
-                error_116_example:
-                  $ref: "#/components/examples/error_116_example"
-        "403":
-          description: "Return this response if one of the following error occurs: 114"
-          content:
-            application/json:
-              examples:
-                error_114_example:
-                  $ref: "#/components/examples/error_114_example"
-        "404":
-          description: "Return this response if one of the following error occurs: 115"
-          content:
-            application/json:
-              examples:
-                error_115_example:
-                  $ref: "#/components/examples/error_115_example"
-        "409":
-          description: "Return this response if one of the following error occurs: 108"
-          content:
-            application/json:
-              examples:
-                error_108_example:
-                  $ref: "#/components/examples/error_108_example"
-        "500":
-          description: "Return this response if one of the following error occurs: 103, 117, 118, 119"
-          content:
-            application/json:
-              examples:
-                error_103_example:
-                  $ref: "#/components/examples/error_103_example"
+          description: Not Found (Không tìm thấy Job hoặc CV)
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
