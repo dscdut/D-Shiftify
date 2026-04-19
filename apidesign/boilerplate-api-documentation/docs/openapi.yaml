@@ -264,6 +264,7 @@ paths:
                           example: "Phù hợp 4/5 kỹ năng yêu cầu và vị trí gần nơi ở của bạn"
         "401":
           description: Unauthorized
+  
 components:
   securitySchemes:
     bearerAuth:
