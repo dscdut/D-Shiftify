@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Shiftify API Documentation
   description: |-
-    Hệ thống quản lý tin tuyển dụng và CV dành cho người yếu thế.
+    He thong quan ly tin tuyen dung va CV danh cho nguoi yeu the.
   contact:
     email: contact@gdsc.dev
   version: 1.0.0
@@ -13,7 +13,7 @@ paths:
     post:
       tags:
         - Application
-      summary: Ứng viên nộp đơn vào công việc
+      summary: Ung vien nop don vao cong viec
       operationId: applyJob
       security:
         - bearerAuth: []
@@ -37,7 +37,7 @@ paths:
                   example: "uuid-cv-456"
       responses:
         "201":
-          description: Nộp đơn thành công
+          description: Nop don thanh cong
           content:
             application/json:
               schema:
@@ -52,7 +52,7 @@ paths:
                     example: "success"
                   message:
                     type: string
-                    example: "Nộp đơn ứng tuyển thành công"
+                    example: "Nop don ung tuyen thanh cong"
                   data:
                     type: object
                     required:
@@ -74,11 +74,11 @@ paths:
         "401":
           description: Unauthorized
         "404":
-          description: Not Found (Không tìm thấy Job hoặc CV)
+          description: Not Found (Khong tim thay Job hoac CV)
     get:
       tags:
         - Application
-      summary: Recruiter xem danh sách người ứng tuyển
+      summary: Recruiter xem danh sach nguoi ung tuyen
       operationId: getApplications
       security:
         - bearerAuth: []
@@ -86,14 +86,14 @@ paths:
         - name: job_id
           in: query
           required: true
-          description: Lọc danh sách ứng tuyển theo ID công việc
+          description: Loc danh sach ung tuyen theo ID cong viec
           schema:
             type: string
             format: uuid
             example: "uuid-job-789"
         - name: status
           in: query
-          description: Lọc theo trạng thái ứng tuyển (applied, interviewing, accepted, rejected)
+          description: Loc theo trang thai ung tuyen (applied, interviewing, accepted, rejected)
           schema:
             type: string
             example: "applied"
@@ -134,7 +134,7 @@ paths:
                         candidate:
                           type: object
                           properties:
-                            full_name: { type: string, example: "Phạm Hoàng Vũ" }
+                            full_name: { type: string, example: "Pham Hoang Vu" }
                             phone: { type: string, example: "0123456789" }
                             avatar_url: { type: string, example: "https://..." }
                         cv_summary:
@@ -155,19 +155,19 @@ paths:
         "401":
           description: Unauthorized
         "403":
-          description: Forbidden (Không có quyền xem danh sách của job này)
+          description: Forbidden (Khong co quyen xem danh sach cua job nay)
   /api/v1/applications/{id}:
     patch:
       tags:
         - Application
-      summary: Cập nhật trạng thái ứng tuyển (Duyệt/Từ chối)
+      summary: Cap nhat trang thai ung tuyen (Duyet/Tu choi)
       operationId: updateApplicationStatus
       security:
         - bearerAuth: []
       parameters:
         - name: id
           in: path
-          description: ID của đơn ứng tuyển cần cập nhật
+          description: ID cua don ung tuyen can cap nhat
           required: true
           schema:
             type: string
@@ -184,12 +184,12 @@ paths:
               properties:
                 status:
                   type: string
-                  description: Trạng thái mới của đơn ứng tuyển
+                  description: Trang thai moi cua don ung tuyen
                   enum: [applied, interviewing, accepted, rejected]
                   example: "accepted"
       responses:
         "200":
-          description: Cập nhật thành công
+          description: Cap nhat thanh cong
           content:
             application/json:
               schema:
@@ -204,7 +204,7 @@ paths:
                     example: "success"
                   message:
                     type: string
-                    example: "Đã cập nhật trạng thái ứng tuyển thành công"
+                    example: "Da cap nhat trang thai ung tuyen thanh cong"
                   updated_at:
                     type: string
                     format: date-time
@@ -212,15 +212,15 @@ paths:
         "401":
           description: Unauthorized
         "403":
-          description: Forbidden (Không có quyền cập nhật đơn này)
+          description: Forbidden (Khong co quyen cap nhat don nay)
         "404":
           description: Not Found
   /api/v1/matches/jobs:
     get:
       tags:
         - Matching
-      summary: Gợi ý việc làm phù hợp cho Candidate
-      description: Dựa trên Profile và CV của ứng viên, hệ thống sẽ đề xuất các công việc có độ tương quan cao nhất.
+      summary: Goi y viec lam phu hop cho Candidate
+      description: Dua tren Profile va CV cua ung vien, he thong se de xuat cac cong viec co do tuong quan cao nhat.
       operationId: getSuggestedJobs
       security:
         - bearerAuth: []
@@ -261,10 +261,76 @@ paths:
                           example: 92.5
                         reason:
                           type: string
-                          example: "Phù hợp 4/5 kỹ năng yêu cầu và vị trí gần nơi ở của bạn"
+                          example: "Phu hop 4/5 ky nang yeu cau va vi tri gan noi o cua ban"
         "401":
           description: Unauthorized
-  
+  /api/v1/matches/candidates/{job_id}:
+    get:
+      tags:
+        - Matching
+      summary: Goi y ung vien phu hop cho 1 Job
+      description: Dua tren yeu cau cua cong viec, he thong tim kiem va de xuat cac ung vien co ky nang va ho so phu hop nhat.
+      operationId: getSuggestedCandidates
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: job_id
+          in: path
+          description: ID cua bai dang tuyen dung
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "uuid-job-789"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - job_id
+                  - suggested_candidates
+                properties:
+                  job_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-job-789"
+                  suggested_candidates:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - candidate_id
+                        - full_name
+                        - match_score
+                        - highlight_skills
+                      properties:
+                        candidate_id:
+                          type: string
+                          format: uuid
+                          example: "uuid-user-111"
+                        full_name:
+                          type: string
+                          example: "Nguyen Van A"
+                        match_score:
+                          type: number
+                          format: float
+                          example: 95.0
+                        highlight_skills:
+                          type: array
+                          items: { type: string }
+                          example: ["Java", "Spring Boot", "SQL"]
+                        disability_support:
+                          type: string
+                          example: "Can ho tro thiet ke giao dien tuong phan cao"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (Khong phai chu so huu Job nay)
+        "404":
+          description: Job khong ton tai
 components:
   securitySchemes:
     bearerAuth:
