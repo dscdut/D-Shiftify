@@ -13,12 +13,12 @@ paths:
     post:
       tags:
         - CV
-      summary: Tạo mới CV cho ứng viên
+      summary: Tao moi CV cho ung vien
       operationId: createCV
       security:
         - bearerAuth: []
       requestBody:
-        description: Thông tin CV cần tạo
+        description: Thong tin CV can tao
         required: true
         content:
           application/json:
@@ -38,10 +38,10 @@ paths:
                   example: "Remote"
                 mobility:
                   type: string
-                  example: "Sử dụng xe lăn"
+                  example: "Su dung xe lan"
                 expected_job:
                   type: string
-                  example: "Nhân viên nhập liệu"
+                  example: "Nhan vien nhap lieu"
                 conditions:
                   type: object
                   properties:
@@ -53,8 +53,8 @@ paths:
                   items:
                     type: object
                     properties:
-                      description: { type: string, example: "Thực tập sinh tại The Code Origin" }
-                      working_time: { type: string, example: "3 tháng" }
+                      description: { type: string, example: "Thuc tap sinh tai The Code Origin" }
+                      working_time: { type: string, example: "3 thang" }
                 skills:
                   type: array
                   items:
@@ -65,7 +65,7 @@ paths:
                   type: array
                   items:
                     type: string
-                  example: ["Chứng chỉ Tin học văn phòng A"]
+                  example: ["Chung chi Tin hoc van phong A"]
       responses:
         "201":
           description: CV created successfully
@@ -87,7 +87,7 @@ paths:
                     example: "success"
                   message:
                     type: string
-                    example: "Tạo CV thành công"
+                    example: "Tao CV thanh cong"
         "401":
           description: Unauthorized
           content:
@@ -100,7 +100,7 @@ paths:
     get:
       tags:
         - CV
-      summary: Lấy danh sách CV của ứng viên hiện tại
+      summary: Lay danh sach CV cua ung vien hien tai
       operationId: getMyCVs
       security:
         - bearerAuth: []
@@ -121,7 +121,7 @@ paths:
                     example: "success"
                   message:
                     type: string
-                    example: "Danh sách CV đã tạo"
+                    example: "Danh sach CV da tao"
                   data:
                     type: array
                     items:
@@ -133,7 +133,7 @@ paths:
                         - created_at
                       properties:
                         id: { type: string, format: uuid, example: "8e5e9334-..." }
-                        expected_job: { type: string, example: "Nhân viên nhập liệu" }
+                        expected_job: { type: string, example: "Nhan vien nhap lieu" }
                         job_type: { type: string, example: "Full-time" }
                         created_at: { type: string, format: date-time, example: "2024-04-15T12:00:00Z" }
         "401":
@@ -149,14 +149,14 @@ paths:
     get:
       tags:
         - CV
-      summary: Lấy chi tiết một CV
+      summary: Lay chi tiet mot CV
       operationId: getCVById
       security:
         - bearerAuth: []
       parameters:
         - name: id
           in: path
-          description: ID của CV cần lấy chi tiết
+          description: ID cua CV can lay chi tiet
           required: true
           schema:
             type: string
@@ -179,7 +179,7 @@ paths:
                     example: "success"
                   message:
                     type: string
-                    example: "Chi tiết CV"
+                    example: "Chi tiet CV"
                   data:
                     type: object
                     required:
@@ -195,12 +195,12 @@ paths:
                       profile:
                         type: object
                         properties:
-                          full_name: { type: string, example: "Phạm Hoàng Vũ" }
-                          disability_status: { type: string, example: "Khiếm thính nhẹ" }
+                          full_name: { type: string, example: "Pham Hoang Vu" }
+                          disability_status: { type: string, example: "Khiem thinh nhe" }
                       job_type: { type: string, example: "Full-time" }
                       work_mode: { type: string, example: "Remote" }
-                      mobility: { type: string, example: "Sử dụng xe lăn" }
-                      expected_job: { type: string, example: "Nhân viên nhập liệu" }
+                      mobility: { type: string, example: "Su dung xe lan" }
+                      expected_job: { type: string, example: "Nhan vien nhap lieu" }
                       conditions:
                         type: object
                         properties:
@@ -212,8 +212,8 @@ paths:
                         items:
                           type: object
                           properties:
-                            description: { type: string, example: "Thực tập sinh tại The Code Origin" }
-                            working_time: { type: string, example: "3 tháng" }
+                            description: { type: string, example: "Thuc tap sinh tai The Code Origin" }
+                            working_time: { type: string, example: "3 thang" }
                       skills:
                         type: array
                         items:
@@ -226,7 +226,7 @@ paths:
                         type: array
                         items:
                           type: string
-                        example: ["Chứng chỉ Tin học văn phòng A"]
+                        example: ["Chung chi Tin hoc van phong A"]
                       updated_at: { type: string, format: date-time, example: "2024-04-15T10:00:00Z" }
         "404":
           description: Not Found
@@ -236,7 +236,7 @@ paths:
                 type: object
                 properties:
                   status: { type: string, example: "error" }
-                  message: { type: string, example: "Không tìm thấy CV" }
+                  message: { type: string, example: "Khong tim thay CV" }
         "401":
           description: Unauthorized
           content:
@@ -249,21 +249,21 @@ paths:
     patch:
       tags:
         - CV
-      summary: Cập nhật thông tin CV
+      summary: Cap nhat thong tin CV
       operationId: updateCV
       security:
         - bearerAuth: []
       parameters:
         - name: id
           in: path
-          description: ID của CV cần cập nhật
+          description: ID cua CV can cap nhat
           required: true
           schema:
             type: string
             format: uuid
             example: "8e5e9334-..."
       requestBody:
-        description: Thông tin CV cần cập nhật (hỗ trợ cập nhật từng phần)
+        description: Thong tin CV can cap nhat (ho tro cap nhat tung phan)
         content:
           application/json:
             schema:
@@ -293,7 +293,7 @@ paths:
                     type: string
       responses:
         "200":
-          description: Cập nhật thành công
+          description: Cap nhat thanh cong
           content:
             application/json:
               schema:
@@ -308,7 +308,7 @@ paths:
                     example: "success"
                   message:
                     type: string
-                    example: "Cập nhật CV thành công"
+                    example: "Cap nhat CV thanh cong"
                   updated_at:
                     type: string
                     format: date-time
@@ -321,7 +321,7 @@ paths:
                 type: object
                 properties:
                   status: { type: string, example: "error" }
-                  message: { type: string, example: "Không tìm thấy CV" }
+                  message: { type: string, example: "Khong tim thay CV" }
         "401":
           description: Unauthorized
           content:
@@ -334,14 +334,14 @@ paths:
     delete:
       tags:
         - CV
-      summary: Xóa CV
+      summary: Xoa CV
       operationId: deleteCV
       security:
         - bearerAuth: []
       parameters:
         - name: id
           in: path
-          description: ID của CV cần xóa
+          description: ID cua CV can xoa
           required: true
           schema:
             type: string
@@ -349,7 +349,7 @@ paths:
             example: "8e5e9334-..."
       responses:
         "200":
-          description: Xóa thành công
+          description: Xoa thanh cong
           content:
             application/json:
               schema:
@@ -363,7 +363,7 @@ paths:
                     example: "success"
                   message:
                     type: string
-                    example: "Đã xóa CV thành công"
+                    example: "Da xoa CV thanh cong"
         "404":
           description: Not Found
           content:
@@ -372,7 +372,7 @@ paths:
                 type: object
                 properties:
                   status: { type: string, example: "error" }
-                  message: { type: string, example: "Không tìm thấy CV để xóa" }
+                  message: { type: string, example: "Khong tim thay CV de xoa" }
         "401":
           description: Unauthorized
           content:
@@ -386,7 +386,7 @@ paths:
     post:
       tags:
         - Job
-      summary: Nhà tuyển dụng đăng tin tuyển dụng mới
+      summary: Nha tuyen dung dang tin tuyen dung moi
       operationId: createJob
       security:
         - bearerAuth: []
@@ -403,15 +403,15 @@ paths:
                 - location
                 - description
               properties:
-                title: { type: string, example: "Nhân viên Chăm sóc khách hàng" }
+                title: { type: string, example: "Nhan vien Cham soc khach hang" }
                 job_type: { type: string, example: "Full-time" }
                 work_mode: { type: string, example: "Hybrid" }
-                experience_required: { type: string, example: "Không yêu cầu kinh nghiệm" }
+                experience_required: { type: string, example: "Khong yeu cau kinh nghiem" }
                 salary_min: { type: integer, example: 7000000 }
                 salary_max: { type: integer, example: 12000000 }
-                location: { type: string, example: "Quận Hải Châu, Đà Nẵng" }
+                location: { type: string, example: "Quan Hai Chau, Da Nang" }
                 working_time: { type: string, example: "08:00 - 17:30" }
-                description: { type: string, example: "Ưu tiên ứng viên có khả năng giao tiếp tốt, hỗ trợ người khiếm thính..." }
+                description: { type: string, example: "Uu tien ung vien co kha nang giao tiep tot, ho tro nguoi khiem thinh..." }
                 skills:
                   type: array
                   items:
@@ -421,7 +421,7 @@ paths:
                       is_required: { type: boolean, example: true }
       responses:
         "201":
-          description: Đăng tin thành công
+          description: Dang tin thanh cong
           content:
             application/json:
               schema:
@@ -436,7 +436,7 @@ paths:
                     example: "success"
                   message:
                     type: string
-                    example: "Đăng tin tuyển dụng thành công"
+                    example: "Dang tin tuyen dung thanh cong"
                   job_id:
                     type: string
                     format: uuid
@@ -453,7 +453,7 @@ paths:
     get:
       tags:
         - Job
-      summary: Lấy danh sách công việc (Dành cho ứng viên)
+      summary: Lay danh sach cong viec (Danh cho ung vien)
       operationId: getJobs
       security:
         - bearerAuth: []
@@ -461,23 +461,23 @@ paths:
         - name: page
           in: query
           schema: { type: integer, default: 1 }
-          description: Trang hiện tại
+          description: Trang hien tai
         - name: limit
           in: query
           schema: { type: integer, default: 10 }
-          description: Số lượng bản ghi trên mỗi trang
+          description: So luong ban ghi tren moi trang
         - name: search
           in: query
           schema: { type: string }
-          description: Tìm kiếm theo tiêu đề công việc
+          description: Tim kiem theo tieu de cong viec
         - name: job_type
           in: query
           schema: { type: string }
-          description: Bộ lọc theo loại hình công việc (Full-time, Part-time,...)
+          description: Bo loc theo loai hinh cong viec (Full-time, Part-time,...)
         - name: min_salary
           in: query
           schema: { type: integer }
-          description: Bộ lọc theo mức lương tối thiểu
+          description: Bo loc theo muc luong toi thieu
       responses:
         "200":
           description: OK
@@ -500,10 +500,10 @@ paths:
                       type: object
                       properties:
                         id: { type: string, format: uuid, example: "job-uuid-123" }
-                        title: { type: string, example: "Nhân viên Chăm sóc khách hàng" }
-                        company_name: { type: string, example: "Công ty ABC" }
+                        title: { type: string, example: "Nhan vien Cham soc khach hang" }
+                        company_name: { type: string, example: "Cong ty ABC" }
                         logo_url: { type: string, example: "https://example.com/logo.png" }
-                        location: { type: string, example: "Đà Nẵng" }
+                        location: { type: string, example: "Da Nang" }
                         salary_range: { type: string, example: "7tr - 12tr" }
                         created_at: { type: string, format: date-time, example: "2024-04-15T08:00:00Z" }
         "401":
@@ -519,14 +519,14 @@ paths:
     get:
       tags:
         - Job
-      summary: Lấy chi tiết một công việc
+      summary: Lay chi tiet mot cong viec
       operationId: getJobById
       security:
         - bearerAuth: []
       parameters:
         - name: id
           in: path
-          description: ID của công việc cần lấy chi tiết
+          description: ID cua cong viec can lay chi tiet
           required: true
           schema:
             type: string
@@ -549,7 +549,7 @@ paths:
                     example: "success"
                   message:
                     type: string
-                    example: "Chi tiết công việc"
+                    example: "Chi tiet cong viec"
                   data:
                     type: object
                     required:
@@ -561,24 +561,24 @@ paths:
                       - salary
                     properties:
                       id: { type: string, format: uuid, example: "job-uuid-123" }
-                      title: { type: string, example: "Nhân viên Chăm sóc khách hàng" }
-                      description: { type: string, example: "Nội dung chi tiết công việc..." }
+                      title: { type: string, example: "Nhan vien Cham soc khach hang" }
+                      description: { type: string, example: "Noi dung chi tiet cong viec..." }
                       company:
                         type: object
                         properties:
-                          name: { type: string, example: "Công ty ABC" }
-                          address: { type: string, example: "123 Lê Duẩn, Đà Nẵng" }
-                          policy_for_disabled: { type: string, example: "Có lối đi riêng cho xe lăn, hỗ trợ máy trợ thính..." }
+                          name: { type: string, example: "Cong ty ABC" }
+                          address: { type: string, example: "123 Le Duan, Da Nang" }
+                          policy_for_disabled: { type: string, example: "Co loi di rieng cho xe lan, ho tro may tro thinh..." }
                       requirements:
                         type: object
                         properties:
-                          experience: { type: string, example: "Không yêu cầu" }
+                          experience: { type: string, example: "Khong yeu cau" }
                           skills:
                             type: array
                             items:
                               type: object
                               properties:
-                                name: { type: string, example: "Giao tiếp" }
+                                name: { type: string, example: "Giao tiep" }
                                 is_required: { type: boolean, example: true }
                       salary:
                         type: object
@@ -593,7 +593,7 @@ paths:
                 type: object
                 properties:
                   status: { type: string, example: "error" }
-                  message: { type: string, example: "Không tìm thấy công việc" }
+                  message: { type: string, example: "Khong tim thay cong viec" }
         "401":
           description: Unauthorized
           content:
@@ -606,33 +606,33 @@ paths:
     patch:
       tags:
         - Job
-      summary: Cập nhật thông tin công việc
+      summary: Cap nhat thong tin cong viec
       operationId: updateJob
       security:
         - bearerAuth: []
       parameters:
         - name: id
           in: path
-          description: ID của công việc cần cập nhật
+          description: ID cua cong viec can cap nhat
           required: true
           schema:
             type: string
             format: uuid
             example: "job-uuid-123"
       requestBody:
-        description: Các trường cần cập nhật (Partial Update)
+        description: Cac truong can cap nhat (Partial Update)
         content:
           application/json:
             schema:
               type: object
               properties:
-                title: { type: string, example: "Nhân viên Chăm sóc khách hàng (Update)" }
+                title: { type: string, example: "Nhan vien Cham soc khach hang (Update)" }
                 salary_max: { type: integer, example: 15000000 }
-                description: { type: string, example: "Cập nhật thêm quyền lợi: Hỗ trợ ăn trưa..." }
-                # Bổ sung các trường khác có thể update nếu cần
+                description: { type: string, example: "Cap nhat them quyen loi: Ho tro an trua..." }
+                # Bo sung cac truong khac co the update neu can
       responses:
         "200":
-          description: Cập nhật thành công
+          description: Cap nhat thanh cong
           content:
             application/json:
               schema:
@@ -647,20 +647,20 @@ paths:
                     example: "success"
                   message:
                     type: string
-                    example: "Cập nhật thông tin thành công"
+                    example: "Cap nhat thong tin thanh cong"
                   updated_at:
                     type: string
                     format: date-time
                     example: "2024-04-15T15:30:00Z"
         "403":
-          description: Forbidden (Không có quyền sửa tin này)
+          description: Forbidden (Khong co quyen sua tin nay)
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   status: { type: string, example: "error" }
-                  message: { type: string, example: "Bạn không có quyền chỉnh sửa tin đăng này" }
+                  message: { type: string, example: "Ban khong co quyen chinh sua tin dang nay" }
         "401":
           description: Unauthorized
         "404":
@@ -668,14 +668,14 @@ paths:
     delete:
       tags:
         - Job
-      summary: Xóa/Đóng tin tuyển dụng
+      summary: Xoa/Dong tin tuyen dung
       operationId: deleteJob
       security:
         - bearerAuth: []
       parameters:
         - name: id
           in: path
-          description: ID của công việc cần xóa/đóng
+          description: ID cua cong viec can xoa/dong
           required: true
           schema:
             type: string
@@ -683,7 +683,7 @@ paths:
             example: "job-uuid-123"
       responses:
         "200":
-          description: Thành công
+          description: Thanh cong
           content:
             application/json:
               schema:
@@ -697,7 +697,7 @@ paths:
                     example: "success"
                   message:
                     type: string
-                    example: "Đã đóng tin tuyển dụng thành công"
+                    example: "Da dong tin tuyen dung thanh cong"
         "403":
           description: Forbidden
         "404":
