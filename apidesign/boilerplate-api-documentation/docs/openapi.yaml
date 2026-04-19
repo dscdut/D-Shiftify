@@ -215,6 +215,55 @@ paths:
           description: Forbidden (Không có quyền cập nhật đơn này)
         "404":
           description: Not Found
+  /api/v1/matches/jobs:
+    get:
+      tags:
+        - Matching
+      summary: Gợi ý việc làm phù hợp cho Candidate
+      description: Dựa trên Profile và CV của ứng viên, hệ thống sẽ đề xuất các công việc có độ tương quan cao nhất.
+      operationId: getSuggestedJobs
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - suggested_jobs
+                properties:
+                  suggested_jobs:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - job_id
+                        - title
+                        - company_name
+                        - match_score
+                        - reason
+                      properties:
+                        job_id:
+                          type: string
+                          format: uuid
+                          example: "uuid-job-999"
+                        title:
+                          type: string
+                          example: "Junior Node.js Developer"
+                        company_name:
+                          type: string
+                          example: "Origin Tech"
+                        match_score:
+                          type: number
+                          format: float
+                          example: 92.5
+                        reason:
+                          type: string
+                          example: "Phù hợp 4/5 kỹ năng yêu cầu và vị trí gần nơi ở của bạn"
+        "401":
+          description: Unauthorized
 components:
   securitySchemes:
     bearerAuth:
