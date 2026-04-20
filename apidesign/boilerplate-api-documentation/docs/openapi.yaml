@@ -564,6 +564,106 @@ paths:
                 properties:
                   status: { type: string, example: "error" }
                   message: { type: string, example: "Khong tim thay thong tin thanh vien trong cuoc hoi thoai" }
+  /api/v1/conversations/{conversation_id}/messages:
+    post:
+      tags:
+        - Chat
+      summary: Gui tin nhan van ban/voice
+      description: Gui mot tin nhan moi vao cuoc hoi thoai. Chap nhan noi dung van ban hoac duong dan file ghi am.
+      operationId: sendMessage
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          description: ID cua cuoc hoi thoai
+          schema:
+            type: string
+            format: uuid
+          example: "uuid-conv-001"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  nullable: true
+                  example: "Em muon hoi them ve JD"
+                  description: Noi dung tin nhan van ban
+                voice_url:
+                  type: string
+                  nullable: true
+                  example: "url_voice_hoi_JD"
+                  description: Duong dan den file voice/audio
+      responses:
+        "201":
+          description: Gui tin nhan thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message_id
+                  - conversation_id
+                  - sender_id
+                  - created_at
+                properties:
+                  message_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-msg-120"
+                  conversation_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-conv-001"
+                  sender_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-user-111"
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: "2026-04-15T20:20:00.00Z"
+        "400":
+          description: Du lieu khong hop le
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Noi dung tin nhan khong duoc de trong" }
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de gui tin nhan" }
+        "403":
+          description: Khong co quyen gui tin nhan trong cuoc hoi thoai nay
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong phai thanh vien cua cuoc hoi thoai nay" }
+        "404":
+          description: Cuoc hoi thoai khong ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay cuoc hoi thoai yeu cau" }
 components:
   securitySchemes:
     bearerAuth:
