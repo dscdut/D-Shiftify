@@ -490,6 +490,80 @@ paths:
                 properties:
                   status: { type: string, example: "error" }
                   message: { type: string, example: "Khong tim thay cuoc hoi thoai yeu cau" }
+    delete:
+      tags:
+        - Chat
+      summary: Xoa participant khoi cuoc hoi thoai
+      description: Xoa mot thanh vien khoi cuoc hoi thoai. He thong uu tien su dung soft-delete cho du lieu thanh vien.
+      operationId: removeParticipant
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          description: ID cua cuoc hoi thoai
+          schema:
+            type: string
+            format: uuid
+          example: "uuid-conv-001"
+        - name: user_id
+          in: query
+          required: true
+          description: ID cua nguoi dung can xoa khoi cuoc hoi thoai
+          schema:
+            type: string
+            format: uuid
+          example: "uuid-user-333"
+      responses:
+        "200":
+          description: Xoa thanh vien thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - deleted_at
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Da xoa participant"
+                  deleted_at:
+                    type: string
+                    format: date-time
+                    example: "2026-04-15T20:10:00Z"
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de thuc hien" }
+        "403":
+          description: Khong co quyen xoa thanh vien
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen xoa nguoi khoi cuoc hoi thoai nay" }
+        "404":
+          description: Cuoc hoi thoai hoac thanh vien khong ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay thong tin thanh vien trong cuoc hoi thoai" }
 components:
   securitySchemes:
     bearerAuth:
