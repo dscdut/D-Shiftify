@@ -1,0 +1,293 @@
+openapi: 3.0.3
+info:
+  title: D-Shiftify Voice System API
+  description: Voice feature APIs including Speech-To-Text (STT), Text-To-Speech (TTS), voice logs, and analytics.
+  version: 1.0.0
+  contact:
+    name: D-Shiftify Team
+
+servers:
+  - url: https://api.shiftify.vn/api/v1
+    description: Production
+  - url: http://localhost:3000/api/v1
+    description: Local development
+
+tags:
+  - name: STT
+    description: Speech-To-Text conversion
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    VoiceSource:
+      type: string
+      enum: [chat, cv, job, community, system, notification]
+
+    VoiceLogStatus:
+      type: string
+      enum: [success, failed, processing]
+
+    JobStatus:
+      type: string
+      enum: [queued, processing, completed, failed, partial]
+
+    VoiceContext:
+      type: object
+      required: [source, reference_id]
+      properties:
+        source:
+          $ref: "#/components/schemas/VoiceSource"
+        reference_id:
+          type: string
+          format: uuid
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            details:
+              type: array
+              items:
+                type: string
+
+    SttRequest:
+      type: object
+      required: [audio_url, context]
+      properties:
+        audio_url:
+          type: string
+          format: uri
+          description: URL of uploaded audio file
+          example: "https://cdn.shiftify.vn/audio/chat-001.webm"
+        language:
+          type: string
+          description: "BCP-47 language tag"
+          default: vi-VN
+          enum: [vi-VN, en-US]
+        context:
+          $ref: "#/components/schemas/VoiceContext"
+
+    SttResult:
+      type: object
+      properties:
+        stt_id:
+          type: string
+          format: uuid
+        text:
+          type: string
+          example: "Em quan tam cong viec nay"
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          example: 0.94
+        language:
+          type: string
+          example: vi-VN
+        duration_sec:
+          type: number
+          format: float
+          example: 8.3
+        word_count:
+          type: integer
+          example: 11
+        voice_log_id:
+          type: string
+          format: uuid
+        context:
+          $ref: "#/components/schemas/VoiceContext"
+        created_at:
+          type: string
+          format: date-time
+
+    SttBatchRequest:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          maxItems: 50
+          items:
+            $ref: "#/components/schemas/SttRequest"
+        callback_url:
+          type: string
+          format: uri
+          description: Webhook URL to notify on job completion
+
+    BatchJob:
+      type: object
+      properties:
+        job_id:
+          type: string
+          format: uuid
+        status:
+          $ref: "#/components/schemas/JobStatus"
+        total_items:
+          type: integer
+        completed_items:
+          type: integer
+        failed_items:
+          type: integer
+        progress_pct:
+          type: number
+          format: float
+        results:
+          type: array
+          nullable: true
+          items:
+            type: object
+            properties:
+              stt_id:
+                type: string
+                format: uuid
+              audio_url:
+                type: string
+                format: uri
+              text:
+                type: string
+              confidence:
+                type: number
+                format: float
+              voice_log_id:
+                type: string
+                format: uuid
+              status:
+                $ref: "#/components/schemas/VoiceLogStatus"
+        estimated_completion_sec:
+          type: integer
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+
+security:
+  - BearerAuth: []
+
+paths:
+  # ═══════════════════════════════════════
+  #  STT - Speech-To-Text
+  # ═══════════════════════════════════════
+  /voice/stt:
+    post:
+      tags: [STT]
+      summary: Convert audio to text
+      description: |
+        Single audio file speech-to-text conversion.
+        - Max duration: 300s (5 min)
+        - Max file size: 25MB
+        - Supported: webm, mp3, wav, ogg, m4a, flac
+        - Auto-creates a voice_log with type=stt
+      operationId: convertStt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SttRequest"
+      responses:
+        "201":
+          description: Transcription successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/SttResult"
+        "400":
+          description: "Invalid audio (INVALID_AUDIO_FORMAT | AUDIO_TOO_LONG | AUDIO_URL_UNREACHABLE)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "413":
+          description: Audio file too large (AUDIO_TOO_LARGE, max 25MB)
+        "422":
+          description: Unsupported language (LANGUAGE_NOT_SUPPORTED)
+        "503":
+          description: STT engine unavailable (STT_SERVICE_UNAVAILABLE)
+
+  /voice/stt/batch:
+    post:
+      tags: [STT]
+      summary: Batch audio-to-text (async)
+      description: |
+        Submit up to 50 audio files for async STT processing.
+        Poll status via GET /voice/jobs/{job_id}.
+        Optional webhook callback on completion.
+      operationId: batchStt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SttBatchRequest"
+      responses:
+        "202":
+          description: Batch job accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/BatchJob"
+        "400":
+          description: Invalid request (empty items or exceeds 50)
+
+  /voice/jobs/{job_id}:
+    get:
+      tags: [STT]
+      summary: Get batch job status
+      description: |
+        Poll async batch STT job status.
+        Results included when status is completed/partial.
+        Job results retained for 24 hours.
+      operationId: getBatchJob
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Job status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/BatchJob"
+        "404":
+          description: Job not found (JOB_NOT_FOUND)
