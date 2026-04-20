@@ -1,487 +1,553 @@
-openapi: 3.1.0
+openapi: 3.0.3
 info:
-  title: Template Swagger API Documentation
-  description: |-
-    API documentation for the template projects, created by GDSC-DUT. This documentation offers detailed insights into the common API endpoints used across all templates.
-  contact:
-    email: contact@gdsc.dev
+  title: D-Shiftify Voice System API
+  description: Voice feature APIs including Speech-To-Text (STT), Text-To-Speech (TTS), voice logs, and analytics.
   version: 1.0.0
-externalDocs:
-  description: Find out more about Swagger
-  url: http://swagger.io
+  contact:
+    name: D-Shiftify Team
+
 servers:
-  - url: http://localhost:3000
+  - url: https://api.shiftify.vn/api/v1
+    description: Production
+  - url: http://localhost:3000/api/v1
+    description: Local development
+
 tags:
-  - name: authentication
-    description: Operations about authentication
-  - name: users
-    description: Operations about user
-  - name: admin
-    description: Operations about admin
-  - name: payment
-    description: Operations about payment
+  - name: STT
+    description: Speech-To-Text conversion
+  - name: TTS
+    description: Text-To-Speech conversion
+  - name: Voice Logs
+    description: Voice usage tracking and management
+  - name: Voice Analytics
+    description: Dashboard monitoring and health checks
+
+security:
+  - BearerAuth: []
+
 paths:
-  /auth/login:
+  /voice/stt:
     post:
-      tags:
-        - authentication
-      operationId: login
+      tags: [STT]
+      summary: Convert audio to text
+      description: |
+        Single audio file speech-to-text conversion.
+        - Max duration: 300s (5 min)
+        - Max file size: 25MB
+        - Supported: webm, mp3, wav, ogg, m4a, flac
+        - Auto-creates a voice_log with type=stt
+      operationId: convertStt
       requestBody:
-        description: default email and password, seeded in the database
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  example: user@gmail.com
-                password:
-                  type: string
-                  example: Password123
-              required:
-                - email
-                - password
+              $ref: "#/components/schemas/SttRequest"
       responses:
-        "200":
-          description: The user is authenticated, and an access token is returned.
+        "201":
+          description: Transcription successful
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  access_token:
-                    type: string
-                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-                required:
-                  - access_token
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/SttResult"
         "400":
-          description: "Return this response if one of the following error occurs: 104"
+          description: "Invalid audio (INVALID_AUDIO_FORMAT | AUDIO_TOO_LONG | AUDIO_URL_UNREACHABLE)"
           content:
             application/json:
-              examples:
-                error_104_example:
-                  value:
-                    error_code: 104
-                    message: Invalid syntax
-                    details:
-                      [
-                        The email field is required,
-                        The password field is required,
-                      ]
-        "401":
-          description: "Return this response if one of the following error occurs: 102"
-          content:
-            application/json:
-              examples:
-                error_102_example:
-                  $ref: "#/components/examples/error_102_example"
-        "500":
-          description: "Return this response if one of the following error occurs: 103, 117, 118, 119"
-          content:
-            application/json:
-              examples:
-                error_103_example:
-                  $ref: "#/components/examples/error_103_example"
-  /auth/register:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "413":
+          description: Audio file too large (AUDIO_TOO_LARGE, max 25MB)
+        "422":
+          description: Unsupported language (LANGUAGE_NOT_SUPPORTED)
+        "503":
+          description: STT engine unavailable (STT_SERVICE_UNAVAILABLE)
+
+  /voice/stt/batch:
     post:
-      tags:
-        - authentication
-      operationId: register
+      tags: [STT]
+      summary: Batch audio-to-text (async)
+      description: |
+        Submit up to 50 audio files for async STT processing.
+        Poll status via GET /voice/jobs/{job_id}.
+        Optional webhook callback on completion.
+      operationId: batchStt
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                full_name:
-                  type: string
-                  example: Pham Tien
-                  description: |-
-                    ^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$
-                    (Starts with one or more letters,
-                    allows for characters like spaces,
-                    hyphens, apostrophes, commas,
-                    and periods within the name,
-                    and does not allow trailing spaces)
-                email:
-                  type: string
-                  example: user@gmail.com
-                  description: |-
-                    ^.*@.*\.(com|net|org)$
-                    (The email address must contain at least one character before and after the '@' symbol,
-                    and end with an extension like .com, .net, .org.)
-                password:
-                  type: string
-                  example: Password123
-                  description: |-
-                    ^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$
-                     (Minimum eight characters, at least one letter(uppercase or lowercase) and one number)
-                confirm_password:
-                  type: string
-                  example: Password123
-              required:
-                - full_name
-                - email
-                - password
-                - confirm_password
+              $ref: "#/components/schemas/SttBatchRequest"
       responses:
-        "201":
-          description: User registered successfully. Email and full_name are returned.
+        "202":
+          description: Batch job accepted
           content:
             application/json:
               schema:
+                type: object
                 properties:
-                  id:
-                    type: integer
-                    example: 1
-                  full_name:
-                    type: string
-                    example: Pham Tien
-                  email:
-                    type: string
-                    example: user@gmail.com
-                required:
-                  - id
-                  - full_name
-                  - email
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/BatchJob"
         "400":
-          description: "Return this response if one of the following error occurs: 104"
-          content:
-            application/json:
-              examples:
-                error_104_example:
-                  value:
-                    error_code: 104
-                    message: Invalid syntax
-                    details: [
-                        "Missing required email field",
-                        "Missing required full_name field",
-                        "Invalid full_name field format: Starts with one or more letters, allows for characters like spaces, hyphens, apostrophes, commas, periods within the name, does not allow trailing spaces",
-                        "Invalid email field format: The email address must contain at least one character before and after the '@' symbol and end with an extension like .com, .net, .org.",
-                        "Invalid password field format: The length of the string must be between 7 and 50 characters.
-                        It must contain at least one digit.
-                        It must contain at least one uppercase letter ",
-                        "Password and confirm password do not match",
-                      ]
-        "409":
-          description: "Return this response if one of the following error occurs: 108"
-          content:
-            application/json:
-              examples:
-                error_108_example:
-                  $ref: "#/components/examples/error_108_example"
-        "500":
-          description: "Return this response if one of the following error occurs: 103, 117, 118, 119"
-          content:
-            application/json:
-              examples:
-                error_103_example:
-                  $ref: "#/components/examples/error_103_example"
-  /users:
+          description: Invalid request (empty items or exceeds 50)
+
+  /voice/jobs/{job_id}:
     get:
-      tags:
-        - users
-      operationId: get_users
+      tags: [STT]
+      summary: Get batch job status
+      description: |
+        Poll async batch STT job status.
+        Results included when status is completed/partial.
+        Job results retained for 24 hours.
+      operationId: getBatchJob
       parameters:
-        - $ref: "#/components/parameters/page_size_param"
-        - $ref: "#/components/parameters/page_param"
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
         "200":
-          description: A paginated list of users
+          description: Job status
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/paginated_total"
+                type: object
                 properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/BatchJob"
+        "404":
+          description: Job not found (JOB_NOT_FOUND)
+
+  /voice/tts:
+    post:
+      tags: [TTS]
+      summary: Convert text to speech
+      description: |
+        Generate audio from text.
+        - Max text: 5000 characters
+        - Speed: 0.5x to 2.0x
+        - Output stored permanently on CDN
+        - Auto-creates a voice_log with type=tts
+      operationId: convertTts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TtsRequest"
+      responses:
+        "201":
+          description: Audio generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/TtsResult"
+        "400":
+          description: "Invalid input (TEXT_EMPTY | TEXT_TOO_LONG)"
+        "422":
+          description: "Invalid voice or speed (VOICE_NOT_SUPPORTED | INVALID_SPEED)"
+        "503":
+          description: TTS engine unavailable (TTS_SERVICE_UNAVAILABLE)
+
+  /voice/tts/preview:
+    post:
+      tags: [TTS]
+      summary: Generate preview audio
+      description: |
+        Short preview for testing voice settings.
+        - Max text: 200 characters
+        - Preview expires after 1 hour
+        - No voice_log created
+      operationId: previewTts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TtsPreviewRequest"
+      responses:
+        "201":
+          description: Preview generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/TtsPreviewResult"
+
+  /voice/voices:
+    get:
+      tags: [TTS]
+      summary: List available voice profiles
+      description: |
+        Returns all available voice profiles with sample audio.
+        Cacheable for the session duration.
+      operationId: listVoices
+      responses:
+        "200":
+          description: Voice profiles list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/user_info"
-                required:
-                  - data
-        "400":
-          description: "Return this response if one of the following error occurs: 104"
-          content:
-            application/json:
-              examples:
-                error_104_example:
-                  value:
-                    error_code: 104
-                    message: Invalid syntax
-                    details:
-                      [
-                        The invalid parameter is passed to the page. The 'page' parameter must be a number greater than 0,
-                        The invalid parameter is passed to the page_size. The 'page_size' parameter must be a number greater than 0,
-                      ]
-        "401":
-          description: "Return this response if one of the following error occurs: 116"
-          content:
-            application/json:
-              examples:
-                error_116_example:
-                  $ref: "#/components/examples/error_116_example"
-        "404":
-          description: "Return this response if one of the following error occurs: 115"
-          content:
-            application/json:
-              examples:
-                error_115_example:
-                  value:
-                    error_code: 115
-                    message: The resource does not exist
-                    details: [Path does not exist]
-        "500":
-          description: "Return this response if one of the following error occurs: 103, 117, 118, 119"
-          content:
-            application/json:
-              examples:
-                error_103_example:
-                  $ref: "#/components/examples/error_103_example"
-    put:
-      tags:
-        - users
-      operationId: update_user
-      description: Users can edit their own information
+                      $ref: "#/components/schemas/VoiceProfileInfo"
+              example:
+                success: true
+                data:
+                  - voice_id: female_vi
+                    label: "Nu - Tieng Viet"
+                    language: vi-VN
+                    gender: female
+                    sample_url: "https://cdn.shiftify.vn/tts/samples/female_vi.mp3"
+                    is_default: true
+                  - voice_id: male_vi
+                    label: "Nam - Tieng Viet"
+                    language: vi-VN
+                    gender: male
+                    sample_url: "https://cdn.shiftify.vn/tts/samples/male_vi.mp3"
+                    is_default: false
+                  - voice_id: female_en
+                    label: "Female - English"
+                    language: en-US
+                    gender: female
+                    sample_url: "https://cdn.shiftify.vn/tts/samples/female_en.mp3"
+                    is_default: false
+                  - voice_id: male_en
+                    label: "Male - English"
+                    language: en-US
+                    gender: male
+                    sample_url: "https://cdn.shiftify.vn/tts/samples/male_en.mp3"
+                    is_default: false
+
+  /voice/logs:
+    get:
+      tags: [Voice Logs]
+      summary: List voice logs
+      description: |
+        Paginated list of voice usage logs.
+        Regular users see only their own logs. Admin sees all.
+      operationId: listVoiceLogs
       parameters:
-        - in: body
-          name: data
-          required: true
-          description: User information data to be updated
+        - name: type
+          in: query
           schema:
-            type: object
-            properties:
-              full_name:
-                type: string
-                example: Pham Tien
-                description: |-
-                  ^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$
-                  (Starts with one or more letters,
-                  allows for characters like spaces,
-                  hyphens, apostrophes, commas,
-                  and periods within the name,
-                  and does not allow trailing spaces)
-              email:
-                type: string
-                example: user@gmail.com
-                description: |-
-                  ^.*@.*\.(com|net|org)$
-                  (The email address must contain at least one character before and after the '@' symbol,
-                  and end with an extension like .com, .net, .org.)
-            required:
-              - full_name
-              - email
+            $ref: "#/components/schemas/VoiceType"
+        - name: source
+          in: query
+          schema:
+            $ref: "#/components/schemas/VoiceSource"
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/VoiceLogStatus"
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: sort
+          in: query
+          description: "Field:direction, e.g. created_at:desc"
+          schema:
+            type: string
+            default: "created_at:desc"
       responses:
         "200":
-          description: User information updated successfully.
+          description: Voice logs list
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/user_info"
-        "400":
-          description: "Return this response if one of the following error occurs: 104"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/VoiceLogListItem"
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+
+  /voice/logs/{voice_log_id}:
+    get:
+      tags: [Voice Logs]
+      summary: Get voice log detail
+      description: |
+        Full detail including original input, output/result, and error info.
+        Regular users can only view their own logs.
+      operationId: getVoiceLog
+      parameters:
+        - name: voice_log_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Voice log detail
           content:
             application/json:
-              examples:
-                error_104_example:
-                  value:
-                    error_code: 104
-                    message: Invalid syntax
-                    details:
-                      [
-                        "Missing required email field",
-                        "Missing required full_name field",
-                        "Invalid full_name field format: Starts with one or more letters, allows for characters like spaces, hyphens, apostrophes, commas, periods within the name, does not allow trailing spaces",
-                        "Invalid email field format: The email address must contain at least one character before and after the '@' symbol and end with an extension like .com, .net, .org.",
-                      ]
-        "401":
-          description: "Return this response if one of the following error occurs: 116"
-          content:
-            application/json:
-              examples:
-                error_116_example:
-                  $ref: "#/components/examples/error_116_example"
-        "409":
-          description: "Return this response if one of the following error occurs: 108"
-          content:
-            application/json:
-              examples:
-                error_108_example:
-                  $ref: "#/components/examples/error_108_example"
-        "500":
-          description: "Return this response if one of the following error occurs: 103, 117, 118, 119"
-          content:
-            application/json:
-              examples:
-                error_103_example:
-                  $ref: "#/components/examples/error_103_example"
-  admin/users/{id}:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/VoiceLogDetail"
+        "403":
+          description: Non-owner non-admin access (FORBIDDEN)
+        "404":
+          description: Log not found (VOICE_LOG_NOT_FOUND)
+
     delete:
-      tags:
-        - admin
-      operationId: delete_user
+      tags: [Voice Logs]
+      summary: Delete voice log (soft-delete)
+      description: Admin-only. Soft-delete preserves audit trail.
+      operationId: deleteVoiceLog
       parameters:
-        - in: path
-          name: id
+        - name: voice_log_id
+          in: path
           required: true
-          description: The ID of the user to delete information.
           schema:
-            type: integer
-            example: 123
-      responses:
-        "204":
-          description: User information deleted successfully
-        "400":
-          description: "Return this response if one of the following error occurs: 104"
-          content:
-            application/json:
-              examples:
-                error_104_example:
-                  value:
-                    error_code: 104
-                    message: Invalid syntax
-                    details:
-                      [
-                        The provided user ID is in an invalid format. The ID must be a number greater than 0,
-                      ]
-        "401":
-          description: "Return this response if one of the following error occurs: 116"
-          content:
-            application/json:
-              examples:
-                error_116_example:
-                  $ref: "#/components/examples/error_116_example"
-        "403":
-          description: "Return this response if one of the following error occurs: 113"
-          content:
-            application/json:
-              examples:
-                error_113_example:
-                  $ref: "#/components/examples/error_113_example"
-        "404":
-          description: "Return this response if one of the following error occurs: 115"
-          content:
-            application/json:
-              examples:
-                error_115_example:
-                  value:
-                    error_code: 115
-                    message: The resource does not exist
-                    details: [The user Id does not exits]
-        "500":
-          description: "Return this response if one of the following error occurs: 103, 117, 118, 119"
-          content:
-            application/json:
-              examples:
-                error_103_example:
-                  $ref: "#/components/examples/error_103_example"
-    put:
-      tags:
-        - admin
-      operationId: update_user
-      description: The admin can edit user information
-      parameters:
-        - in: path
-          name: id
-          required: true
-          description: The ID of the user to update information
-          schema:
-            type: integer
-            example: 123
-        - in: body
-          name: data
-          required: true
-          description: User information data to be updated
-          schema:
-            type: object
-            properties:
-              full_name:
-                type: string
-                example: Pham Tien
-                description: |-
-                  ^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$
-                  (Starts with one or more letters,
-                  allows for characters like spaces,
-                  hyphens, apostrophes, commas,
-                  and periods within the name,
-                  and does not allow trailing spaces)
-              email:
-                type: string
-                example: user@gmail.com
-                description: |-
-                  ^.*@.*\.(com|net|org)$
-                  (The email address must contain at least one character before and after the '@' symbol,
-                  and end with an extension like .com, .net, .org.)
-              role_id:
-                type: integer
-                example: 2
-            required:
-              - full_name
-              - email
-              - role_id
+            type: string
+            format: uuid
       responses:
         "200":
-          description: User information updated successfully.
+          description: Deleted
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/user_info"
-        "400":
-          description: "Return this response if one of the following error occurs: 104"
-          content:
-            application/json:
-              examples:
-                error_104_example:
-                  value:
-                    error_code: 104
-                    message: Invalid syntax
-                    details:
-                      [
-                        "Missing required email field",
-                        "Missing required full_name field",
-                        "Missing required role_id field",
-                        "Invalid full_name field format: Starts with one or more letters, allows for characters like spaces, hyphens, apostrophes, commas, periods within the name, does not allow trailing spaces",
-                        "Invalid email field format: The email address must contain at least one character before and after the '@' symbol and end with an extension like .com, .net, .org.",
-                        "The provided user ID is in an invalid format. The ID must be a number greater than 0",
-                        "Role with the provided ID does not exist",
-                      ]
-        "401":
-          description: "Return this response if one of the following error occurs: 116"
-          content:
-            application/json:
-              examples:
-                error_116_example:
-                  $ref: "#/components/examples/error_116_example"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Voice log deleted successfully"
+                  data:
+                    type: object
+                    properties:
+                      voice_log_id:
+                        type: string
+                        format: uuid
+                      deleted_at:
+                        type: string
+                        format: date-time
         "403":
-          description: "Return this response if one of the following error occurs: 114"
-          content:
-            application/json:
-              examples:
-                error_114_example:
-                  $ref: "#/components/examples/error_114_example"
+          description: Non-admin access (FORBIDDEN)
         "404":
-          description: "Return this response if one of the following error occurs: 115"
+          description: Log not found or already deleted
+
+  /voice/logs/{voice_log_id}/retry:
+    post:
+      tags: [Voice Logs]
+      summary: Retry failed voice request
+      description: |
+        Re-queue a failed STT/TTS request using original input.
+        - Only logs with status=failed can be retried
+        - Maximum 3 retries per log
+      operationId: retryVoiceLog
+      parameters:
+        - name: voice_log_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "202":
+          description: Retry queued
           content:
             application/json:
-              examples:
-                error_115_example:
-                  $ref: "#/components/examples/error_115_example"
-        "409":
-          description: "Return this response if one of the following error occurs: 108"
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      voice_log_id:
+                        type: string
+                        format: uuid
+                      status:
+                        type: string
+                        example: processing
+                      retry_count:
+                        type: integer
+                        example: 2
+                      message:
+                        type: string
+                        example: "Request queued for retry"
+                      updated_at:
+                        type: string
+                        format: date-time
+        "400":
+          description: "Not retryable (NOT_RETRYABLE | MAX_RETRIES_EXCEEDED)"
+        "404":
+          description: Log not found
+
+  /voice/logs/summary:
+    get:
+      tags: [Voice Analytics]
+      summary: Voice usage statistics
+      description: |
+        Aggregated voice usage stats for admin dashboard.
+        - Max date range: 90 days
+        - group_by=hour only for ranges <= 7 days
+        - Cacheable for 5 minutes
+      operationId: getVoiceSummary
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: group_by
+          in: query
+          schema:
+            $ref: "#/components/schemas/GroupBy"
+        - name: type
+          in: query
+          schema:
+            $ref: "#/components/schemas/VoiceType"
+      responses:
+        "200":
+          description: Usage summary
           content:
             application/json:
-              examples:
-                error_108_example:
-                  $ref: "#/components/examples/error_108_example"
-        "500":
-          description: "Return this response if one of the following error occurs: 103, 117, 118, 119"
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/VoiceSummary"
+        "400":
+          description: "Invalid date range (INVALID_DATE_RANGE, max 90 days)"
+        "403":
+          description: Non-admin access
+
+  /voice/logs/summary/errors:
+    get:
+      tags: [Voice Analytics]
+      summary: Error breakdown
+      description: |
+        Detailed failure analysis for debugging.
+        Shows error code distribution and recent failures.
+      operationId: getVoiceErrorSummary
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: type
+          in: query
+          schema:
+            $ref: "#/components/schemas/VoiceType"
+      responses:
+        "200":
+          description: Error summary
           content:
             application/json:
-              examples:
-                error_103_example:
-                  $ref: "#/components/examples/error_103_example"
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/ErrorSummary"
+        "403":
+          description: Non-admin access
+
+  /voice/health:
+    get:
+      tags: [Voice Analytics]
+      summary: Voice system health check
+      description: |
+        Health status of STT engine, TTS engine, and audio CDN.
+        - overall: healthy | degraded | unhealthy
+        - Frontend can show warning banner when degraded/unhealthy
+      operationId: getVoiceHealth
+      responses:
+        "200":
+          description: Health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/VoiceHealth"
