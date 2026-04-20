@@ -764,6 +764,92 @@ paths:
                 properties:
                   status: { type: string, example: "error" }
                   message: { type: string, example: "Khong tim thay cuoc hoi thoai yeu cau" }
+  /api/v1/conversations/{conversation_id}/read:
+    patch:
+      tags:
+        - Chat
+      summary: Danh dau da doc tin nhan
+      description: Cap nhat trang thai da doc tin nhan cho nguoi dung hien tai trong mot cuoc hoi thoai.
+      operationId: markConversationRead
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          description: ID cua cuoc hoi thoai
+          schema:
+            type: string
+            format: uuid
+          example: "uuid-conv-001"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - last_read_message_id
+              properties:
+                last_read_message_id:
+                  type: string
+                  format: uuid
+                  example: "uuid-msg-120"
+                  description: ID cua tin nhan cuoi cung da doc
+      responses:
+        "200":
+          description: Thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - conversation_id
+                  - unread_count
+                  - updated_at
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  conversation_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-conv-001"
+                  unread_count:
+                    type: integer
+                    example: 0
+                  updated_at:
+                    type: string
+                    format: date-time
+                    example: "2026-04-15T20:25:00Z"
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de thuc hien" }
+        "403":
+          description: Khong co quyen cap nhat trang thai doc
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong phai thanh vien cua cuoc hoi thoai nay" }
+        "404":
+          description: Khong tim thay cuoc hoi thoai hoac tin nhan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Thong tin yeu cau khong ton tai" }
   /api/v1/messages/{message_id}:
     get:
       tags:
