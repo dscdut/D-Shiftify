@@ -15,6 +15,8 @@ servers:
 tags:
   - name: STT
     description: Speech-To-Text conversion
+  - name: TTS
+    description: Text-To-Speech conversion
 
 components:
   securitySchemes:
@@ -179,6 +181,143 @@ components:
           format: date-time
           nullable: true
 
+    # ── TTS Schemas ──
+    AudioFormat:
+      type: string
+      enum: [mp3, wav, ogg]
+
+    VoiceProfile:
+      type: string
+      enum: [female_vi, male_vi, female_en, male_en]
+      default: female_vi
+
+    TtsRequest:
+      type: object
+      required: [text, context]
+      properties:
+        text:
+          type: string
+          maxLength: 5000
+          example: "Ban da duoc moi phong van vao thu 6"
+        voice:
+          $ref: "#/components/schemas/VoiceProfile"
+        speed:
+          type: number
+          format: float
+          minimum: 0.5
+          maximum: 2.0
+          default: 1.0
+        format:
+          $ref: "#/components/schemas/AudioFormat"
+        context:
+          $ref: "#/components/schemas/VoiceContext"
+
+    TtsResult:
+      type: object
+      properties:
+        tts_id:
+          type: string
+          format: uuid
+        audio_url:
+          type: string
+          format: uri
+          example: "https://cdn.shiftify.vn/tts/tts-001.mp3"
+        duration_sec:
+          type: number
+          format: float
+          example: 5.2
+        format:
+          type: string
+          example: mp3
+        file_size:
+          type: integer
+          description: File size in bytes
+          example: 83200
+        voice:
+          type: string
+          example: female_vi
+        speed:
+          type: number
+          format: float
+          example: 1.0
+        char_count:
+          type: integer
+          example: 48
+        voice_log_id:
+          type: string
+          format: uuid
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: "null = permanent, set for preview files"
+        created_at:
+          type: string
+          format: date-time
+
+    TtsPreviewRequest:
+      type: object
+      required: [text]
+      properties:
+        text:
+          type: string
+          maxLength: 200
+          example: "Day la ban doc thu giong noi"
+        voice:
+          $ref: "#/components/schemas/VoiceProfile"
+        speed:
+          type: number
+          format: float
+          minimum: 0.5
+          maximum: 2.0
+          default: 1.0
+        format:
+          $ref: "#/components/schemas/AudioFormat"
+
+    TtsPreviewResult:
+      type: object
+      properties:
+        preview_url:
+          type: string
+          format: uri
+        duration_sec:
+          type: number
+          format: float
+        format:
+          type: string
+        file_size:
+          type: integer
+        voice:
+          type: string
+        speed:
+          type: number
+          format: float
+        expires_at:
+          type: string
+          format: date-time
+          description: Preview files expire after 1 hour
+
+    VoiceProfileInfo:
+      type: object
+      properties:
+        voice_id:
+          type: string
+          example: female_vi
+        label:
+          type: string
+          example: "Nu - Tieng Viet"
+        language:
+          type: string
+          example: vi-VN
+        gender:
+          type: string
+          enum: [female, male]
+        sample_url:
+          type: string
+          format: uri
+        is_default:
+          type: boolean
+
 security:
   - BearerAuth: []
 
@@ -291,3 +430,124 @@ paths:
                     $ref: "#/components/schemas/BatchJob"
         "404":
           description: Job not found (JOB_NOT_FOUND)
+
+  # ═══════════════════════════════════════
+  #  TTS - Text-To-Speech
+  # ═══════════════════════════════════════
+  /voice/tts:
+    post:
+      tags: [TTS]
+      summary: Convert text to speech
+      description: |
+        Generate audio from text.
+        - Max text: 5000 characters
+        - Speed: 0.5x to 2.0x
+        - Output stored permanently on CDN
+        - Auto-creates a voice_log with type=tts
+      operationId: convertTts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TtsRequest"
+      responses:
+        "201":
+          description: Audio generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/TtsResult"
+        "400":
+          description: "Invalid input (TEXT_EMPTY | TEXT_TOO_LONG)"
+        "422":
+          description: "Invalid voice or speed (VOICE_NOT_SUPPORTED | INVALID_SPEED)"
+        "503":
+          description: TTS engine unavailable (TTS_SERVICE_UNAVAILABLE)
+
+  /voice/tts/preview:
+    post:
+      tags: [TTS]
+      summary: Generate preview audio
+      description: |
+        Short preview for testing voice settings.
+        - Max text: 200 characters
+        - Preview expires after 1 hour
+        - No voice_log created
+      operationId: previewTts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TtsPreviewRequest"
+      responses:
+        "201":
+          description: Preview generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/TtsPreviewResult"
+
+  /voice/voices:
+    get:
+      tags: [TTS]
+      summary: List available voice profiles
+      description: |
+        Returns all available voice profiles with sample audio.
+        Cacheable for the session duration.
+      operationId: listVoices
+      responses:
+        "200":
+          description: Voice profiles list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/VoiceProfileInfo"
+              example:
+                success: true
+                data:
+                  - voice_id: female_vi
+                    label: "Nu - Tieng Viet"
+                    language: vi-VN
+                    gender: female
+                    sample_url: "https://cdn.shiftify.vn/tts/samples/female_vi.mp3"
+                    is_default: true
+                  - voice_id: male_vi
+                    label: "Nam - Tieng Viet"
+                    language: vi-VN
+                    gender: male
+                    sample_url: "https://cdn.shiftify.vn/tts/samples/male_vi.mp3"
+                    is_default: false
+                  - voice_id: female_en
+                    label: "Female - English"
+                    language: en-US
+                    gender: female
+                    sample_url: "https://cdn.shiftify.vn/tts/samples/female_en.mp3"
+                    is_default: false
+                  - voice_id: male_en
+                    label: "Male - English"
+                    language: en-US
+                    gender: male
+                    sample_url: "https://cdn.shiftify.vn/tts/samples/male_en.mp3"
+                    is_default: false
