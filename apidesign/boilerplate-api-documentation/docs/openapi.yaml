@@ -13,7 +13,7 @@ paths:
     post:
       tags:
         - CV
-      summary: Tao moi CV cho ung vien
+      summary: Tao moi CV
       operationId: createCV
       security:
         - bearerAuth: []
@@ -453,7 +453,7 @@ paths:
     get:
       tags:
         - Job
-      summary: Lay danh sach cong viec (Danh cho ung vien)
+      summary: Lay danh sach cong viec 
       operationId: getJobs
       security:
         - bearerAuth: []
