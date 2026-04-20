@@ -19,6 +19,8 @@ tags:
     description: Text-To-Speech conversion
   - name: Voice Logs
     description: Voice usage tracking and management
+  - name: Voice Analytics
+    description: Dashboard monitoring and health checks
 
 components:
   securitySchemes:
@@ -433,6 +435,229 @@ components:
         updated_at:
           type: string
           format: date-time
+
+    # ── Analytics Schemas ──
+    GroupBy:
+      type: string
+      enum: [hour, day, week, month]
+      default: day
+
+    HealthStatus:
+      type: string
+      enum: [healthy, degraded, unhealthy]
+
+    VoiceSummary:
+      type: object
+      properties:
+        period:
+          type: object
+          properties:
+            from:
+              type: string
+              format: date
+            to:
+              type: string
+              format: date
+        totals:
+          type: object
+          properties:
+            total_requests:
+              type: integer
+              example: 1200
+            success:
+              type: integer
+              example: 1140
+            failed:
+              type: integer
+              example: 60
+            success_rate:
+              type: number
+              format: float
+              example: 95.0
+            total_duration_sec:
+              type: number
+              format: float
+              example: 9600.5
+            unique_users:
+              type: integer
+              example: 87
+        by_type:
+          type: object
+          properties:
+            stt:
+              type: object
+              properties:
+                total_requests:
+                  type: integer
+                success:
+                  type: integer
+                failed:
+                  type: integer
+                avg_confidence:
+                  type: number
+                  format: float
+                avg_duration_sec:
+                  type: number
+                  format: float
+                total_words_transcribed:
+                  type: integer
+            tts:
+              type: object
+              properties:
+                total_requests:
+                  type: integer
+                success:
+                  type: integer
+                failed:
+                  type: integer
+                avg_duration_sec:
+                  type: number
+                  format: float
+                total_chars_converted:
+                  type: integer
+        by_source:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              count:
+                type: integer
+              pct:
+                type: number
+                format: float
+        timeline:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+              total:
+                type: integer
+              success:
+                type: integer
+              failed:
+                type: integer
+              stt_count:
+                type: integer
+              tts_count:
+                type: integer
+
+    ErrorSummary:
+      type: object
+      properties:
+        period:
+          type: object
+          properties:
+            from:
+              type: string
+              format: date
+            to:
+              type: string
+              format: date
+        total_errors:
+          type: integer
+        by_error_code:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+              count:
+                type: integer
+              pct:
+                type: number
+                format: float
+              last_occurred_at:
+                type: string
+                format: date-time
+        retryable_count:
+          type: integer
+        recent_failures:
+          type: array
+          items:
+            type: object
+            properties:
+              voice_log_id:
+                type: string
+                format: uuid
+              type:
+                $ref: "#/components/schemas/VoiceType"
+              source:
+                $ref: "#/components/schemas/VoiceSource"
+              error_code:
+                type: string
+              user_id:
+                type: string
+                format: uuid
+              retry_count:
+                type: integer
+              created_at:
+                type: string
+                format: date-time
+
+    VoiceHealth:
+      type: object
+      properties:
+        overall:
+          $ref: "#/components/schemas/HealthStatus"
+        services:
+          type: object
+          properties:
+            stt_engine:
+              type: object
+              properties:
+                status:
+                  $ref: "#/components/schemas/HealthStatus"
+                latency_ms:
+                  type: integer
+                  nullable: true
+                error:
+                  type: string
+                  nullable: true
+                last_checked_at:
+                  type: string
+                  format: date-time
+            tts_engine:
+              type: object
+              properties:
+                status:
+                  $ref: "#/components/schemas/HealthStatus"
+                latency_ms:
+                  type: integer
+                  nullable: true
+                error:
+                  type: string
+                  nullable: true
+                last_checked_at:
+                  type: string
+                  format: date-time
+            audio_cdn:
+              type: object
+              properties:
+                status:
+                  $ref: "#/components/schemas/HealthStatus"
+                latency_ms:
+                  type: integer
+                  nullable: true
+                error:
+                  type: string
+                  nullable: true
+                last_checked_at:
+                  type: string
+                  format: date-time
+        queue:
+          type: object
+          properties:
+            pending_jobs:
+              type: integer
+            processing_jobs:
+              type: integer
+            avg_wait_time_sec:
+              type: number
+              format: float
+              nullable: true
 
 security:
   - BearerAuth: []
@@ -859,3 +1084,119 @@ paths:
           description: "Not retryable (NOT_RETRYABLE | MAX_RETRIES_EXCEEDED)"
         "404":
           description: Log not found
+
+  # ═══════════════════════════════════════
+  #  Voice Analytics & Monitoring
+  # ═══════════════════════════════════════
+  /voice/logs/summary:
+    get:
+      tags: [Voice Analytics]
+      summary: Voice usage statistics
+      description: |
+        Aggregated voice usage stats for admin dashboard.
+        - Max date range: 90 days
+        - group_by=hour only for ranges <= 7 days
+        - Cacheable for 5 minutes
+      operationId: getVoiceSummary
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: group_by
+          in: query
+          schema:
+            $ref: "#/components/schemas/GroupBy"
+        - name: type
+          in: query
+          schema:
+            $ref: "#/components/schemas/VoiceType"
+      responses:
+        "200":
+          description: Usage summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/VoiceSummary"
+        "400":
+          description: "Invalid date range (INVALID_DATE_RANGE, max 90 days)"
+        "403":
+          description: Non-admin access
+
+  /voice/logs/summary/errors:
+    get:
+      tags: [Voice Analytics]
+      summary: Error breakdown
+      description: |
+        Detailed failure analysis for debugging.
+        Shows error code distribution and recent failures.
+      operationId: getVoiceErrorSummary
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: type
+          in: query
+          schema:
+            $ref: "#/components/schemas/VoiceType"
+      responses:
+        "200":
+          description: Error summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/ErrorSummary"
+        "403":
+          description: Non-admin access
+
+  /voice/health:
+    get:
+      tags: [Voice Analytics]
+      summary: Voice system health check
+      description: |
+        Health status of STT engine, TTS engine, and audio CDN.
+        - overall: healthy | degraded | unhealthy
+        - Frontend can show warning banner when degraded/unhealthy
+      operationId: getVoiceHealth
+      responses:
+        "200":
+          description: Health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/VoiceHealth"
