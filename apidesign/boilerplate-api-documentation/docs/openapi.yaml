@@ -664,6 +664,106 @@ paths:
                 properties:
                   status: { type: string, example: "error" }
                   message: { type: string, example: "Khong tim thay cuoc hoi thoai yeu cau" }
+    get:
+      tags:
+        - Chat
+      summary: Lay lich su tin nhan
+      description: Lay danh sach cac tin nhan trong mot cuoc hoi thoai. Su dung cursor-based pagination de toi uu hieu nang.
+      operationId: getMessages
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          description: ID cua cuoc hoi thoai
+          schema:
+            type: string
+            format: uuid
+          example: "uuid-conv-001"
+        - name: cursor
+          in: query
+          description: ID cua tin nhan de danh dau vi tri bat dau lay tin nhan tiep theo
+          schema:
+            type: string
+          example: "uuid-msg-090"
+        - name: limit
+          in: query
+          description: So luong tin nhan lay ra trong mot lan goi
+          schema:
+            type: integer
+            default: 20
+          example: 30
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  next_cursor:
+                    type: string
+                    nullable: true
+                    example: "uuid-msg-050"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - message_id
+                        - sender_id
+                        - created_at
+                      properties:
+                        message_id:
+                          type: string
+                          format: uuid
+                          example: "uuid-msg-120"
+                        content:
+                          type: string
+                          nullable: true
+                          example: "Em muon hoi them ve JD"
+                        voice_url:
+                          type: string
+                          nullable: true
+                          example: null
+                        sender_id:
+                          type: string
+                          format: uuid
+                          example: "uuid-user-111"
+                        created_at:
+                          type: string
+                          format: date-time
+                          example: "2026-04-15T20:20:00Z"
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de xem lich su tin nhan" }
+        "403":
+          description: Khong co quyen xem tin nhan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen xem tin nhan cua cuoc hoi thoai nay" }
+        "404":
+          description: Cuoc hoi thoai khong ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay cuoc hoi thoai yeu cau" }
 components:
   securitySchemes:
     bearerAuth:
