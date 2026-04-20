@@ -764,6 +764,88 @@ paths:
                 properties:
                   status: { type: string, example: "error" }
                   message: { type: string, example: "Khong tim thay cuoc hoi thoai yeu cau" }
+  /api/v1/messages/{message_id}:
+    get:
+      tags:
+        - Chat
+      summary: Lay chi tiet 1 tin nhan
+      description: Lay thong tin chi tiet cua mot tin nhan cu the.
+      operationId: getMessageDetail
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: message_id
+          in: path
+          required: true
+          description: ID cua tin nhan can lay chi tiet
+          schema:
+            type: string
+            format: uuid
+          example: "uuid-msg-120"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message_id
+                  - conversation_id
+                  - sender_id
+                  - created_at
+                properties:
+                  message_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-msg-120"
+                  conversation_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-conv-001"
+                  sender_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-user-111"
+                  content:
+                    type: string
+                    nullable: true
+                    example: "Em muon hoi them ve JD"
+                  voice_url:
+                    type: string
+                    nullable: true
+                    example: null
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: "2026-04-15T20:20:00Z"
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de xem chi tiet tin nhan" }
+        "403":
+          description: Khong co quyen xem tin nhan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen xem tin nhan nay" }
+        "404":
+          description: Tin nhan khong ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay tin nhan yeu cau" }
 components:
   securitySchemes:
     bearerAuth:
