@@ -320,6 +320,176 @@ paths:
                 properties:
                   status: { type: string, example: "error" }
                   message: { type: string, example: "Khong tim thay cuoc hoi thoai de xoa" }
+  /api/v1/conversations/{conversation_id}/participants:
+    post:
+      tags:
+        - Chat
+      summary: Them participant vao cuoc hoi thoai
+      description: Them mot nguoi dung moi vao cuoc hoi thoai. Khong cho phep them trung nguoi dung trong cung mot cuoc hoi thoai.
+      operationId: addParticipant
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          description: ID cua cuoc hoi thoai can them thanh vien
+          schema:
+            type: string
+            format: uuid
+          example: "uuid-conv-001"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+              properties:
+                user_id:
+                  type: string
+                  format: uuid
+                  example: "uuid-user-333"
+                  description: ID cua nguoi dung muon them vao
+      responses:
+        "201":
+          description: Them thanh vien thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - participant_id
+                  - conversation_id
+                  - message
+                properties:
+                  participant_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-part-003"
+                  conversation_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-conv-001"
+                  message:
+                    type: string
+                    example: "Them participant thanh cong"
+        "400":
+          description: Yeu cau khong hop le hoac nguoi dung da ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Nguoi dung nay da co mat trong cuoc hoi thoai" }
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de thuc hien" }
+        "403":
+          description: Khong co quyen them thanh vien
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen them nguoi vao cuoc hoi thoai nay" }
+        "404":
+          description: Cuoc hoi thoai hoac nguoi dung khong ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay thong tin yeu cau" }
+    get:
+      tags:
+        - Chat
+      summary: Lay danh sach participant trong cuoc hoi thoai
+      description: Lay danh sach cac thanh vien dang tham gia vao mot cuoc hoi thoai.
+      operationId: getConversationParticipants
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          description: ID cua cuoc hoi thoai can lay danh sach thanh vien
+          schema:
+            type: string
+            format: uuid
+          example: "uuid-conv-001"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - total
+                  - data
+                properties:
+                  total:
+                    type: integer
+                    example: 2
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - participant_id
+                        - user_id
+                        - created_at
+                      properties:
+                        participant_id:
+                          type: string
+                          format: uuid
+                          example: "uuid-part-009"
+                        user_id:
+                          type: string
+                          format: uuid
+                          example: "uuid-user-111"
+                        created_at:
+                          type: string
+                          format: date-time
+                          example: "2026-04-15T20:00:00Z"
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de xem danh sach thanh vien" }
+        "403":
+          description: Khong co quyen xem danh sach thanh vien
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen xem danh sach thanh vien cua hoi thoai nay" }
+        "404":
+          description: Cuoc hoi thoai khong ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay cuoc hoi thoai yeu cau" }
 components:
   securitySchemes:
     bearerAuth:
