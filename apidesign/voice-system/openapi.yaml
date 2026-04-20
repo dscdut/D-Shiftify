@@ -17,6 +17,8 @@ tags:
     description: Speech-To-Text conversion
   - name: TTS
     description: Text-To-Speech conversion
+  - name: Voice Logs
+    description: Voice usage tracking and management
 
 components:
   securitySchemes:
@@ -318,6 +320,120 @@ components:
         is_default:
           type: boolean
 
+    # ── Shared Objects ──
+    VoiceType:
+      type: string
+      enum: [stt, tts]
+
+    UserSummary:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        full_name:
+          type: string
+        role:
+          type: string
+
+    PaginationMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+
+    # ── Voice Log Schemas ──
+    VoiceLogListItem:
+      type: object
+      properties:
+        voice_log_id:
+          type: string
+          format: uuid
+        type:
+          $ref: "#/components/schemas/VoiceType"
+        source:
+          $ref: "#/components/schemas/VoiceSource"
+        reference_id:
+          type: string
+          format: uuid
+        status:
+          $ref: "#/components/schemas/VoiceLogStatus"
+        metadata:
+          type: object
+          description: "STT: confidence, duration_sec, language, word_count. TTS: duration_sec, voice, char_count, file_size"
+        user:
+          $ref: "#/components/schemas/UserSummary"
+        created_at:
+          type: string
+          format: date-time
+
+    VoiceLogDetail:
+      type: object
+      properties:
+        voice_log_id:
+          type: string
+          format: uuid
+        user:
+          $ref: "#/components/schemas/UserSummary"
+        type:
+          $ref: "#/components/schemas/VoiceType"
+        source:
+          $ref: "#/components/schemas/VoiceSource"
+        reference_id:
+          type: string
+          format: uuid
+        status:
+          $ref: "#/components/schemas/VoiceLogStatus"
+        input:
+          type: object
+          description: Original request parameters
+          properties:
+            audio_url:
+              type: string
+              format: uri
+            language:
+              type: string
+            text:
+              type: string
+            voice:
+              type: string
+        output:
+          type: object
+          nullable: true
+          description: "Result data (null if failed)"
+          properties:
+            text:
+              type: string
+            confidence:
+              type: number
+              format: float
+            duration_sec:
+              type: number
+              format: float
+            audio_url:
+              type: string
+              format: uri
+        error:
+          type: object
+          nullable: true
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+        retry_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
 security:
   - BearerAuth: []
 
@@ -551,3 +667,195 @@ paths:
                     gender: male
                     sample_url: "https://cdn.shiftify.vn/tts/samples/male_en.mp3"
                     is_default: false
+
+  # ═══════════════════════════════════════
+  #  Voice Logs - CRUD
+  # ═══════════════════════════════════════
+  /voice/logs:
+    get:
+      tags: [Voice Logs]
+      summary: List voice logs
+      description: |
+        Paginated list of voice usage logs.
+        Regular users see only their own logs. Admin sees all.
+      operationId: listVoiceLogs
+      parameters:
+        - name: type
+          in: query
+          schema:
+            $ref: "#/components/schemas/VoiceType"
+        - name: source
+          in: query
+          schema:
+            $ref: "#/components/schemas/VoiceSource"
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/VoiceLogStatus"
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: sort
+          in: query
+          description: "Field:direction, e.g. created_at:desc"
+          schema:
+            type: string
+            default: "created_at:desc"
+      responses:
+        "200":
+          description: Voice logs list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/VoiceLogListItem"
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+
+  /voice/logs/{voice_log_id}:
+    get:
+      tags: [Voice Logs]
+      summary: Get voice log detail
+      description: |
+        Full detail including original input, output/result, and error info.
+        Regular users can only view their own logs.
+      operationId: getVoiceLog
+      parameters:
+        - name: voice_log_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Voice log detail
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/VoiceLogDetail"
+        "403":
+          description: Non-owner non-admin access (FORBIDDEN)
+        "404":
+          description: Log not found (VOICE_LOG_NOT_FOUND)
+
+    delete:
+      tags: [Voice Logs]
+      summary: Delete voice log (soft-delete)
+      description: Admin-only. Soft-delete preserves audit trail.
+      operationId: deleteVoiceLog
+      parameters:
+        - name: voice_log_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Voice log deleted successfully"
+                  data:
+                    type: object
+                    properties:
+                      voice_log_id:
+                        type: string
+                        format: uuid
+                      deleted_at:
+                        type: string
+                        format: date-time
+        "403":
+          description: Non-admin access (FORBIDDEN)
+        "404":
+          description: Log not found or already deleted
+
+  /voice/logs/{voice_log_id}/retry:
+    post:
+      tags: [Voice Logs]
+      summary: Retry failed voice request
+      description: |
+        Re-queue a failed STT/TTS request using original input.
+        - Only logs with status=failed can be retried
+        - Maximum 3 retries per log
+      operationId: retryVoiceLog
+      parameters:
+        - name: voice_log_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "202":
+          description: Retry queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      voice_log_id:
+                        type: string
+                        format: uuid
+                      status:
+                        type: string
+                        example: processing
+                      retry_count:
+                        type: integer
+                        example: 2
+                      message:
+                        type: string
+                        example: "Request queued for retry"
+                      updated_at:
+                        type: string
+                        format: date-time
+        "400":
+          description: "Not retryable (NOT_RETRYABLE | MAX_RETRIES_EXCEEDED)"
+        "404":
+          description: Log not found
