@@ -1,17 +1,14 @@
 openapi: 3.1.0
 info:
-  title: D-Shiftify API
-  description: |
-    He thong API Voice ho tro cac tinh nang chuyen doi ngon ngu (STT/TTS), 
-    quan ly nhat ky giong noi va phan tich du lieu hieu nang he thong.
-    Duoc thiet ke theo tieu chuan RESTful voi phan hoi JSON dong nhat,
-    tuong thich voi he thong Shiftify Core.
+  title: D-Shiftify API & Documentation
   version: 1.0.0
 servers:
   - url: https://api.shiftify.vn/api/v1
     description: Production Server
   - url: http://localhost:3000/api/v1
     description: Local Development Environment
+  - url: http://localhost:3000
+    description: Core API Local Environment
 
 tags:
   - name: STT
@@ -22,6 +19,20 @@ tags:
     description: "Quan ly va truy xuat lich su su dung dich vu voice"
   - name: Voice Analytics
     description: "Bao cao thong ke va giam sat suc khoe he thong"
+  - name: authentication
+    description: Operations about authentication
+  - name: profile
+    description: Operations about user profile
+  - name: CV
+    description: Operations about CV management
+  - name: Job
+    description: Operations about job management
+  - name: Application
+    description: Operations about job applications
+  - name: Matching
+    description: Operations about AI-powered matching
+  - name: Chat
+    description: Cac API lien quan den he thong Chat va Conversation
 
 security:
   - bearerAuth: []
@@ -102,6 +113,7 @@ paths:
         - Roles: Admin, System
       operationId: batchStt
       requestBody:
+        description: User registration details
         required: true
         content:
           application/json:
@@ -483,6 +495,3206 @@ paths:
                           properties:
                             date: { type: string, example: "2026-04-15" }
                             count: { type: integer, example: 88 }
+
+  /auth/v1/login:
+    post:
+      tags:
+        - authentication
+      summary: User login
+      description: Authenticate a user and return access and refresh tokens.
+      operationId: login
+      requestBody:
+        description: User credentials
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                  description: Registered email address.
+                password:
+                  type: string
+                  format: password
+                  example: SecurePassword123
+                  description: User's account password.
+      responses:
+        "200":
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: User logged in successfully
+                  data:
+                    type: object
+                    required:
+                      - access_token
+                      - refresh_token
+                      - expires_in
+                      - user
+                    properties:
+                      access_token:
+                        type: string
+                        description: JWT token for authenticated requests.
+                        example: "eyJhbGci..."
+                      refresh_token:
+                        type: string
+                        description: Token used to obtain a new access token.
+                        example: "def456..."
+                      expires_in:
+                        type: integer
+                        description: Expiration time of access token in seconds.
+                        example: 3600
+                      user:
+                        type: object
+                        required:
+                          - id
+                          - email
+                          - role
+                          - full_name
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            example: "550e8400-e29b-41d4-a716-446655440000"
+                          email:
+                            type: string
+                            example: user@example.com
+                          role:
+                            type: string
+                            example: candidate
+                          full_name:
+                            type: string
+                            example: Nguyen Van A
+        "400":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, message]
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: Email and password are required
+        "401":
+          description: Unauthorized - Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: Invalid email or password
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: Server error during authentication
+
+  /auth/v1/register:
+    post:
+      tags:
+        - authentication
+      summary: Register a new account
+      description: |
+        Endpoint for creating a new user account. 
+        Supports various roles: candidate, recruiter, training_center, and admin.
+      operationId: register
+      requestBody:
+        description: User registration details
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - phone
+                - password
+                - role
+                - full_name
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                  description: "Unique email address for registration."
+                phone:
+                  type: string
+                  example: "0987654321"
+                  description: "User phone number. Must be unique."
+                password:
+                  type: string
+                  format: password
+                  example: SecurePassword123
+                  description: "Minimum 8 characters, at least one uppercase, one lowercase, and one number."
+                role:
+                  type: string
+                  enum: [candidate, recruiter, training_center, admin]
+                  example: candidate
+                  description: "The intended role of the user within the platform."
+                full_name:
+                  type: string
+                  example: Nguyen Van A
+                  description: "Full legal name of the user."
+      responses:
+        "200":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: User registered successfully
+                  data:
+                    type: object
+                    required:
+                      - user_id
+                      - email
+                      - role
+                    properties:
+                      user_id:
+                        type: string
+                        format: uuid
+                        example: "550e8400-e29b-41d4-a716-446655440000"
+                      email:
+                        type: string
+                        example: user@example.com
+                      role:
+                        type: string
+                        example: candidate
+        "400":
+          description: Validation Error (Invalid format or missing fields)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: Validation failed
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                    example: ["Email is invalid", "Password must be at least 8 characters"]
+        "409":
+          description: Conflict (Email or Phone already exists)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: User already exists
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: Internal server error occurred
+
+  /auth/v1/refresh:
+    post:
+      tags:
+        - authentication
+      summary: Refresh authentication tokens
+      description: Get a new access token using a valid refresh token.
+      operationId: refreshTokens
+      requestBody:
+        description: Refresh token payload
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refresh_token
+              properties:
+                refresh_token:
+                  type: string
+                  example: "def456..."
+                  description: "The refresh token provided during login."
+      responses:
+        "200":
+          description: Tokens refreshed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Tokens refreshed successfully"
+                  data:
+                    type: object
+                    required:
+                      - access_token
+                      - refresh_token
+                    properties:
+                      access_token:
+                        type: string
+                        example: "new-eyJhbGci..."
+                      refresh_token:
+                        type: string
+                        example: "new-def456..."
+        "401":
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: Refresh token is invalid or expired
+
+  /auth/v1/forgot-password:
+    post:
+      tags:
+        - authentication
+      summary: Request password reset
+      description: |
+        Endpoint to request a password reset code. 
+        A code or link will be sent to the provided email if it exists in the system.
+      operationId: forgotPassword
+      requestBody:
+        description: Registered user email
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                  description: "The email address associated with the account."
+      responses:
+        "200":
+          description: Reset code sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "The code has been sent to your email. Please check the email box!"
+        "404":
+          description: Email not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: Email address not found
+
+  /auth/v1/reset-password:
+    post:
+      tags:
+        - authentication
+      summary: Reset user password
+      description: Update the password for an account using a valid reset token.
+      operationId: resetPassword
+      requestBody:
+        description: Token and new password details
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+                - new_password
+              properties:
+                token:
+                  type: string
+                  example: "reset-token-from-email"
+                  description: "The reset token received via email."
+                new_password:
+                  type: string
+                  format: password
+                  example: "NewSecurePassword123"
+                  description: "The new password for the account."
+      responses:
+        "200":
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Mat khau da duoc thay doi thanh cong. Ban co the dang nhap ngay bay gio."
+        "400":
+          description: Invalid token or password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: "Ma xac thuc khong hop le hoac mat khau khong dung yeu cau."
+
+  # --- Profile ---
+  /profile/v1/me:
+    get:
+      tags:
+        - profile
+      summary: Get current user profile
+      description: Retrieve detailed information about the currently authenticated user.
+      operationId: getCurrentUserProfile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Profile retrieved successfully"
+                  data:
+                    type: object
+                    properties:
+                      id: { type: string, format: uuid, example: "uuid-profile" }
+                      full_name: { type: string, example: "Nguyen Van A" }
+                      dob: { type: string, example: "1995-05-20" }
+                      gender: { type: string, example: "Male" }
+                      phone: { type: string, example: "0987654321" }
+                      disability_status: { type: string, example: "Khiem thi nhe" }
+                      created_at: { type: string, example: "2023-10-01T08:00:00Z" }
+                      devices:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id: { type: string, example: "uuid-device-1" }
+                            name: { type: string, example: "May doc man hinh (Screen Reader)" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
+    patch:
+      tags:
+        - profile
+      summary: Chinh sua thong tin cua user hien tai
+      operationId: updateCurrentUserProfile
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Thong tin ho so can cap nhat
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - phone
+                - password
+                - role
+                - full_name
+              properties:
+                full_name: { type: string, example: "Nguyen Van A" }
+                dob: { type: string, format: date, example: "1998-10-15" }
+                gender: { type: string, example: "Nam" }
+                phone: { type: string, example: "0912345678" }
+                disability_status: { type: string, example: "Khuyet tat van dong nhe" }
+                device_ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  example: ["uuid-device-1", "uuid-device-3"]
+      responses:
+        "200":
+          description: Cap nhat thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Cap nhat ho so thanh cong"
+                  data:
+                    type: object
+                    properties:
+                      id: { type: string, format: uuid, example: "uuid-profile" }
+                      full_name: { type: string, example: "Nguyen Van A" }
+                      dob: { type: string, example: "1998-10-15" }
+                      gender: { type: string, example: "Nam" }
+                      phone: { type: string, example: "0912345678" }
+                      disability_status: { type: string, example: "Khuyet tat van dong nhe" }
+                      devices:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id: { type: string, example: "uuid-device-1" }
+                            name: { type: string, example: "Xe lan tay" }
+                        example: 
+                          - { id: "uuid-device-1", name: "Xe lan tay" }
+                          - { id: "uuid-device-3", name: "Nep chan ho tro" }
+                      updated_at: { type: string, format: date-time, example: "2024-05-20T10:30:00Z" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
+    delete:
+      tags:
+        - profile
+      summary: Xoa tai khoan
+      operationId: deleteCurrentUserAccount
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Xac nhan mat khau de xoa tai khoan
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - password
+              properties:
+                password:
+                  type: string
+                  format: password
+                  example: "ConfirmPasswordToVerify"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Tai khoan cua ban da duoc vo hieu hoa."
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
+
+  /profile/v1/me/devices:
+    post:
+      tags:
+        - profile
+      summary: Them thiet bi vao profile cua user
+      operationId: addDevicesToProfile
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Danh sach ID thiet bi can them
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - device_ids
+              properties:
+                device_ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  example: ["uuid1", "uuid2"]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Add devices successfully"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
+
+  /profile/v1/assistive-devices:
+    get:
+      tags:
+        - profile
+      summary: Lay danh sach tat ca cac thiet bi ho tro co san trong he thong
+      operationId: getAssistiveDevices
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Danh sach thiet bi ho tro"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - name
+                      properties:
+                        id: { type: string, format: uuid, example: "uuid1" }
+                        name: { type: string, example: "Xe lan dien" }
+                    example:
+                      - { id: "uuid1", name: "Xe lan dien" }
+                      - { id: "uuid2", name: "May tro thinh" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
+
+  /profile/v1/voice-logs:
+    post:
+      tags:
+        - profile
+      summary: Luu nhat ky su dung giong noi (STT/TTS)
+      operationId: createVoiceLog
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Thong tin nhat ky giong noi
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - type
+                - source
+                - reference_id
+                - status
+              properties:
+                type:
+                  type: string
+                  enum: [stt, tts]
+                  description: Loai xu ly giong noi
+                  example: "stt"
+                source:
+                  type: string
+                  enum: [cv, chat, job, system]
+                  description: Nguon goi xu ly
+                  example: "cv"
+                reference_id:
+                  type: string
+                  format: uuid
+                  example: "uuid-reference-id"
+                status:
+                  type: integer
+                  example: 200
+      responses:
+        "201":
+          description: Log created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Voice log saved successfully"
+                  data:
+                    type: object
+                    properties:
+                      id: { type: string, format: uuid, example: "uuid-log-new" }
+                      user_id: { type: string, format: uuid, example: "uuid-user" }
+                      created_at: { type: string, format: date-time, example: "2024-05-20T10:00:00Z" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
+
+  # --- CV ---
+  /api/v1/cvs:
+    post:
+      tags:
+        - CV
+      summary: Tao moi CV
+      operationId: createCV
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Thong tin CV can tao
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - job_type
+                - work_mode
+                - mobility
+                - expected_job
+              properties:
+                job_type:
+                  type: string
+                  example: "Full-time"
+                work_mode:
+                  type: string
+                  example: "Remote"
+                mobility:
+                  type: string
+                  example: "Su dung xe lan"
+                expected_job:
+                  type: string
+                  example: "Nhan vien nhap lieu"
+                conditions:
+                  type: object
+                  properties:
+                    prefer_near_home: { type: boolean, example: true }
+                    prefer_low_traffic: { type: boolean, example: true }
+                    prefer_good_company: { type: boolean, example: true }
+                experiences:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      description: { type: string, example: "Thuc tap sinh tai The Code Origin" }
+                      working_time: { type: string, example: "3 thang" }
+                skills:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  example: ["uuid-skill-1", "uuid-skill-2"]
+                certificates:
+                  type: array
+                  items:
+                    type: string
+                  example: ["Chung chi Tin hoc van phong A"]
+      responses:
+        "201":
+          description: CV created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - cv_id
+                  - status
+                  - message
+                properties:
+                  cv_id:
+                    type: string
+                    format: uuid
+                    example: "8e5e9334-..."
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Tao CV thanh cong"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
+    get:
+      tags:
+        - CV
+      summary: Lay danh sach CV cua ung vien hien tai
+      operationId: getMyCVs
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Danh sach CV da tao"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - expected_job
+                        - job_type
+                        - created_at
+                      properties:
+                        id: { type: string, format: uuid, example: "8e5e9334-..." }
+                        expected_job: { type: string, example: "Nhan vien nhap lieu" }
+                        job_type: { type: string, example: "Full-time" }
+                        created_at: { type: string, format: date-time, example: "2024-04-15T12:00:00Z" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
+
+  /api/v1/cvs/{id}:
+    get:
+      tags:
+        - CV
+      summary: Lay chi tiet mot CV
+      operationId: getCVById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID cua CV can lay chi tiet
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "8e5e9334-..."
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Chi tiet CV"
+                  data:
+                    type: object
+                    required:
+                      - id
+                      - profile
+                      - job_type
+                      - work_mode
+                      - mobility
+                      - expected_job
+                      - updated_at
+                    properties:
+                      id: { type: string, format: uuid, example: "8e5e9334-..." }
+                      profile:
+                        type: object
+                        properties:
+                          full_name: { type: string, example: "Pham Hoang Vu" }
+                          disability_status: { type: string, example: "Khiem thinh nhe" }
+                      job_type: { type: string, example: "Full-time" }
+                      work_mode: { type: string, example: "Remote" }
+                      mobility: { type: string, example: "Su dung xe lan" }
+                      expected_job: { type: string, example: "Nhan vien nhap lieu" }
+                      conditions:
+                        type: object
+                        properties:
+                          prefer_near_home: { type: boolean, example: true }
+                          prefer_low_traffic: { type: boolean, example: true }
+                          prefer_good_company: { type: boolean, example: true }
+                      experiences:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            description: { type: string, example: "Thuc tap sinh tai The Code Origin" }
+                            working_time: { type: string, example: "3 thang" }
+                      skills:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id: { type: string, example: "uuid-1" }
+                            name: { type: string, example: "Node.js" }
+                            type: { type: string, example: "hard" }
+                      certificates:
+                        type: array
+                        items:
+                          type: string
+                        example: ["Chung chi Tin hoc van phong A"]
+                      updated_at: { type: string, format: date-time, example: "2024-04-15T10:00:00Z" }
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay CV" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
+    patch:
+      tags:
+        - CV
+      summary: Cap nhat thong tin CV
+      operationId: updateCV
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID cua CV can cap nhat
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "8e5e9334-..."
+      requestBody:
+        description: Thong tin CV can cap nhat (ho tro cap nhat tung phan)
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                expected_job: { type: string, example: "Senior Backend Developer" }
+                work_mode: { type: string, example: "Hybrid" }
+                conditions:
+                  type: object
+                  properties:
+                    prefer_near_home: { type: boolean, example: false }
+                experiences:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      description: { type: string }
+                      working_time: { type: string }
+                skills:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                certificates:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: Cap nhat thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - updated_at
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Cap nhat CV thanh cong"
+                  updated_at:
+                    type: string
+                    format: date-time
+                    example: "2024-04-15T10:00:00Z"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay CV" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
+    delete:
+      tags:
+        - CV
+      summary: Xoa CV
+      operationId: deleteCV
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID cua CV can xoa
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "8e5e9334-..."
+      responses:
+        "200":
+          description: Xoa thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Da xoa CV thanh cong"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay CV de xoa" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
+
+  # --- Job ---
+  /api/v1/jobs:
+    post:
+      tags:
+        - Job
+      summary: Nha tuyen dung dang tin tuyen dung moi
+      operationId: createJob
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: User registration details
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - job_type
+                - work_mode
+                - location
+                - description
+              properties:
+                title: { type: string, example: "Nhan vien Cham soc khach hang" }
+                job_type: { type: string, example: "Full-time" }
+                work_mode: { type: string, example: "Hybrid" }
+                experience_required: { type: string, example: "Khong yeu cau kinh nghiem" }
+                salary_min: { type: integer, example: 7000000 }
+                salary_max: { type: integer, example: 12000000 }
+                location: { type: string, example: "Quan Hai Chau, Da Nang" }
+                working_time: { type: string, example: "08:00 - 17:30" }
+                description: { type: string, example: "Uu tien ung vien co kha nang giao tiep tot, ho tro nguoi khiem thinh..." }
+                status:
+                  type: string
+                  enum: [open, closed, paused]
+                  default: open
+                  description: Trang thai khi tao moi (Mac dinh la open)
+                skills:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      skill_id: { type: string, format: uuid, example: "uuid-skill-1" }
+                      is_required: { type: boolean, example: true }
+      responses:
+        "201":
+          description: Dang tin thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - job_id
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Dang tin tuyen dung thanh cong"
+                  job_id:
+                    type: string
+                    format: uuid
+                    example: "job-uuid-123"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
+    get:
+      tags:
+        - Job
+      summary: Tim kiem cong viec (Danh cho Candidate)
+      description: |
+        Lay danh sach cac cong viec dang trong trang thai `open`. 
+        API nay cho phep moi nguoi (ke ca chua dang nhap) tim kiem va xem tin tuyen dung.
+      operationId: searchJobs
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1, minimum: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 10, minimum: 1, maximum: 100 }
+        - name: search
+          in: query
+          schema: { type: string }
+          description: Tim kiem theo tieu de hoac ten cong ty
+        - name: job_type
+          in: query
+          schema: { type: string }
+        - name: work_mode
+          in: query
+          schema: { type: string, enum: [Remote, Hybrid, On-site] }
+        - name: location
+          in: query
+          schema: { type: string }
+        - name: min_salary
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                  - meta
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Lay danh sach cong viec thanh cong"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, format: uuid, example: "job-uuid-123" }
+                        title: { type: string, example: "Nhan vien Cham soc khach hang" }
+                        status: { type: string, example: "open" }
+                        company:
+                          type: object
+                          properties:
+                            name: { type: string, example: "Cong ty ABC" }
+                            logo_url: { type: string, example: "https://example.com/logo.png" }
+                        location: { type: string, example: "Da Nang" }
+                        job_type: { type: string, example: "Full-time" }
+                        work_mode: { type: string, example: "Hybrid" }
+                        salary:
+                          type: object
+                          properties:
+                            min: { type: integer, example: 7000000 }
+                            max: { type: integer, example: 12000000 }
+                            currency: { type: string, example: "VND" }
+                        created_at: { type: string, format: date-time, example: "2024-04-15T08:00:00Z" }
+                  meta:
+                    type: object
+                    required: [total, page, limit, total_pages]
+                    properties:
+                      total: { type: integer, example: 150 }
+                      page: { type: integer, example: 1 }
+                      limit: { type: integer, example: 10 }
+                      total_pages: { type: integer, example: 15 }
+
+  /api/v1/jobs/{id}:
+    get:
+      tags:
+        - Job
+      summary: Lay chi tiet mot cong viec
+      operationId: getJobById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID cua cong viec can lay chi tiet
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "job-uuid-123"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Chi tiet cong viec"
+                  data:
+                    type: object
+                    required:
+                      - id
+                      - title
+                      - description
+                      - company
+                      - requirements
+                      - salary
+                    properties:
+                      id: { type: string, format: uuid, example: "job-uuid-123" }
+                      title: { type: string, example: "Nhan vien Cham soc khach hang" }
+                      description: { type: string, example: "Noi dung chi tiet cong viec..." }
+                      company:
+                        type: object
+                        properties:
+                          name: { type: string, example: "Cong ty ABC" }
+                          address: { type: string, example: "123 Le Duan, Da Nang" }
+                          policy_for_disabled: { type: string, example: "Co loi di rieng cho xe lan, ho tro may tro thinh..." }
+                      requirements:
+                        type: object
+                        properties:
+                          experience: { type: string, example: "Khong yeu cau" }
+                          skills:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name: { type: string, example: "Giao tiep" }
+                                is_required: { type: boolean, example: true }
+                      salary:
+                        type: object
+                        properties:
+                          min: { type: integer, example: 7000000 }
+                          max: { type: integer, example: 12000000 }
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay cong viec" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
+    patch:
+      tags:
+        - Job
+      summary: Cap nhat thong tin cong viec
+      operationId: updateJob
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID cua cong viec can cap nhat
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "job-uuid-123"
+      requestBody:
+        description: Cac truong can cap nhat (Partial Update)
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string, example: "Nhan vien Cham soc khach hang (Update)" }
+                status:
+                  type: string
+                  enum: [open, closed, paused]
+                salary_max: { type: integer, example: 15000000 }
+                description: { type: string, example: "Cap nhat them quyen loi: Ho tro an trua..." }
+      responses:
+        "200":
+          description: Cap nhat thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - updated_at
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Cap nhat thong tin thanh cong"
+                  updated_at:
+                    type: string
+                    format: date-time
+                    example: "2024-04-15T15:30:00Z"
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban can dang nhap de cap nhat thong tin" }
+        "403":
+          description: Forbidden (Khong co quyen sua tin nay)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen chinh sua tin dang nay" }
+        "404":
+          description: Khong tim thay tin tuyen dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Tin tuyen dung khong ton tai hoac da bi xoa" }
+    delete:
+      tags:
+        - Job
+      summary: Xoa/Dong tin tuyen dung
+      operationId: deleteJob
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID cua cong viec can xoa/dong
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "job-uuid-123"
+      responses:
+        "200":
+          description: Xoa hoac dong tin tuyen dung thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Da xoa tin tuyen dung thanh cong"
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Phien dang nhap het han hoac khong hop le" }
+        "403":
+          description: Khong co quyen xoa tin nay (Khong phai chu so huu)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen xoa tin tuyen dung nay" }
+        "404":
+          description: Khong tim thay tin tuyen dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Tin tuyen dung khong ton tai hoac da bi xoa" }
+
+  /api/v1/employer/jobs:
+    get:
+      tags:
+        - Job
+      summary: Quan ly tin tuyen dung (Danh cho Employer)
+      description: |
+        Lay danh sach tin tuyen dung cua chinh nha tuyen dung dang dang nhap.
+        Ho tro loc theo cac trang thai (open, closed, paused).
+      operationId: getEmployerJobs
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: status
+          in: query
+          schema: { type: string, enum: [open, closed, paused] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                  - meta
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Lay danh sach cong viec thanh cong"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, format: uuid, example: "job-uuid-123" }
+                        title: { type: string, example: "Nhan vien Cham soc khach hang" }
+                        status: { type: string, example: "open" }
+                        company:
+                          type: object
+                          properties:
+                            name: { type: string, example: "Cong ty ABC" }
+                            logo_url: { type: string, example: "https://example.com/logo.png" }
+                        location: { type: string, example: "Da Nang" }
+                        job_type: { type: string, example: "Full-time" }
+                        work_mode: { type: string, example: "Hybrid" }
+                        salary:
+                          type: object
+                          properties:
+                            min: { type: integer, example: 7000000 }
+                            max: { type: integer, example: 12000000 }
+                            currency: { type: string, example: "VND" }
+                        created_at: { type: string, format: date-time, example: "2024-04-15T08:00:00Z" }
+                  meta:
+                    type: object
+                    required: [total, page, limit, total_pages]
+                    properties:
+                      total: { type: integer, example: 150 }
+                      page: { type: integer, example: 1 }
+                      limit: { type: integer, example: 10 }
+                      total_pages: { type: integer, example: 15 }
+        "403":
+          description: Forbidden - Chi danh cho Employer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen truy cap tai nguyen nay" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
+
+  /api/v1/admin/jobs:
+    get:
+      tags:
+        - Job
+      summary: Quan tri tin tuyen dung (Danh cho Admin)
+      description: |
+        Lay toan bo tin tuyen dung tren he thong. Ho tro loc theo status (open, closed, paused).
+      operationId: getAdminJobs
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string, enum: [open, closed, paused] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                  - meta
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Lay danh sach cong viec thanh cong"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, format: uuid, example: "job-uuid-123" }
+                        title: { type: string, example: "Nhan vien Cham soc khach hang" }
+                        status: { type: string, example: "open" }
+                        company:
+                          type: object
+                          properties:
+                            name: { type: string, example: "Cong ty ABC" }
+                            logo_url: { type: string, example: "https://example.com/logo.png" }
+                        location: { type: string, example: "Da Nang" }
+                        job_type: { type: string, example: "Full-time" }
+                        work_mode: { type: string, example: "Hybrid" }
+                        salary:
+                          type: object
+                          properties:
+                            min: { type: integer, example: 7000000 }
+                            max: { type: integer, example: 12000000 }
+                            currency: { type: string, example: "VND" }
+                        created_at: { type: string, format: date-time, example: "2024-04-15T08:00:00Z" }
+                  meta:
+                    type: object
+                    required: [total, page, limit, total_pages]
+                    properties:
+                      total: { type: integer, example: 150 }
+                      page: { type: integer, example: 1 }
+                      limit: { type: integer, example: 10 }
+                      total_pages: { type: integer, example: 15 }
+        "403":
+          description: Forbidden - Chi danh cho Admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen Admin" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
+
+  # --- Application ---
+  /api/v1/applications:
+    post:
+      tags:
+        - Application
+      summary: Ung vien nop don vao cong viec
+      operationId: applyJob
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - job_id
+                - cv_id
+              properties:
+                job_id:
+                  type: string
+                  format: uuid
+                  example: "uuid-job-789"
+                cv_id:
+                  type: string
+                  format: uuid
+                  example: "uuid-cv-456"
+      responses:
+        "201":
+          description: Nop don thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Nop don ung tuyen thanh cong"
+                  data:
+                    type: object
+                    required:
+                      - application_id
+                      - status
+                      - created_at
+                    properties:
+                      application_id:
+                        type: string
+                        format: uuid
+                        example: "uuid-app-001"
+                      status:
+                        type: string
+                        example: "applied"
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: "2024-04-15T20:00:00Z"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban can dang nhap de nop don ung tuyen" }
+        "404":
+          description: Not Found (Khong tim thay Job hoac CV)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay cong viec hoac ho so ung tuyen" }
+    get:
+      tags:
+        - Application
+      summary: Recruiter xem danh sach nguoi ung tuyen
+      operationId: getApplications
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: job_id
+          in: query
+          required: true
+          description: Loc danh sach ung tuyen theo ID cong viec
+          schema:
+            type: string
+            format: uuid
+            example: "uuid-job-789"
+        - name: status
+          in: query
+          description: Loc theo trang thai ung tuyen (applied, interviewing, accepted, rejected)
+          schema:
+            type: string
+            example: "applied"
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - total
+                  - data
+                properties:
+                  total:
+                    type: integer
+                    example: 5
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - candidate
+                        - cv_summary
+                        - applied_at
+                        - status
+                      properties:
+                        candidate:
+                          type: object
+                          properties:
+                            full_name: { type: string, example: "Pham Hoang Vu" }
+                            phone: { type: string, example: "0123456789" }
+                            avatar_url: { type: string, example: "https://..." }
+                        cv_summary:
+                          type: object
+                          properties:
+                            expected_job: { type: string, example: "Backend Developer" }
+                            skills: 
+                              type: array
+                              items: { type: string }
+                              example: ["Node.js", "PostgreSQL"]
+                        applied_at:
+                          type: string
+                          format: date-time
+                          example: "2024-04-15T20:00:00Z"
+                        status:
+                          type: string
+                          example: "applied"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de xem danh sach ung tuyen" }
+        "403":
+          description: Forbidden (Khong co quyen xem danh sach cua job nay)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen xem danh sach ung vien cho cong viec nay" }
+
+  /api/v1/applications/{id}:
+    patch:
+      tags:
+        - Application
+      summary: Cap nhat trang thai ung tuyen (Duyet/Tu choi)
+      operationId: updateApplicationStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID cua don ung tuyen can cap nhat
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "uuid-app-001"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  description: Trang thai moi cua don ung tuyen
+                  enum: [applied, interviewing, accepted, rejected]
+                  example: "accepted"
+      responses:
+        "200":
+          description: Cap nhat thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - updated_at
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Da cap nhat trang thai ung tuyen thanh cong"
+                  updated_at:
+                    type: string
+                    format: date-time
+                    example: "2024-04-15T21:00:00Z"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban can dang nhap de cap nhat trang thai" }
+        "403":
+          description: Forbidden (Khong co quyen cap nhat don nay)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen thay doi trang thai don ung tuyen nay" }
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay don ung tuyen" }
+
+  # --- Matching ---
+  /api/v1/matches/jobs:
+    get:
+      tags:
+        - Matching
+      summary: Goi y viec lam phu hop cho Candidate
+      description: Dua tren Profile va CV cua ung vien, he thong se de xuat cac cong viec co do tuong quan cao nhat.
+      operationId: getSuggestedJobs
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - suggested_jobs
+                properties:
+                  suggested_jobs:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - job_id
+                        - title
+                        - company_name
+                        - match_score
+                        - reason
+                      properties:
+                        job_id:
+                          type: string
+                          format: uuid
+                          example: "uuid-job-999"
+                        title:
+                          type: string
+                          example: "Junior Node.js Developer"
+                        company_name:
+                          type: string
+                          example: "Origin Tech"
+                        match_score:
+                          type: number
+                          format: float
+                          example: 92.5
+                        reason:
+                          type: string
+                          example: "Phu hop 4/5 ky nang yeu cau va vi tri gan noi o cua ban"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban can dang nhap de nhan goi y viec lam" }
+
+  /api/v1/matches/candidates/{job_id}:
+    get:
+      tags:
+        - Matching
+      summary: Goi y ung vien phu hop cho 1 Job
+      description: Dua tren yeu cau cua cong viec, he thong tim kiem va de xuat cac ung vien co ky nang va ho so phu hop nhat.
+      operationId: getSuggestedCandidates
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: job_id
+          in: path
+          description: ID cua bai dang tuyen dung
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "uuid-job-789"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - job_id
+                  - suggested_candidates
+                properties:
+                  job_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-job-789"
+                  suggested_candidates:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - candidate_id
+                        - full_name
+                        - match_score
+                        - highlight_skills
+                      properties:
+                        candidate_id:
+                          type: string
+                          format: uuid
+                          example: "uuid-user-111"
+                        full_name:
+                          type: string
+                          example: "Nguyen Van A"
+                        match_score:
+                          type: number
+                          format: float
+                          example: 95.0
+                        highlight_skills:
+                          type: array
+                          items: { type: string }
+                          example: ["Java", "Spring Boot", "SQL"]
+                        disability_support:
+                          type: string
+                          example: "Can ho tro thiet ke giao dien tuong phan cao"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de xem goi y ung vien" }
+        "403":
+          description: Forbidden (Khong phai chu so huu Job nay)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen xem goi y ung vien cho cong viec nay" }
+        "404":
+          description: Job khong ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay cong viec yeu cau" }
+
+  # --- Chat ---
+  /api/v1/conversations:
+    post:
+      tags:
+        - Chat
+      summary: Tao cuoc hoi thoai moi
+      description: Tao mot cuoc tro chuyen moi. He thong tu dong them nguoi tao vao danh sach nguoi tham gia.
+      operationId: createConversation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - participant_ids
+              properties:
+                participant_ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  example: ["uuid-user-222"]
+                  description: Danh sach ID nguoi dung tham gia (khong bao gom nguoi tao)
+                context:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum: [job, system]
+                      example: "job"
+                    reference_id:
+                      type: string
+                      format: uuid
+                      example: "uuid-job-789"
+      responses:
+        "201":
+          description: Tao cuoc hoi thoai thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - conversation_id
+                  - created_at
+                  - message
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  conversation_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-conv-001"
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: "2026-04-15T20:00:00Z"
+                  message:
+                    type: string
+                    example: "Tao cuoc hoi thoai thanh cong"
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban can dang nhap de thuc hien hanh dong nay" }
+        "403":
+          description: Khong co quyen tao cuoc hoi thoai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen tao cuoc hoi thoai" }
+        "404":
+          description: Khong tim thay nguoi dung tham gia hoac tham chieu
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Nguoi dung hoac doi tuong tham chieu khong ton tai" }
+    get:
+      tags:
+        - Chat
+      summary: Lay danh sach cuoc hoi thoai
+      description: Lay danh sach cac cuoc hoi thoai cua nguoi dung hien tai. Ho tro phan trang va tim kiem.
+      operationId: getConversations
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          example: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+          example: 20
+        - name: search
+          in: query
+          description: Tim kiem theo ten nguoi tham gia hoac noi dung
+          schema:
+            type: string
+          example: "backend"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - total
+                  - data
+                properties:
+                  total:
+                    type: integer
+                    example: 12
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - conversation_id
+                        - participants
+                        - last_message
+                        - unread_count
+                      properties:
+                        conversation_id:
+                          type: string
+                          format: uuid
+                          example: "uuid-conv-001"
+                        participants:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              user_id: { type: string, format: uuid, example: "uuid-user-111" }
+                              full_name: { type: string, example: "Pham Hoang Vu" }
+                        last_message:
+                          type: object
+                          properties:
+                            message_id: { type: string, format: uuid, example: "uuid-msg-050" }
+                            content: { type: string, example: "Chao ban" }
+                            created_at: { type: string, format: date-time, example: "2026-04-15T20:15:00Z" }
+                        unread_count:
+                          type: integer
+                          example: 2
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de xem danh sach hoi thoai" }
+
+  /api/v1/conversations/{conversation_id}:
+    get:
+      tags:
+        - Chat
+      summary: Lay chi tiet mot cuoc hoi thoai
+      description: Lay thong tin chi tiet ve mot cuoc hoi thoai. Chi nguoi tham gia moi co quyen xem.
+      operationId: getConversationDetail
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          description: ID cua cuoc hoi thoai can lay chi tiet
+          schema:
+            type: string
+            format: uuid
+          example: "uuid-conv-001"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - conversation_id
+                  - participants
+                  - created_at
+                properties:
+                  conversation_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-conv-001"
+                  participants:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        user_id: { type: string, format: uuid, example: "uuid-user-111" }
+                        full_name: { type: string, example: "Pham Hoang Vu" }
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: "2026-04-15T20:00:00Z"
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de xem chi tiet hoi thoai" }
+        "403":
+          description: Khong co quyen xem cuoc hoi thoai nay
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong phai la thanh vien cua cuoc hoi thoai nay" }
+        "404":
+          description: Cuoc hoi thoai khong ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay cuoc hoi thoai yeu cau" }
+    delete:
+      tags:
+        - Chat
+      summary: Xoa cuoc hoi thoai
+      description: Xoa mot cuoc hoi thoai va cac du lieu lien quan (tin nhan, thanh vien). He thong uu tien su dung soft-delete.
+      operationId: deleteConversation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          description: ID cua cuoc hoi thoai can xoa
+          schema:
+            type: string
+            format: uuid
+          example: "uuid-conv-001"
+      responses:
+        "200":
+          description: Xoa thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - deleted_at
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Da xoa cuoc hoi thoai"
+                  deleted_at:
+                    type: string
+                    format: date-time
+                    example: "2026-04-15T20:05:00Z"
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de thuc hien hanh dong nay" }
+        "403":
+          description: Khong co quyen xoa cuoc hoi thoai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen xoa cuoc hoi thoai nay" }
+        "404":
+          description: Cuoc hoi thoai khong ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay cuoc hoi thoai de xoa" }
+
+  /api/v1/conversations/{conversation_id}/participants:
+    post:
+      tags:
+        - Chat
+      summary: Them participant vao cuoc hoi thoai
+      description: Them mot nguoi dung moi vao cuoc hoi thoai. Khong cho phep them trung nguoi dung trong cung mot cuoc hoi thoai.
+      operationId: addParticipant
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          description: ID cua cuoc hoi thoai can them thanh vien
+          schema:
+            type: string
+            format: uuid
+          example: "uuid-conv-001"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+              properties:
+                user_id:
+                  type: string
+                  format: uuid
+                  example: "uuid-user-333"
+                  description: ID cua nguoi dung muon them vao
+      responses:
+        "201":
+          description: Them thanh vien thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - participant_id
+                  - conversation_id
+                  - message
+                properties:
+                  participant_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-part-003"
+                  conversation_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-conv-001"
+                  message:
+                    type: string
+                    example: "Them participant thanh cong"
+        "400":
+          description: Yeu cau khong hop le hoac nguoi dung da ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Nguoi dung nay da co mat trong cuoc hoi thoai" }
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de thuc hien" }
+        "403":
+          description: Khong co quyen them thanh vien
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen them nguoi vao cuoc hoi thoai nay" }
+        "404":
+          description: Cuoc hoi thoai hoac nguoi dung khong ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay thong tin yeu cau" }
+    get:
+      tags:
+        - Chat
+      summary: Lay danh sach participant trong cuoc hoi thoai
+      description: Lay danh sach cac thanh vien dang tham gia vao mot cuoc hoi thoai.
+      operationId: getConversationParticipants
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          description: ID cua cuoc hoi thoai can lay danh sach thanh vien
+          schema:
+            type: string
+            format: uuid
+          example: "uuid-conv-001"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - total
+                  - data
+                properties:
+                  total:
+                    type: integer
+                    example: 2
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - participant_id
+                        - user_id
+                        - created_at
+                      properties:
+                        participant_id:
+                          type: string
+                          format: uuid
+                          example: "uuid-part-009"
+                        user_id:
+                          type: string
+                          format: uuid
+                          example: "uuid-user-111"
+                        created_at:
+                          type: string
+                          format: date-time
+                          example: "2026-04-15T20:00:00Z"
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de xem danh sach thanh vien" }
+        "403":
+          description: Khong co quyen xem danh sach thanh vien
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen xem danh sach thanh vien cua hoi thoai nay" }
+        "404":
+          description: Cuoc hoi thoai khong ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay cuoc hoi thoai yeu cau" }
+    delete:
+      tags:
+        - Chat
+      summary: Xoa participant khoi cuoc hoi thoai
+      description: Xoa mot thanh vien khoi cuoc hoi thoai. He thong uu tien su dung soft-delete cho du lieu thanh vien.
+      operationId: removeParticipant
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          description: ID cua cuoc hoi thoai
+          schema:
+            type: string
+            format: uuid
+          example: "uuid-conv-001"
+        - name: user_id
+          in: query
+          required: true
+          description: ID cua nguoi dung can xoa khoi cuoc hoi thoai
+          schema:
+            type: string
+            format: uuid
+          example: "uuid-user-333"
+      responses:
+        "200":
+          description: Xoa thanh vien thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - deleted_at
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Da xoa participant"
+                  deleted_at:
+                    type: string
+                    format: date-time
+                    example: "2026-04-15T20:10:00Z"
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de thuc hien" }
+        "403":
+          description: Khong co quyen xoa thanh vien
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen xoa nguoi khoi cuoc hoi thoai nay" }
+        "404":
+          description: Cuoc hoi thoai hoac thanh vien khong ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay thong tin thanh vien trong cuoc hoi thoai" }
+
+  /api/v1/conversations/{conversation_id}/messages:
+    post:
+      tags:
+        - Chat
+      summary: Gui tin nhan van ban/voice
+      description: Gui mot tin nhan moi vao cuoc hoi thoai. Chap nhan noi dung van ban hoac duong dan file ghi am.
+      operationId: sendMessage
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          description: ID cua cuoc hoi thoai
+          schema:
+            type: string
+            format: uuid
+          example: "uuid-conv-001"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  nullable: true
+                  example: "Em muon hoi them ve JD"
+                  description: Noi dung tin nhan van ban
+                voice_url:
+                  type: string
+                  nullable: true
+                  example: "url_voice_hoi_JD"
+                  description: Duong dan den file voice/audio
+      responses:
+        "201":
+          description: Gui tin nhan thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message_id
+                  - conversation_id
+                  - sender_id
+                  - created_at
+                properties:
+                  message_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-msg-120"
+                  conversation_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-conv-001"
+                  sender_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-user-111"
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: "2026-04-15T20:20:00.00Z"
+        "400":
+          description: Du lieu khong hop le
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Noi dung tin nhan khong duoc de trong" }
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de gui tin nhan" }
+        "403":
+          description: Khong co quyen gui tin nhan trong cuoc hoi thoai nay
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong phai thanh vien cua cuoc hoi thoai nay" }
+        "404":
+          description: Cuoc hoi thoai khong ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay cuoc hoi thoai yeu cau" }
+    get:
+      tags:
+        - Chat
+      summary: Lay lich su tin nhan
+      description: Lay danh sach cac tin nhan trong mot cuoc hoi thoai. Su dung cursor-based pagination de toi uu hieu nang.
+      operationId: getMessages
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          description: ID cua cuoc hoi thoai
+          schema:
+            type: string
+            format: uuid
+          example: "uuid-conv-001"
+        - name: cursor
+          in: query
+          description: ID cua tin nhan de danh dau vi tri bat dau lay tin nhan tiep theo
+          schema:
+            type: string
+          example: "uuid-msg-090"
+        - name: limit
+          in: query
+          description: So luong tin nhan lay ra trong mot lan goi
+          schema:
+            type: integer
+            default: 20
+          example: 30
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  next_cursor:
+                    type: string
+                    nullable: true
+                    example: "uuid-msg-050"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - message_id
+                        - sender_id
+                        - created_at
+                      properties:
+                        message_id:
+                          type: string
+                          format: uuid
+                          example: "uuid-msg-120"
+                        content:
+                          type: string
+                          nullable: true
+                          example: "Em muon hoi them ve JD"
+                        voice_url:
+                          type: string
+                          nullable: true
+                          example: null
+                        sender_id:
+                          type: string
+                          format: uuid
+                          example: "uuid-user-111"
+                        created_at:
+                          type: string
+                          format: date-time
+                          example: "2026-04-15T20:20:00Z"
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de xem lich su tin nhan" }
+        "403":
+          description: Khong co quyen xem tin nhan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen xem tin nhan cua cuoc hoi thoai nay" }
+        "404":
+          description: Cuoc hoi thoai khong ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay cuoc hoi thoai yeu cau" }
+
+  /api/v1/conversations/{conversation_id}/read:
+    patch:
+      tags:
+        - Chat
+      summary: Danh dau da doc tin nhan
+      description: Cap nhat trang thai da doc tin nhan cho nguoi dung hien tai trong mot cuoc hoi thoai.
+      operationId: markConversationRead
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          description: ID cua cuoc hoi thoai
+          schema:
+            type: string
+            format: uuid
+          example: "uuid-conv-001"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - last_read_message_id
+              properties:
+                last_read_message_id:
+                  type: string
+                  format: uuid
+                  example: "uuid-msg-120"
+                  description: ID cua tin nhan cuoi cung da doc
+      responses:
+        "200":
+          description: Thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - conversation_id
+                  - unread_count
+                  - updated_at
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  conversation_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-conv-001"
+                  unread_count:
+                    type: integer
+                    example: 0
+                  updated_at:
+                    type: string
+                    format: date-time
+                    example: "2026-04-15T20:25:00Z"
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de thuc hien" }
+        "403":
+          description: Khong co quyen cap nhat trang thai doc
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong phai thanh vien cua cuoc hoi thoai nay" }
+        "404":
+          description: Khong tim thay cuoc hoi thoai hoac tin nhan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Thong tin yeu cau khong ton tai" }
+
+  /api/v1/messages/{message_id}:
+    get:
+      tags:
+        - Chat
+      summary: Lay chi tiet 1 tin nhan
+      description: Lay thong tin chi tiet cua mot tin nhan cu the.
+      operationId: getMessageDetail
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: message_id
+          in: path
+          required: true
+          description: ID cua tin nhan can lay chi tiet
+          schema:
+            type: string
+            format: uuid
+          example: "uuid-msg-120"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message_id
+                  - conversation_id
+                  - sender_id
+                  - created_at
+                properties:
+                  message_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-msg-120"
+                  conversation_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-conv-001"
+                  sender_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-user-111"
+                  content:
+                    type: string
+                    nullable: true
+                    example: "Em muon hoi them ve JD"
+                  voice_url:
+                    type: string
+                    nullable: true
+                    example: null
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: "2026-04-15T20:20:00Z"
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de xem chi tiet tin nhan" }
+        "403":
+          description: Khong co quyen xem tin nhan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen xem tin nhan nay" }
+        "404":
+          description: Tin nhan khong ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay tin nhan yeu cau" }
+    patch:
+      tags:
+        - Chat
+      summary: Cap nhat noi dung tin nhan
+      description: Cap nhat noi dung van ban hoac file ghi am cua mot tin nhan da gui. Chi nguoi gui moi co quyen cap nhat.
+      operationId: updateMessage
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: message_id
+          in: path
+          required: true
+          description: ID cua tin nhan can cap nhat
+          schema:
+            type: string
+            format: uuid
+          example: "uuid-msg-120"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  nullable: true
+                  example: "Em muon hoi them ve mo ta cong viec"
+                voice_url:
+                  type: string
+                  nullable: true
+                  example: null
+      responses:
+        "200":
+          description: Cap nhat thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - updated_at
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Cap nhat tin nhan thanh cong"
+                  updated_at:
+                    type: string
+                    format: date-time
+                    example: "2026-04-15T20:22:00Z"
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de thuc hien" }
+        "403":
+          description: Khong co quyen cap nhat tin nhan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong phai nguoi gui tin nhan nay" }
+        "404":
+          description: Tin nhan khong ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay tin nhan de cap nhat" }
+    delete:
+      tags:
+        - Chat
+      summary: Xoa tin nhan
+      description: Xoa mot tin nhan da gui. He thong su dung soft-delete. Chi nguoi gui moi co quyen xoa.
+      operationId: deleteMessage
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: message_id
+          in: path
+          required: true
+          description: ID cua tin nhan can xoa
+          schema:
+            type: string
+            format: uuid
+          example: "uuid-msg-120"
+      responses:
+        "200":
+          description: Xoa thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - deleted_at
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Da xoa tin nhan"
+                  deleted_at:
+                    type: string
+                    format: date-time
+                    example: "2026-04-15T20:30:00Z"
+        "401":
+          description: Chua xac thuc nguoi dung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de thuc hien" }
+        "403":
+          description: Khong co quyen xoa tin nhan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen xoa tin nhan nay" }
+        "404":
+          description: Tin nhan khong ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay tin nhan de xoa" }
 
 components:
   securitySchemes:
