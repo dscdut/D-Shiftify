@@ -1,14 +1,24 @@
 openapi: 3.1.0
 info:
-  title: Shiftify API Documentation
-  description: He thong quan ly tin tuyen dung va CV danh cho nguoi yeu the, cung cap cac tinh nang tim viec, nop don va tro chuyen truc tiep giua Ung vien va Nha tuyen dung.
-  contact:
-    email: contact@gdsc.dev
+  title: D-Shiftify API & Documentation
   version: 1.0.0
 servers:
+  - url: https://api.shiftify.vn/api/v1
+    description: Production Server
+  - url: http://localhost:3000/api/v1
+    description: Local Development Environment
   - url: http://localhost:3000
+    description: Core API Local Environment
 
 tags:
+  - name: STT
+    description: "Speech-To-Text: Chuyen doi am thanh thanh van ban"
+  - name: TTS
+    description: "Text-To-Speech: Chuyen doi van ban thanh giong noi nhan tao"
+  - name: Voice Logs
+    description: "Quan ly va truy xuat lich su su dung dich vu voice"
+  - name: Voice Analytics
+    description: "Bao cao thong ke va giam sat suc khoe he thong"
   - name: authentication
     description: Operations about authentication
   - name: profile
@@ -24,8 +34,468 @@ tags:
   - name: Chat
     description: Cac API lien quan den he thong Chat va Conversation
 
+security:
+  - bearerAuth: []
+
 paths:
-  # --- Authentication ---
+  /voice/stt:
+    post:
+      tags: [STT]
+      summary: Chuyen giong noi thanh van ban (Speech-To-Text)
+      description: |
+        Tiep nhan file am thanh va thuc hien nhan dang giong noi.
+        - Roles: Candidate, Recruiter, TrainingCenter, Admin
+      operationId: convertStt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [audio_url, source, reference_id]
+              properties:
+                audio_url:
+                  type: string
+                  format: uri
+                  example: "https://cdn.shiftify.vn/audio/chat-001.webm"
+                source:
+                  type: string
+                  example: "chat"
+                reference_id:
+                  type: string
+                  format: uuid
+                  example: "uuid-conv-001"
+                language:
+                  type: string
+                  example: "vi-VN"
+                  default: "vi-VN"
+      responses:
+        "201":
+          description: Thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, message]
+                properties:
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
+                  data:
+                    type: object
+                    properties:
+                      transcription:
+                        type: string
+                        example: "Em quan tam cong viec nay"
+                      confidence:
+                        type: number
+                        example: 0.94
+                      voice_log_id:
+                        type: string
+                        format: uuid
+                        example: "uuid-vlog-001"
+        "400":
+          description: Loi du lieu dau vao
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, message]
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Mo ta loi o day" }
+
+  /voice/stt/batch:
+    post:
+      tags: [STT]
+      summary: Xu ly hang loat (async)
+      description: |
+        Gui yeu cau xu ly nhieu file am thanh cung luc.
+        - Roles: Admin, System
+      operationId: batchStt
+      requestBody:
+        description: User registration details
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required: [audio_url, source, reference_id]
+                    properties:
+                      audio_url: { type: string, format: uri, example: "https://cdn.shiftify.vn/audio/cv-001.webm" }
+                      source: { type: string, example: "cv" }
+                      reference_id: { type: string, format: uuid, example: "uuid-cv-456" }
+      responses:
+        "202":
+          description: Yeu cau da duoc tiep nhan
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, message]
+                properties:
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
+                  data:
+                    type: object
+                    properties:
+                      job_id: { type: string, format: uuid, example: "uuid-stt-job-001" }
+                      queued: { type: integer, example: 2 }
+                      status: { type: string, example: "processing" }
+
+  /voice/tts:
+    post:
+      tags: [TTS]
+      summary: Chuyen van ban thanh giong noi (Text-To-Speech)
+      description: |
+        Tao file am thanh tu noi dung van ban.
+        - Roles: Candidate, Recruiter, TrainingCenter, System
+      operationId: convertTts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text, source, reference_id, voice]
+              properties:
+                text:
+                  type: string
+                  example: "Ban da duoc moi phong van vao thu 6"
+                source:
+                  type: string
+                  example: "system"
+                reference_id:
+                  type: string
+                  format: uuid
+                  example: "uuid-noti-010"
+                voice:
+                  type: string
+                  example: "female_vi"
+      responses:
+        "201":
+          description: Thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, message]
+                properties:
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
+                  data:
+                    type: object
+                    properties:
+                      audio_url: { type: string, format: uri, example: "https://cdn.shiftify.vn/tts/tts-001.mp3" }
+                      duration_sec: { type: number, example: 5.2 }
+                      voice_log_id: { type: string, format: uuid, example: "uuid-vlog-002" }
+
+  /voice/tts/previewer:
+    post:
+      tags: [TTS]
+      summary: Tao ban doc thu TTS
+      description: |
+        Tao doan am thanh ngan de nghe thu giong doc.
+        - Roles: Recruiter, TrainingCenter, Admin
+      operationId: previewTts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text, voice]
+              properties:
+                text: { type: string, example: "Day la ban doc thu" }
+                voice: { type: string, example: "male_vi" }
+                speed: { type: number, example: 1.0 }
+      responses:
+        "201":
+          description: Preview da duoc tao
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, message]
+                properties:
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
+                  data:
+                    type: object
+                    properties:
+                      preview_url: { type: string, format: uri, example: "https://cdn.shiftify.vn/tts/preview-001.mp3" }
+                      expires_at: { type: string, format: date-time, example: "2026-04-15T21:00:00Z" }
+
+  /voice/logs:
+    get:
+      tags: [Voice Logs]
+      summary: Lay danh sach voice logs cua user
+      description: |
+        Lay lich su su dung voice co phan trang va loc theo tieu chi.
+        - Roles: Candidate, Recruiter, TrainingCenter, Admin
+      operationId: listVoiceLogs
+      parameters:
+        - name: type
+          in: query
+          schema: { type: string, example: "stt" }
+        - name: source
+          in: query
+          schema: { type: string, example: "chat" }
+        - name: status
+          in: query
+          schema: { type: string, example: "success" }
+        - name: page
+          in: query
+          schema: { type: integer, example: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, example: 20 }
+      responses:
+        "200":
+          description: Danh sach nhat ky
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, message]
+                properties:
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
+                  data:
+                    type: object
+                    properties:
+                      total: { type: integer, example: 42 }
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            voice_log_id: { type: string, format: uuid, example: "uuid-vlog-001" }
+                            type: { type: string, example: "stt" }
+                            source: { type: string, example: "chat" }
+                            reference_id: { type: string, format: uuid, example: "uuid-conv-001" }
+                            status: { type: string, example: "success" }
+                            created_at: { type: string, format: date-time, example: "2026-04-15T20:00:00Z" }
+
+    post:
+      tags: [Voice Logs]
+      summary: Tao voice log
+      description: |
+        Tao thu cong mot ban ghi nhat ky voice.
+        - Roles: Admin, System
+      operationId: createVoiceLog
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, type, source, reference_id, status]
+              properties:
+                user_id: { type: string, format: uuid, example: "uuid-user-111" }
+                type: { type: string, example: "stt" }
+                source: { type: string, example: "chat" }
+                reference_id: { type: string, format: uuid, example: "uuid-conv-001" }
+                status: { type: string, example: "success" }
+      responses:
+        "201":
+          description: Tao thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, message]
+                properties:
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
+                  data:
+                    type: object
+                    properties:
+                      voice_log_id: { type: string, format: uuid, example: "uuid-vlog-003" }
+                      created_at: { type: string, format: date-time, example: "2026-04-15T20:01:00Z" }
+
+  /voice/logs/{voice_log_id}:
+    get:
+      tags: [Voice Logs]
+      summary: Lay chi tiet 1 voice log
+      description: |
+        Xem thong tin chi tiet cua mot ban ghi nhat ky voice.
+        - Roles: Candidate, Recruiter, TrainingCenter, Admin
+      operationId: getVoiceLog
+      parameters:
+        - name: voice_log_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid, example: "uuid-vlog-001" }
+      responses:
+        "200":
+          description: Thong tin chi tiet
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, message]
+                properties:
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
+                  data:
+                    type: object
+                    properties:
+                      voice_log_id: { type: string, format: uuid, example: "uuid-vlog-001" }
+                      user_id: { type: string, format: uuid, example: "uuid-user-111" }
+                      type: { type: string, example: "stt" }
+                      source: { type: string, example: "chat" }
+                      reference_id: { type: string, format: uuid, example: "uuid-conv-001" }
+                      status: { type: string, example: "success" }
+                      created_at: { type: string, format: date-time, example: "2026-04-15T20:00:00Z" }
+
+    delete:
+      tags: [Voice Logs]
+      summary: Xoa voice log
+      description: |
+        Xoa mot ban ghi nhat ky voice.
+        - Roles: Admin
+      operationId: deleteVoiceLog
+      parameters:
+        - name: voice_log_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid, example: "uuid-vlog-001" }
+      responses:
+        "200":
+          description: Xoa thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, message]
+                properties:
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
+                  data:
+                    type: object
+                    properties:
+                      deleted_at: { type: string, format: date-time, example: "2026-04-15T20:04:00Z" }
+
+  /voice/logs/{voice_log_id}/status:
+    patch:
+      tags: [Voice Logs]
+      summary: Cap nhat trang thai voice log
+      description: |
+        Thay doi trang thai cua mot ban ghi nhat ky voice.
+        - Roles: Admin, System
+      operationId: updateVoiceLogStatus
+      parameters:
+        - name: voice_log_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid, example: "uuid-vlog-001" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, example: "failed" }
+      responses:
+        "200":
+          description: Cap nhat thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, message]
+                properties:
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
+                  data:
+                    type: object
+                    properties:
+                      updated_at: { type: string, format: date-time, example: "2026-04-15T20:03:00Z" }
+
+  /voice/logs/{voice_log_id}/retry:
+    post:
+      tags: [Voice Logs]
+      summary: Retry request voice da that bai
+      description: |
+        Thu lai yeu cau voice bi loi.
+        - Roles: Admin, System
+      operationId: retryVoiceLog
+      parameters:
+        - name: voice_log_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid, example: "uuid-vlog-099" }
+      responses:
+        "202":
+          description: Retry queued
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, message]
+                properties:
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
+                  data:
+                    type: object
+                    properties:
+                      status: { type: string, example: "queued" }
+                      voice_log_id: { type: string, format: uuid, example: "uuid-vlog-099" }
+
+  /voice/logs/summary:
+    get:
+      tags: [Voice Analytics]
+      summary: Thong ke tong hop theo thoi gian
+      description: |
+        Lay du lieu thong ke su dung voice.
+        - Roles: Admin, System
+      operationId: getVoiceSummary
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema: { type: string, example: "2026-04-01" }
+        - name: to
+          in: query
+          required: true
+          schema: { type: string, example: "2026-04-15" }
+        - name: group_by
+          in: query
+          schema: { type: string, example: "day" }
+      responses:
+        "200":
+          description: Du lieu thong ke
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, message]
+                properties:
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
+                  data:
+                    type: object
+                    properties:
+                      total_requests: { type: integer, example: 1200 }
+                      success: { type: integer, example: 1140 }
+                      failed: { type: integer, example: 60 }
+                      success_rate: { type: number, example: 95.0 }
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            date: { type: string, example: "2026-04-15" }
+                            count: { type: integer, example: 88 }
+
   /auth/v1/login:
     post:
       tags:
@@ -119,6 +589,7 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [status, message]
                 properties:
                   status:
                     type: string
@@ -3231,3 +3702,4 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: Nhap Token JWT de xac thuc (Bearer <token>)
