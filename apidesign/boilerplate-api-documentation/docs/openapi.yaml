@@ -412,6 +412,11 @@ paths:
                 location: { type: string, example: "Quan Hai Chau, Da Nang" }
                 working_time: { type: string, example: "08:00 - 17:30" }
                 description: { type: string, example: "Uu tien ung vien co kha nang giao tiep tot, ho tro nguoi khiem thinh..." }
+                status:
+                  type: string
+                  enum: [open, closed, paused]
+                  default: open
+                  description: Trang thai khi tao moi (Mac dinh la open)
                 skills:
                   type: array
                   items:
@@ -453,31 +458,34 @@ paths:
     get:
       tags:
         - Job
-      summary: Lay danh sach cong viec 
-      operationId: getJobs
-      security:
-        - bearerAuth: []
+      summary: Tim kiem cong viec (Danh cho Candidate)
+      description: |
+        Lay danh sach cac cong viec dang trong trang thai `open`. 
+        API nay cho phep moi nguoi (ke ca chua dang nhap) tim kiem va xem tin tuyen dung.
+      operationId: searchJobs
       parameters:
         - name: page
           in: query
-          schema: { type: integer, default: 1 }
-          description: Trang hien tai
+          schema: { type: integer, default: 1, minimum: 1 }
         - name: limit
           in: query
-          schema: { type: integer, default: 10 }
-          description: So luong ban ghi tren moi trang
+          schema: { type: integer, default: 10, minimum: 1, maximum: 100 }
         - name: search
           in: query
           schema: { type: string }
-          description: Tim kiem theo tieu de cong viec
+          description: Tim kiem theo tieu de hoac ten cong ty
         - name: job_type
           in: query
           schema: { type: string }
-          description: Bo loc theo loai hinh cong viec (Full-time, Part-time,...)
+        - name: work_mode
+          in: query
+          schema: { type: string, enum: [Remote, Hybrid, On-site] }
+        - name: location
+          in: query
+          schema: { type: string }
         - name: min_salary
           in: query
           schema: { type: integer }
-          description: Bo loc theo muc luong toi thieu
       responses:
         "200":
           description: OK
@@ -486,14 +494,17 @@ paths:
               schema:
                 type: object
                 required:
-                  - total
-                  - page
-                  - limit
+                  - status
+                  - message
                   - data
+                  - meta
                 properties:
-                  total: { type: integer, example: 150 }
-                  page: { type: integer, example: 1 }
-                  limit: { type: integer, example: 10 }
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Lay danh sach cong viec thanh cong"
                   data:
                     type: array
                     items:
@@ -501,11 +512,195 @@ paths:
                       properties:
                         id: { type: string, format: uuid, example: "job-uuid-123" }
                         title: { type: string, example: "Nhan vien Cham soc khach hang" }
-                        company_name: { type: string, example: "Cong ty ABC" }
-                        logo_url: { type: string, example: "https://example.com/logo.png" }
+                        status: { type: string, example: "open" }
+                        company:
+                          type: object
+                          properties:
+                            name: { type: string, example: "Cong ty ABC" }
+                            logo_url: { type: string, example: "https://example.com/logo.png" }
                         location: { type: string, example: "Da Nang" }
-                        salary_range: { type: string, example: "7tr - 12tr" }
+                        job_type: { type: string, example: "Full-time" }
+                        work_mode: { type: string, example: "Hybrid" }
+                        salary:
+                          type: object
+                          properties:
+                            min: { type: integer, example: 7000000 }
+                            max: { type: integer, example: 12000000 }
+                            currency: { type: string, example: "VND" }
                         created_at: { type: string, format: date-time, example: "2024-04-15T08:00:00Z" }
+                  meta:
+                    type: object
+                    required: [total, page, limit, total_pages]
+                    properties:
+                      total: { type: integer, example: 150 }
+                      page: { type: integer, example: 1 }
+                      limit: { type: integer, example: 10 }
+                      total_pages: { type: integer, example: 15 }
+  /api/v1/employer/jobs:
+    get:
+      tags:
+        - Job
+      summary: Quan ly tin tuyen dung (Danh cho Employer)
+      description: |
+        Lay danh sach tin tuyen dung cua chinh nha tuyen dung dang dang nhap.
+        Ho tro loc theo cac trang thai (open, closed, paused).
+      operationId: getEmployerJobs
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: status
+          in: query
+          schema: { type: string, enum: [open, closed, paused] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                  - meta
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Lay danh sach cong viec thanh cong"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, format: uuid, example: "job-uuid-123" }
+                        title: { type: string, example: "Nhan vien Cham soc khach hang" }
+                        status: { type: string, example: "open" }
+                        company:
+                          type: object
+                          properties:
+                            name: { type: string, example: "Cong ty ABC" }
+                            logo_url: { type: string, example: "https://example.com/logo.png" }
+                        location: { type: string, example: "Da Nang" }
+                        job_type: { type: string, example: "Full-time" }
+                        work_mode: { type: string, example: "Hybrid" }
+                        salary:
+                          type: object
+                          properties:
+                            min: { type: integer, example: 7000000 }
+                            max: { type: integer, example: 12000000 }
+                            currency: { type: string, example: "VND" }
+                        created_at: { type: string, format: date-time, example: "2024-04-15T08:00:00Z" }
+                  meta:
+                    type: object
+                    required: [total, page, limit, total_pages]
+                    properties:
+                      total: { type: integer, example: 150 }
+                      page: { type: integer, example: 1 }
+                      limit: { type: integer, example: 10 }
+                      total_pages: { type: integer, example: 15 }
+        "403":
+          description: Forbidden - Chi danh cho Employer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen truy cap tai nguyen nay" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Unauthenticated" }
+  /api/v1/admin/jobs:
+    get:
+      tags:
+        - Job
+      summary: Quan tri tin tuyen dung (Danh cho Admin)
+      description: |
+        Lay toan bo tin tuyen dung tren he thong. Ho tro loc theo status (open, closed, paused).
+      operationId: getAdminJobs
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string, enum: [open, closed, paused] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                  - meta
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Lay danh sach cong viec thanh cong"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, format: uuid, example: "job-uuid-123" }
+                        title: { type: string, example: "Nhan vien Cham soc khach hang" }
+                        status: { type: string, example: "open" }
+                        company:
+                          type: object
+                          properties:
+                            name: { type: string, example: "Cong ty ABC" }
+                            logo_url: { type: string, example: "https://example.com/logo.png" }
+                        location: { type: string, example: "Da Nang" }
+                        job_type: { type: string, example: "Full-time" }
+                        work_mode: { type: string, example: "Hybrid" }
+                        salary:
+                          type: object
+                          properties:
+                            min: { type: integer, example: 7000000 }
+                            max: { type: integer, example: 12000000 }
+                            currency: { type: string, example: "VND" }
+                        created_at: { type: string, format: date-time, example: "2024-04-15T08:00:00Z" }
+                  meta:
+                    type: object
+                    required: [total, page, limit, total_pages]
+                    properties:
+                      total: { type: integer, example: 150 }
+                      page: { type: integer, example: 1 }
+                      limit: { type: integer, example: 10 }
+                      total_pages: { type: integer, example: 15 }
+        "403":
+          description: Forbidden - Chi danh cho Admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen Admin" }
         "401":
           description: Unauthorized
           content:
@@ -627,6 +822,9 @@ paths:
               type: object
               properties:
                 title: { type: string, example: "Nhan vien Cham soc khach hang (Update)" }
+                status:
+                  type: string
+                  enum: [open, closed, paused]
                 salary_max: { type: integer, example: 15000000 }
                 description: { type: string, example: "Cap nhat them quyen loi: Ho tro an trua..." }
                 # Bo sung cac truong khac co the update neu can
