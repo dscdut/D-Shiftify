@@ -1,8 +1,7 @@
 openapi: 3.1.0
 info:
-  title: Template Swagger API Documentation
-  description: |-
-    API documentation for CV management.
+  title: Shiftify API Documentation
+  description: He thong quan ly tin tuyen dung va CV danh cho nguoi yeu the.
   contact:
     email: contact@gdsc.dev
   version: 1.0.0
@@ -18,6 +17,10 @@ tags:
     description: Operations about CV management
   - name: Job
     description: Operations about job management
+  - name: Application
+    description: Operations about job applications
+  - name: Matching
+    description: Operations about AI-powered matching
 
 paths:
   # --- Authentication ---
@@ -1740,6 +1743,411 @@ paths:
                 properties:
                   status: { type: string, example: "error" }
                   message: { type: string, example: "Unauthenticated" }
+
+  # --- Application ---
+  /api/v1/applications:
+    post:
+      tags:
+        - Application
+      summary: Ung vien nop don vao cong viec
+      operationId: applyJob
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - job_id
+                - cv_id
+              properties:
+                job_id:
+                  type: string
+                  format: uuid
+                  example: "uuid-job-789"
+                cv_id:
+                  type: string
+                  format: uuid
+                  example: "uuid-cv-456"
+      responses:
+        "201":
+          description: Nop don thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Nop don ung tuyen thanh cong"
+                  data:
+                    type: object
+                    required:
+                      - application_id
+                      - status
+                      - created_at
+                    properties:
+                      application_id:
+                        type: string
+                        format: uuid
+                        example: "uuid-app-001"
+                      status:
+                        type: string
+                        example: "applied"
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: "2024-04-15T20:00:00Z"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban can dang nhap de nop don ung tuyen" }
+        "404":
+          description: Not Found (Khong tim thay Job hoac CV)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay cong viec hoac ho so ung tuyen" }
+    get:
+      tags:
+        - Application
+      summary: Recruiter xem danh sach nguoi ung tuyen
+      operationId: getApplications
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: job_id
+          in: query
+          required: true
+          description: Loc danh sach ung tuyen theo ID cong viec
+          schema:
+            type: string
+            format: uuid
+            example: "uuid-job-789"
+        - name: status
+          in: query
+          description: Loc theo trang thai ung tuyen (applied, interviewing, accepted, rejected)
+          schema:
+            type: string
+            example: "applied"
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - total
+                  - data
+                properties:
+                  total:
+                    type: integer
+                    example: 5
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - candidate
+                        - cv_summary
+                        - applied_at
+                        - status
+                      properties:
+                        candidate:
+                          type: object
+                          properties:
+                            full_name: { type: string, example: "Pham Hoang Vu" }
+                            phone: { type: string, example: "0123456789" }
+                            avatar_url: { type: string, example: "https://..." }
+                        cv_summary:
+                          type: object
+                          properties:
+                            expected_job: { type: string, example: "Backend Developer" }
+                            skills: 
+                              type: array
+                              items: { type: string }
+                              example: ["Node.js", "PostgreSQL"]
+                        applied_at:
+                          type: string
+                          format: date-time
+                          example: "2024-04-15T20:00:00Z"
+                        status:
+                          type: string
+                          example: "applied"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de xem danh sach ung tuyen" }
+        "403":
+          description: Forbidden (Khong co quyen xem danh sach cua job nay)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen xem danh sach ung vien cho cong viec nay" }
+
+  /api/v1/applications/{id}:
+    patch:
+      tags:
+        - Application
+      summary: Cap nhat trang thai ung tuyen (Duyet/Tu choi)
+      operationId: updateApplicationStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID cua don ung tuyen can cap nhat
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "uuid-app-001"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  description: Trang thai moi cua don ung tuyen
+                  enum: [applied, interviewing, accepted, rejected]
+                  example: "accepted"
+      responses:
+        "200":
+          description: Cap nhat thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - updated_at
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Da cap nhat trang thai ung tuyen thanh cong"
+                  updated_at:
+                    type: string
+                    format: date-time
+                    example: "2024-04-15T21:00:00Z"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban can dang nhap de cap nhat trang thai" }
+        "403":
+          description: Forbidden (Khong co quyen cap nhat don nay)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen thay doi trang thai don ung tuyen nay" }
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay don ung tuyen" }
+
+  # --- Matching ---
+  /api/v1/matches/jobs:
+    get:
+      tags:
+        - Matching
+      summary: Goi y viec lam phu hop cho Candidate
+      description: Dua tren Profile va CV cua ung vien, he thong se de xuat cac cong viec co do tuong quan cao nhat.
+      operationId: getSuggestedJobs
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - suggested_jobs
+                properties:
+                  suggested_jobs:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - job_id
+                        - title
+                        - company_name
+                        - match_score
+                        - reason
+                      properties:
+                        job_id:
+                          type: string
+                          format: uuid
+                          example: "uuid-job-999"
+                        title:
+                          type: string
+                          example: "Junior Node.js Developer"
+                        company_name:
+                          type: string
+                          example: "Origin Tech"
+                        match_score:
+                          type: number
+                          format: float
+                          example: 92.5
+                        reason:
+                          type: string
+                          example: "Phu hop 4/5 ky nang yeu cau va vi tri gan noi o cua ban"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban can dang nhap de nhan goi y viec lam" }
+
+  /api/v1/matches/candidates/{job_id}:
+    get:
+      tags:
+        - Matching
+      summary: Goi y ung vien phu hop cho 1 Job
+      description: Dua tren yeu cau cua cong viec, he thong tim kiem va de xuat cac ung vien co ky nang va ho so phu hop nhat.
+      operationId: getSuggestedCandidates
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: job_id
+          in: path
+          description: ID cua bai dang tuyen dung
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "uuid-job-789"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - job_id
+                  - suggested_candidates
+                properties:
+                  job_id:
+                    type: string
+                    format: uuid
+                    example: "uuid-job-789"
+                  suggested_candidates:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - candidate_id
+                        - full_name
+                        - match_score
+                        - highlight_skills
+                      properties:
+                        candidate_id:
+                          type: string
+                          format: uuid
+                          example: "uuid-user-111"
+                        full_name:
+                          type: string
+                          example: "Nguyen Van A"
+                        match_score:
+                          type: number
+                          format: float
+                          example: 95.0
+                        highlight_skills:
+                          type: array
+                          items: { type: string }
+                          example: ["Java", "Spring Boot", "SQL"]
+                        disability_support:
+                          type: string
+                          example: "Can ho tro thiet ke giao dien tuong phan cao"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Vui long dang nhap de xem goi y ung vien" }
+        "403":
+          description: Forbidden (Khong phai chu so huu Job nay)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Ban khong co quyen xem goi y ung vien cho cong viec nay" }
+        "404":
+          description: Job khong ton tai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Khong tim thay cong viec yeu cau" }
 
 components:
   securitySchemes:
