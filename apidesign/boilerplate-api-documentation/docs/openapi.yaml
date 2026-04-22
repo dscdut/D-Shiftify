@@ -1,410 +1,426 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
-  title: D-Shiftify Voice System API
-  description: Voice feature APIs including Speech-To-Text (STT), Text-To-Speech (TTS), voice logs, and analytics.
+  title: D-Shiftify API
+  description: |
+    He thong API Voice ho tro cac tinh nang chuyen doi ngon ngu (STT/TTS), 
+    quan ly nhat ky giong noi va phan tich du lieu hieu nang he thong.
+    Duoc thiet ke theo tieu chuan RESTful voi phan hoi JSON dong nhat,
+    tuong thich voi he thong Shiftify Core.
   version: 1.0.0
-  contact:
-    name: D-Shiftify Team
-
 servers:
   - url: https://api.shiftify.vn/api/v1
-    description: Production
+    description: Production Server
   - url: http://localhost:3000/api/v1
-    description: Local development
+    description: Local Development Environment
 
 tags:
   - name: STT
-    description: Speech-To-Text conversion
+    description: "Speech-To-Text: Chuyen doi am thanh thanh van ban"
   - name: TTS
-    description: Text-To-Speech conversion
+    description: "Text-To-Speech: Chuyen doi van ban thanh giong noi nhan tao"
   - name: Voice Logs
-    description: Voice usage tracking and management
+    description: "Quan ly va truy xuat lich su su dung dich vu voice"
   - name: Voice Analytics
-    description: Dashboard monitoring and health checks
+    description: "Bao cao thong ke va giam sat suc khoe he thong"
 
 security:
-  - BearerAuth: []
+  - bearerAuth: []
 
 paths:
   /voice/stt:
     post:
       tags: [STT]
-      summary: Convert audio to text
+      summary: Chuyen giong noi thanh van ban (Speech-To-Text)
       description: |
-        Single audio file speech-to-text conversion.
-        - Max duration: 300s (5 min)
-        - Max file size: 25MB
-        - Supported: webm, mp3, wav, ogg, m4a, flac
-        - Auto-creates a voice_log with type=stt
+        Tiep nhan file am thanh va thuc hien nhan dang giong noi.
+        - Roles: Candidate, Recruiter, TrainingCenter, Admin
       operationId: convertStt
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SttRequest"
+              type: object
+              required: [audio_url, source, reference_id]
+              properties:
+                audio_url:
+                  type: string
+                  format: uri
+                  example: "https://cdn.shiftify.vn/audio/chat-001.webm"
+                source:
+                  type: string
+                  example: "chat"
+                reference_id:
+                  type: string
+                  format: uuid
+                  example: "uuid-conv-001"
+                language:
+                  type: string
+                  example: "vi-VN"
+                  default: "vi-VN"
       responses:
         "201":
-          description: Transcription successful
+          description: Thanh cong
           content:
             application/json:
               schema:
                 type: object
+                required: [status, message]
                 properties:
-                  success:
-                    type: boolean
-                    example: true
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
                   data:
-                    $ref: "#/components/schemas/SttResult"
+                    type: object
+                    properties:
+                      transcription:
+                        type: string
+                        example: "Em quan tam cong viec nay"
+                      confidence:
+                        type: number
+                        example: 0.94
+                      voice_log_id:
+                        type: string
+                        format: uuid
+                        example: "uuid-vlog-001"
         "400":
-          description: "Invalid audio (INVALID_AUDIO_FORMAT | AUDIO_TOO_LONG | AUDIO_URL_UNREACHABLE)"
+          description: Loi du lieu dau vao
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "413":
-          description: Audio file too large (AUDIO_TOO_LARGE, max 25MB)
-        "422":
-          description: Unsupported language (LANGUAGE_NOT_SUPPORTED)
-        "503":
-          description: STT engine unavailable (STT_SERVICE_UNAVAILABLE)
+                type: object
+                required: [status, message]
+                properties:
+                  status: { type: string, example: "error" }
+                  message: { type: string, example: "Mo ta loi o day" }
 
   /voice/stt/batch:
     post:
       tags: [STT]
-      summary: Batch audio-to-text (async)
+      summary: Xu ly hang loat (async)
       description: |
-        Submit up to 50 audio files for async STT processing.
-        Poll status via GET /voice/jobs/{job_id}.
-        Optional webhook callback on completion.
+        Gui yeu cau xu ly nhieu file am thanh cung luc.
+        - Roles: Admin, System
       operationId: batchStt
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SttBatchRequest"
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required: [audio_url, source, reference_id]
+                    properties:
+                      audio_url: { type: string, format: uri, example: "https://cdn.shiftify.vn/audio/cv-001.webm" }
+                      source: { type: string, example: "cv" }
+                      reference_id: { type: string, format: uuid, example: "uuid-cv-456" }
       responses:
         "202":
-          description: Batch job accepted
+          description: Yeu cau da duoc tiep nhan
           content:
             application/json:
               schema:
                 type: object
+                required: [status, message]
                 properties:
-                  success:
-                    type: boolean
-                    example: true
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
                   data:
-                    $ref: "#/components/schemas/BatchJob"
-        "400":
-          description: Invalid request (empty items or exceeds 50)
-
-  /voice/jobs/{job_id}:
-    get:
-      tags: [STT]
-      summary: Get batch job status
-      description: |
-        Poll async batch STT job status.
-        Results included when status is completed/partial.
-        Job results retained for 24 hours.
-      operationId: getBatchJob
-      parameters:
-        - name: job_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: Job status
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  data:
-                    $ref: "#/components/schemas/BatchJob"
-        "404":
-          description: Job not found (JOB_NOT_FOUND)
+                    type: object
+                    properties:
+                      job_id: { type: string, format: uuid, example: "uuid-stt-job-001" }
+                      queued: { type: integer, example: 2 }
+                      status: { type: string, example: "processing" }
 
   /voice/tts:
     post:
       tags: [TTS]
-      summary: Convert text to speech
+      summary: Chuyen van ban thanh giong noi (Text-To-Speech)
       description: |
-        Generate audio from text.
-        - Max text: 5000 characters
-        - Speed: 0.5x to 2.0x
-        - Output stored permanently on CDN
-        - Auto-creates a voice_log with type=tts
+        Tao file am thanh tu noi dung van ban.
+        - Roles: Candidate, Recruiter, TrainingCenter, System
       operationId: convertTts
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TtsRequest"
+              type: object
+              required: [text, source, reference_id, voice]
+              properties:
+                text:
+                  type: string
+                  example: "Ban da duoc moi phong van vao thu 6"
+                source:
+                  type: string
+                  example: "system"
+                reference_id:
+                  type: string
+                  format: uuid
+                  example: "uuid-noti-010"
+                voice:
+                  type: string
+                  example: "female_vi"
       responses:
         "201":
-          description: Audio generated
+          description: Thanh cong
           content:
             application/json:
               schema:
                 type: object
+                required: [status, message]
                 properties:
-                  success:
-                    type: boolean
-                    example: true
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
                   data:
-                    $ref: "#/components/schemas/TtsResult"
-        "400":
-          description: "Invalid input (TEXT_EMPTY | TEXT_TOO_LONG)"
-        "422":
-          description: "Invalid voice or speed (VOICE_NOT_SUPPORTED | INVALID_SPEED)"
-        "503":
-          description: TTS engine unavailable (TTS_SERVICE_UNAVAILABLE)
+                    type: object
+                    properties:
+                      audio_url: { type: string, format: uri, example: "https://cdn.shiftify.vn/tts/tts-001.mp3" }
+                      duration_sec: { type: number, example: 5.2 }
+                      voice_log_id: { type: string, format: uuid, example: "uuid-vlog-002" }
 
-  /voice/tts/preview:
+  /voice/tts/previewer:
     post:
       tags: [TTS]
-      summary: Generate preview audio
+      summary: Tao ban doc thu TTS
       description: |
-        Short preview for testing voice settings.
-        - Max text: 200 characters
-        - Preview expires after 1 hour
-        - No voice_log created
+        Tao doan am thanh ngan de nghe thu giong doc.
+        - Roles: Recruiter, TrainingCenter, Admin
       operationId: previewTts
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TtsPreviewRequest"
+              type: object
+              required: [text, voice]
+              properties:
+                text: { type: string, example: "Day la ban doc thu" }
+                voice: { type: string, example: "male_vi" }
+                speed: { type: number, example: 1.0 }
       responses:
         "201":
-          description: Preview generated
+          description: Preview da duoc tao
           content:
             application/json:
               schema:
                 type: object
+                required: [status, message]
                 properties:
-                  success:
-                    type: boolean
-                    example: true
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
                   data:
-                    $ref: "#/components/schemas/TtsPreviewResult"
-
-  /voice/voices:
-    get:
-      tags: [TTS]
-      summary: List available voice profiles
-      description: |
-        Returns all available voice profiles with sample audio.
-        Cacheable for the session duration.
-      operationId: listVoices
-      responses:
-        "200":
-          description: Voice profiles list
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/VoiceProfileInfo"
-              example:
-                success: true
-                data:
-                  - voice_id: female_vi
-                    label: "Nu - Tieng Viet"
-                    language: vi-VN
-                    gender: female
-                    sample_url: "https://cdn.shiftify.vn/tts/samples/female_vi.mp3"
-                    is_default: true
-                  - voice_id: male_vi
-                    label: "Nam - Tieng Viet"
-                    language: vi-VN
-                    gender: male
-                    sample_url: "https://cdn.shiftify.vn/tts/samples/male_vi.mp3"
-                    is_default: false
-                  - voice_id: female_en
-                    label: "Female - English"
-                    language: en-US
-                    gender: female
-                    sample_url: "https://cdn.shiftify.vn/tts/samples/female_en.mp3"
-                    is_default: false
-                  - voice_id: male_en
-                    label: "Male - English"
-                    language: en-US
-                    gender: male
-                    sample_url: "https://cdn.shiftify.vn/tts/samples/male_en.mp3"
-                    is_default: false
+                    type: object
+                    properties:
+                      preview_url: { type: string, format: uri, example: "https://cdn.shiftify.vn/tts/preview-001.mp3" }
+                      expires_at: { type: string, format: date-time, example: "2026-04-15T21:00:00Z" }
 
   /voice/logs:
     get:
       tags: [Voice Logs]
-      summary: List voice logs
+      summary: Lay danh sach voice logs cua user
       description: |
-        Paginated list of voice usage logs.
-        Regular users see only their own logs. Admin sees all.
+        Lay lich su su dung voice co phan trang va loc theo tieu chi.
+        - Roles: Candidate, Recruiter, TrainingCenter, Admin
       operationId: listVoiceLogs
       parameters:
         - name: type
           in: query
-          schema:
-            $ref: "#/components/schemas/VoiceType"
+          schema: { type: string, example: "stt" }
         - name: source
           in: query
-          schema:
-            $ref: "#/components/schemas/VoiceSource"
+          schema: { type: string, example: "chat" }
         - name: status
           in: query
-          schema:
-            $ref: "#/components/schemas/VoiceLogStatus"
-        - name: from
-          in: query
-          schema:
-            type: string
-            format: date
-        - name: to
-          in: query
-          schema:
-            type: string
-            format: date
+          schema: { type: string, example: "success" }
         - name: page
           in: query
-          schema:
-            type: integer
-            default: 1
+          schema: { type: integer, example: 1 }
         - name: limit
           in: query
-          schema:
-            type: integer
-            default: 20
-            maximum: 100
-        - name: sort
-          in: query
-          description: "Field:direction, e.g. created_at:desc"
-          schema:
-            type: string
-            default: "created_at:desc"
+          schema: { type: integer, example: 20 }
       responses:
         "200":
-          description: Voice logs list
+          description: Danh sach nhat ky
           content:
             application/json:
               schema:
                 type: object
+                required: [status, message]
                 properties:
-                  success:
-                    type: boolean
-                    example: true
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
                   data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/VoiceLogListItem"
-                  meta:
-                    $ref: "#/components/schemas/PaginationMeta"
+                    type: object
+                    properties:
+                      total: { type: integer, example: 42 }
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            voice_log_id: { type: string, format: uuid, example: "uuid-vlog-001" }
+                            type: { type: string, example: "stt" }
+                            source: { type: string, example: "chat" }
+                            reference_id: { type: string, format: uuid, example: "uuid-conv-001" }
+                            status: { type: string, example: "success" }
+                            created_at: { type: string, format: date-time, example: "2026-04-15T20:00:00Z" }
+
+    post:
+      tags: [Voice Logs]
+      summary: Tao voice log
+      description: |
+        Tao thu cong mot ban ghi nhat ky voice.
+        - Roles: Admin, System
+      operationId: createVoiceLog
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, type, source, reference_id, status]
+              properties:
+                user_id: { type: string, format: uuid, example: "uuid-user-111" }
+                type: { type: string, example: "stt" }
+                source: { type: string, example: "chat" }
+                reference_id: { type: string, format: uuid, example: "uuid-conv-001" }
+                status: { type: string, example: "success" }
+      responses:
+        "201":
+          description: Tao thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, message]
+                properties:
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
+                  data:
+                    type: object
+                    properties:
+                      voice_log_id: { type: string, format: uuid, example: "uuid-vlog-003" }
+                      created_at: { type: string, format: date-time, example: "2026-04-15T20:01:00Z" }
 
   /voice/logs/{voice_log_id}:
     get:
       tags: [Voice Logs]
-      summary: Get voice log detail
+      summary: Lay chi tiet 1 voice log
       description: |
-        Full detail including original input, output/result, and error info.
-        Regular users can only view their own logs.
+        Xem thong tin chi tiet cua mot ban ghi nhat ky voice.
+        - Roles: Candidate, Recruiter, TrainingCenter, Admin
       operationId: getVoiceLog
       parameters:
         - name: voice_log_id
           in: path
           required: true
-          schema:
-            type: string
-            format: uuid
+          schema: { type: string, format: uuid, example: "uuid-vlog-001" }
       responses:
         "200":
-          description: Voice log detail
+          description: Thong tin chi tiet
           content:
             application/json:
               schema:
                 type: object
+                required: [status, message]
                 properties:
-                  success:
-                    type: boolean
-                    example: true
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
                   data:
-                    $ref: "#/components/schemas/VoiceLogDetail"
-        "403":
-          description: Non-owner non-admin access (FORBIDDEN)
-        "404":
-          description: Log not found (VOICE_LOG_NOT_FOUND)
+                    type: object
+                    properties:
+                      voice_log_id: { type: string, format: uuid, example: "uuid-vlog-001" }
+                      user_id: { type: string, format: uuid, example: "uuid-user-111" }
+                      type: { type: string, example: "stt" }
+                      source: { type: string, example: "chat" }
+                      reference_id: { type: string, format: uuid, example: "uuid-conv-001" }
+                      status: { type: string, example: "success" }
+                      created_at: { type: string, format: date-time, example: "2026-04-15T20:00:00Z" }
 
     delete:
       tags: [Voice Logs]
-      summary: Delete voice log (soft-delete)
-      description: Admin-only. Soft-delete preserves audit trail.
+      summary: Xoa voice log
+      description: |
+        Xoa mot ban ghi nhat ky voice.
+        - Roles: Admin
       operationId: deleteVoiceLog
       parameters:
         - name: voice_log_id
           in: path
           required: true
-          schema:
-            type: string
-            format: uuid
+          schema: { type: string, format: uuid, example: "uuid-vlog-001" }
       responses:
         "200":
-          description: Deleted
+          description: Xoa thanh cong
           content:
             application/json:
               schema:
                 type: object
+                required: [status, message]
                 properties:
-                  success:
-                    type: boolean
-                    example: true
-                  message:
-                    type: string
-                    example: "Voice log deleted successfully"
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
                   data:
                     type: object
                     properties:
-                      voice_log_id:
-                        type: string
-                        format: uuid
-                      deleted_at:
-                        type: string
-                        format: date-time
-        "403":
-          description: Non-admin access (FORBIDDEN)
-        "404":
-          description: Log not found or already deleted
+                      deleted_at: { type: string, format: date-time, example: "2026-04-15T20:04:00Z" }
+
+  /voice/logs/{voice_log_id}/status:
+    patch:
+      tags: [Voice Logs]
+      summary: Cap nhat trang thai voice log
+      description: |
+        Thay doi trang thai cua mot ban ghi nhat ky voice.
+        - Roles: Admin, System
+      operationId: updateVoiceLogStatus
+      parameters:
+        - name: voice_log_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid, example: "uuid-vlog-001" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, example: "failed" }
+      responses:
+        "200":
+          description: Cap nhat thanh cong
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, message]
+                properties:
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
+                  data:
+                    type: object
+                    properties:
+                      updated_at: { type: string, format: date-time, example: "2026-04-15T20:03:00Z" }
 
   /voice/logs/{voice_log_id}/retry:
     post:
       tags: [Voice Logs]
-      summary: Retry failed voice request
+      summary: Retry request voice da that bai
       description: |
-        Re-queue a failed STT/TTS request using original input.
-        - Only logs with status=failed can be retried
-        - Maximum 3 retries per log
+        Thu lai yeu cau voice bi loi.
+        - Roles: Admin, System
       operationId: retryVoiceLog
       parameters:
         - name: voice_log_id
           in: path
           required: true
-          schema:
-            type: string
-            format: uuid
+          schema: { type: string, format: uuid, example: "uuid-vlog-099" }
       responses:
         "202":
           description: Retry queued
@@ -412,142 +428,66 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [status, message]
                 properties:
-                  success:
-                    type: boolean
-                    example: true
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
                   data:
                     type: object
                     properties:
-                      voice_log_id:
-                        type: string
-                        format: uuid
-                      status:
-                        type: string
-                        example: processing
-                      retry_count:
-                        type: integer
-                        example: 2
-                      message:
-                        type: string
-                        example: "Request queued for retry"
-                      updated_at:
-                        type: string
-                        format: date-time
-        "400":
-          description: "Not retryable (NOT_RETRYABLE | MAX_RETRIES_EXCEEDED)"
-        "404":
-          description: Log not found
+                      status: { type: string, example: "queued" }
+                      voice_log_id: { type: string, format: uuid, example: "uuid-vlog-099" }
 
   /voice/logs/summary:
     get:
       tags: [Voice Analytics]
-      summary: Voice usage statistics
+      summary: Thong ke tong hop theo thoi gian
       description: |
-        Aggregated voice usage stats for admin dashboard.
-        - Max date range: 90 days
-        - group_by=hour only for ranges <= 7 days
-        - Cacheable for 5 minutes
+        Lay du lieu thong ke su dung voice.
+        - Roles: Admin, System
       operationId: getVoiceSummary
       parameters:
         - name: from
           in: query
           required: true
-          schema:
-            type: string
-            format: date
+          schema: { type: string, example: "2026-04-01" }
         - name: to
           in: query
           required: true
-          schema:
-            type: string
-            format: date
+          schema: { type: string, example: "2026-04-15" }
         - name: group_by
           in: query
-          schema:
-            $ref: "#/components/schemas/GroupBy"
-        - name: type
-          in: query
-          schema:
-            $ref: "#/components/schemas/VoiceType"
+          schema: { type: string, example: "day" }
       responses:
         "200":
-          description: Usage summary
+          description: Du lieu thong ke
           content:
             application/json:
               schema:
                 type: object
+                required: [status, message]
                 properties:
-                  success:
-                    type: boolean
-                    example: true
+                  status: { type: string, enum: [success, error], example: "success" }
+                  message: { type: string, example: "Thao tac thuc hien thanh cong" }
                   data:
-                    $ref: "#/components/schemas/VoiceSummary"
-        "400":
-          description: "Invalid date range (INVALID_DATE_RANGE, max 90 days)"
-        "403":
-          description: Non-admin access
+                    type: object
+                    properties:
+                      total_requests: { type: integer, example: 1200 }
+                      success: { type: integer, example: 1140 }
+                      failed: { type: integer, example: 60 }
+                      success_rate: { type: number, example: 95.0 }
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            date: { type: string, example: "2026-04-15" }
+                            count: { type: integer, example: 88 }
 
-  /voice/logs/summary/errors:
-    get:
-      tags: [Voice Analytics]
-      summary: Error breakdown
-      description: |
-        Detailed failure analysis for debugging.
-        Shows error code distribution and recent failures.
-      operationId: getVoiceErrorSummary
-      parameters:
-        - name: from
-          in: query
-          required: true
-          schema:
-            type: string
-            format: date
-        - name: to
-          in: query
-          required: true
-          schema:
-            type: string
-            format: date
-        - name: type
-          in: query
-          schema:
-            $ref: "#/components/schemas/VoiceType"
-      responses:
-        "200":
-          description: Error summary
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  data:
-                    $ref: "#/components/schemas/ErrorSummary"
-        "403":
-          description: Non-admin access
-
-  /voice/health:
-    get:
-      tags: [Voice Analytics]
-      summary: Voice system health check
-      description: |
-        Health status of STT engine, TTS engine, and audio CDN.
-        - overall: healthy | degraded | unhealthy
-        - Frontend can show warning banner when degraded/unhealthy
-      operationId: getVoiceHealth
-      responses:
-        "200":
-          description: Health status
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  data:
-                    $ref: "#/components/schemas/VoiceHealth"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Nhap Token JWT de xac thuc (Bearer <token>)
