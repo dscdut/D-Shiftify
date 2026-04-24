@@ -12,6 +12,7 @@ class CreateRefreshTokensTable {
             table
                 .uuid('user_id')
                 .notNullable()
+                .onDelete('CASCADE')
                 .references('id')
                 .inTable('users');
             table.string('token').notNullable().unique();

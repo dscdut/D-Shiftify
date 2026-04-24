@@ -9,21 +9,19 @@ class CreateApplicationsTable {
                 .uuid('id')
                 .primary()
                 .defaultTo(this.knex.raw('gen_random_uuid()'));
+            table.uuid('job_id').notNullable().references('id').inTable('jobs');
+            table.uuid('cv_id').notNullable().references('id').inTable('cvs');
             table
-                .uuid('job_id')
+                .enu('status', ['PENDING', 'REVIEWED', 'ACCEPTED', 'REJECTED'])
                 .notNullable()
-                .references('id')
-                .inTable('jobs');
-            table
-                .uuid('cv_id')
-                .notNullable()
-                .references('id')
-                .inTable('cvs');
-            table.string('status');
+                .defaultTo('PENDING');
             table.timestamps(true, true);
             table.timestamp('deleted_at');
 
             table.unique(['job_id', 'cv_id']);
+
+            table.index('job_id');
+            table.index('cv_id');
         });
     }
 

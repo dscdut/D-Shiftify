@@ -9,7 +9,7 @@ class CreateAssistiveDevicesTable {
                 .uuid('id')
                 .primary()
                 .defaultTo(this.knex.raw('gen_random_uuid()'));
-            table.string('name');
+            table.string('name').notNullable();
             table.timestamps(true, true);
         });
     }
@@ -19,10 +19,10 @@ class CreateAssistiveDevicesTable {
     }
 }
 
-export async function up (knex) {
+export async function up(knex) {
     return new CreateAssistiveDevicesTable(knex).up();
 }
 
-export async function down (knex) {
+export async function down(knex) {
     return new CreateAssistiveDevicesTable(knex).down();
 }

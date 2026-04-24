@@ -13,6 +13,7 @@ class CreateUserDevicesTable {
                 .uuid('profile_id')
                 .notNullable()
                 .references('id')
+                .onDelete('CASCADE')
                 .inTable('profiles');
             table
                 .uuid('device_id')

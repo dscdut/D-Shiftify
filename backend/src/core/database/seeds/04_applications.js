@@ -1,3 +1,5 @@
+import logger from '@utils/logger.js';
+
 class ApplicationsSeeder {
     constructor(knex) {
         this.knex = knex;
@@ -8,7 +10,7 @@ class ApplicationsSeeder {
             .join('roles', 'users.role_id', 'roles.id')
             .join('profiles', 'users.id', 'profiles.user_id')
             .join('cvs', 'profiles.id', 'cvs.profile_id')
-            .where('roles.name', 'candidate')
+            .where('roles.name', 'CANDIDATE')
             .select('cvs.id as cv_id')
             .first();
         return candidate;
@@ -16,7 +18,7 @@ class ApplicationsSeeder {
 
     async getJobs() {
         return this.knex('jobs')
-            .where('status', 'active')
+            .where('status', 'ACTIVE')
             .select('id')
             .limit(2);
     }
@@ -26,28 +28,31 @@ class ApplicationsSeeder {
             id: this.knex.raw('gen_random_uuid()'),
             job_id: job.id,
             cv_id: cvId,
-            status: index === 0 ? 'pending' : 'reviewed',
+            status: index === 0 ? 'PENDING' : 'REVIEWED',
             created_at: this.knex.fn.now(),
-            updated_at: this.knex.fn.now()
+            updated_at: this.knex.fn.now(),
         }));
     }
 
     async seed() {
-        await this.knex('applications').del();
+        await this.knex('applications').truncate();
 
         const candidate = await this.getCandidateData();
         if (!candidate) {
-            console.log('No candidate CV found, skipping applications seed');
+            logger.error('No candidate CV found, skipping applications seed');
             return;
         }
 
         const jobs = await this.getJobs();
         if (jobs.length === 0) {
-            console.log('No jobs found, skipping applications seed');
+            logger.error('No jobs found, skipping applications seed');
             return;
         }
 
-        const applications = await this.buildApplications(candidate.cv_id, jobs);
+        const applications = await this.buildApplications(
+            candidate.cv_id,
+            jobs,
+        );
         await this.knex('applications').insert(applications);
     }
 }

@@ -13,12 +13,13 @@ class CreateProfilesTable {
                 .uuid('user_id')
                 .notNullable()
                 .unique()
+                .onDelete('CASCADE')
                 .references('id')
                 .inTable('users');
             table.string('full_name');
             table.date('dob');
-            table.string('gender');
-            table.string('phone');
+            table.enu('gender', ['MALE', 'FEMALE', 'OTHER']);
+            table.string('phone').unique();
             table.string('disability_status');
             table.timestamps(true, true);
             table.timestamp('deleted_at');

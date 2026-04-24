@@ -14,9 +14,9 @@ class CreateCvsTable {
                 .notNullable()
                 .references('id')
                 .inTable('profiles');
-            table.string('job_type');
-            table.string('work_mode');
-            table.string('mobility');
+            table.enu('job_type');
+            table.enu('work_mode');
+            table.enu('mobility');
             table.string('expected_job');
             table.jsonb('skills');
             table.jsonb('conditions');

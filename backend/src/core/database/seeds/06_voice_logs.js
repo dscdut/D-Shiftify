@@ -30,7 +30,7 @@ class VoiceLogsSeeder {
                 reference_id: jobId,
                 status: 'completed',
                 created_at: this.knex.fn.now(),
-                updated_at: this.knex.fn.now()
+                updated_at: this.knex.fn.now(),
             },
             {
                 id: this.knex.raw('gen_random_uuid()'),
@@ -40,8 +40,8 @@ class VoiceLogsSeeder {
                 reference_id: jobId,
                 status: 'completed',
                 created_at: this.knex.fn.now(),
-                updated_at: this.knex.fn.now()
-            }
+                updated_at: this.knex.fn.now(),
+            },
         ];
     }
 

@@ -15,7 +15,9 @@ class CreateUsersTable {
                 .uuid('role_id')
                 .notNullable()
                 .references('id')
-                .inTable('roles');
+                .inTable('roles')
+                .onDelete('CASCADE')
+                .onUpdate('CASCADE');
             table.timestamps(true, true);
             table.timestamp('deleted_at');
         });

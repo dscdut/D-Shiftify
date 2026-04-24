@@ -11,12 +11,16 @@ class CreateVoiceLogsTable {
                 .defaultTo(this.knex.raw('gen_random_uuid()'));
             table
                 .uuid('user_id')
+                .notNullable()
                 .references('id')
                 .inTable('users');
-            table.string('type');
-            table.string('source');
+            table.string('type').notNullable();
+            table.string('source').notNullable();
             table.uuid('reference_id');
-            table.string('status');
+            table
+                .enu('status', ['PENDING', 'ACCEPTED', 'REJECTED'])
+                .notNullable()
+                .defaultTo('PENDING');
             table.timestamps(true, true);
         });
     }

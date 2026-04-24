@@ -13,18 +13,20 @@ class CreateMatchesTable {
                 .uuid('job_id')
                 .notNullable()
                 .references('id')
+                .onDelete('CASCADE')
                 .inTable('jobs');
             table
-                .uuid('candidate_user_id')
+                .uuid('cv_id')
                 .notNullable()
                 .references('id')
-                .inTable('users');
+                .onDelete('CASCADE')
+                .inTable('cvs');
             table.float('score');
-            table.string('status');
+            table.enu('status');
             table.timestamps(true, true);
             table.timestamp('deleted_at');
 
-            table.unique(['job_id', 'candidate_user_id']);
+            table.unique(['job_id', 'cv_id']);
         });
     }
 
