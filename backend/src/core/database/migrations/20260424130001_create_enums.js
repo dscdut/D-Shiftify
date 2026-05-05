@@ -1,10 +1,14 @@
-// @ts-check
-/**
- * Create ENUM types used across the schema
- */
-exports.up = async (knex) => {
+exports.up = async knex => {
     await knex.raw(`
         CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+        CREATE OR REPLACE FUNCTION update_timestamp()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            NEW.updated_at = CURRENT_TIMESTAMP;
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
 
         CREATE TYPE application_status AS ENUM ('applied', 'accepted', 'rejected');
         CREATE TYPE match_status AS ENUM ('pending', 'matched', 'rejected');
@@ -16,7 +20,7 @@ exports.up = async (knex) => {
     `);
 };
 
-exports.down = async (knex) => {
+exports.down = async knex => {
     await knex.raw(`
         DROP TYPE IF EXISTS application_status CASCADE;
         DROP TYPE IF EXISTS match_status CASCADE;
@@ -25,5 +29,6 @@ exports.down = async (knex) => {
         DROP TYPE IF EXISTS enrollment_status CASCADE;
         DROP TYPE IF EXISTS working_time_type CASCADE;
         DROP TYPE IF EXISTS job_status CASCADE;
+        DROP FUNCTION IF EXISTS update_timestamp() CASCADE;
     `);
 };

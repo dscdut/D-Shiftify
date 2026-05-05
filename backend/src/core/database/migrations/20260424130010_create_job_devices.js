@@ -1,21 +1,24 @@
-// @ts-check
-/**
- * Create job_devices table
- */
 const tableName = 'job_devices';
 
-exports.up = async (knex) => {
-    await knex.schema.createTable(tableName, (table) => {
-        table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
-        table.uuid('job_id').notNullable()
-            .references('id').inTable('jobs')
+exports.up = async knex => {
+    await knex.schema.createTable(tableName, table => {
+        table
+            .uuid('job_id')
+            .notNullable()
+            .references('id')
+            .inTable('jobs')
             .onDelete('CASCADE');
-        table.uuid('device_id').notNullable()
-            .references('id').inTable('assistive_devices')
+        table
+            .uuid('device_id')
+            .notNullable()
+            .references('id')
+            .inTable('assistive_devices')
             .onDelete('CASCADE');
         table.timestamps(false, true);
 
         table.unique(['job_id', 'device_id']);
+        table.index('job_id');
+        table.index('device_id');
     });
 
     await knex.raw(`
@@ -26,4 +29,4 @@ exports.up = async (knex) => {
     `);
 };
 
-exports.down = (knex) => knex.schema.dropTable(tableName);
+exports.down = knex => knex.schema.dropTable(tableName);

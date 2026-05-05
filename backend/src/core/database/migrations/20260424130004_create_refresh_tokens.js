@@ -1,14 +1,13 @@
-// @ts-check
-/**
- * Create refresh_tokens table
- */
 const tableName = 'refresh_tokens';
 
-exports.up = async (knex) => {
-    await knex.schema.createTable(tableName, (table) => {
+exports.up = async knex => {
+    await knex.schema.createTable(tableName, table => {
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
-        table.uuid('user_id').notNullable()
-            .references('id').inTable('users')
+        table
+            .uuid('user_id')
+            .notNullable()
+            .references('id')
+            .inTable('users')
             .onDelete('CASCADE');
         table.string('token').notNullable().unique();
         table.timestamp('expires_at').notNullable();
@@ -26,4 +25,4 @@ exports.up = async (knex) => {
     `);
 };
 
-exports.down = (knex) => knex.schema.dropTable(tableName);
+exports.down = knex => knex.schema.dropTable(tableName);

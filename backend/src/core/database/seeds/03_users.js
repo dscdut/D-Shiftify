@@ -2,47 +2,35 @@ const bcrypt = require('bcrypt');
 
 const USERS = [
     { email: 'admin@shiftify.com', role: 'admin' },
-    { email: 'candidate@example.com', role: 'candidate' },
-    { email: 'recruiter@example.com', role: 'recruiter' },
+    { email: 'candidate1@example.com', role: 'candidate' },
+    { email: 'candidate2@example.com', role: 'candidate' },
+    { email: 'recruiter1@example.com', role: 'recruiter' },
+    { email: 'recruiter2@example.com', role: 'recruiter' },
+    { email: 'training@example.com', role: 'training_center' },
 ];
 
 const DEFAULT_PASSWORD = 'password123';
 
-class UsersSeeder {
-    constructor(knex) {
-        this.knex = knex;
-    }
+exports.seed = async knex => {
+    await knex('users').del();
 
-    async getRoleMap() {
-        const roles = await this.knex('roles').select('id', 'name');
-        return roles.reduce((map, role) => {
-            map[role.name] = role.id;
-            return map;
-        }, {});
-    }
+    const roles = await knex('roles').select('id', 'name');
+    const roleMap = roles.reduce((map, role) => {
+        map[role.name] = role.id;
+        return map;
+    }, {});
 
-    async buildUsers(roleMap, hashedPassword) {
-        return USERS.map(user => ({
-            id: this.knex.raw('gen_random_uuid()'),
-            email: user.email,
-            password_hash: hashedPassword,
-            role_id: roleMap[user.role],
-            created_at: this.knex.fn.now(),
-            updated_at: this.knex.fn.now(),
-        }));
-    }
+    const hashedPassword = await bcrypt.hash(DEFAULT_PASSWORD, 10);
 
-    async seed() {
-        await this.knex('users').del();
+    const users = USERS.map(user => ({
+        id: knex.raw('uuid_generate_v4()'),
+        email: user.email,
+        password_hash: hashedPassword,
+        role_id: roleMap[user.role],
+        created_at: knex.fn.now(),
+        updated_at: knex.fn.now(),
+        deleted_at: null,
+    }));
 
-        const roleMap = await this.getRoleMap();
-        const hashedPassword = await bcrypt.hash(DEFAULT_PASSWORD, 10);
-        const users = await this.buildUsers(roleMap, hashedPassword);
-
-        await this.knex('users').insert(users);
-    }
-}
-
-export async function seed(knex) {
-    return new UsersSeeder(knex).seed();
-}
+    await knex('users').insert(users);
+};

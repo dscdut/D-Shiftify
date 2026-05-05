@@ -1,16 +1,15 @@
-// @ts-check
-/**
- * Create jobs table
- */
 const tableName = 'jobs';
 
-exports.up = async (knex) => {
-    await knex.schema.createTable(tableName, (table) => {
+exports.up = async knex => {
+    await knex.schema.createTable(tableName, table => {
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
-        table.uuid('company_id').notNullable()
-            .references('id').inTable('companies')
+        table
+            .uuid('company_id')
+            .notNullable()
+            .references('id')
+            .inTable('companies')
             .onDelete('CASCADE');
-        table.string('title');
+        table.string('title').notNullable();
         table.string('job_type');
         table.string('work_mode');
         table.string('experience_required');
@@ -25,9 +24,12 @@ exports.up = async (knex) => {
         table.specificType('status', 'job_status');
         table.timestamps(false, true);
         table.dateTime('deleted_at').defaultTo(null);
+
+        table.index('company_id');
+        table.index('status');
+        table.index(['status', 'created_at']);
     });
 
-    // Add check constraints
     await knex.raw(`
         ALTER TABLE ${tableName}
         ADD CONSTRAINT check_salary_min CHECK (salary_min >= 0);
@@ -45,4 +47,4 @@ exports.up = async (knex) => {
     `);
 };
 
-exports.down = (knex) => knex.schema.dropTable(tableName);
+exports.down = knex => knex.schema.dropTable(tableName);

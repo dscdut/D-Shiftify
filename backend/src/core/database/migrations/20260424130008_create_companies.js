@@ -1,19 +1,19 @@
-// @ts-check
-/**
- * Create companies table
- */
 const tableName = 'companies';
 
-exports.up = async (knex) => {
-    await knex.schema.createTable(tableName, (table) => {
+exports.up = async knex => {
+    await knex.schema.createTable(tableName, table => {
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
-        table.uuid('user_id').unique().notNullable()
-            .references('id').inTable('users')
+        table
+            .uuid('user_id')
+            .unique()
+            .notNullable()
+            .references('id')
+            .inTable('users')
             .onDelete('CASCADE');
-        table.string('name');
+        table.string('name').notNullable();
         table.string('slogan');
-        table.string('phone');
-        table.string('email');
+        table.string('phone').unique();
+        table.string('email').notNullable().unique();
         table.string('website');
         table.string('industry');
         table.string('tax_code');
@@ -26,6 +26,8 @@ exports.up = async (knex) => {
         table.string('logo_url');
         table.timestamps(false, true);
         table.dateTime('deleted_at').defaultTo(null);
+
+        table.index('user_id');
     });
 
     await knex.raw(`
@@ -36,4 +38,4 @@ exports.up = async (knex) => {
     `);
 };
 
-exports.down = (knex) => knex.schema.dropTable(tableName);
+exports.down = knex => knex.schema.dropTable(tableName);

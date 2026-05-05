@@ -1,19 +1,21 @@
-// @ts-check
-/**
- * Create users table
- */
 const tableName = 'users';
 
-exports.up = async (knex) => {
-    await knex.schema.createTable(tableName, (table) => {
+exports.up = async knex => {
+    await knex.schema.createTable(tableName, table => {
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.string('email').unique().notNullable();
         table.string('password_hash').notNullable();
-        table.uuid('role_id').notNullable()
-            .references('id').inTable('roles')
-            .onDelete('RESTRICT');
+        table
+            .uuid('role_id')
+            .notNullable()
+            .references('id')
+            .inTable('roles')
+            .onDelete('CASCADE');
         table.timestamps(false, true);
         table.dateTime('deleted_at').defaultTo(null);
+
+        table.index('role_id');
+        table.index('email');
     });
 
     await knex.raw(`
@@ -24,4 +26,4 @@ exports.up = async (knex) => {
     `);
 };
 
-exports.down = (knex) => knex.schema.dropTable(tableName);
+exports.down = knex => knex.schema.dropTable(tableName);

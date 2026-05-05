@@ -1,14 +1,13 @@
-// @ts-check
-/**
- * Create cvs table
- */
 const tableName = 'cvs';
 
-exports.up = async (knex) => {
-    await knex.schema.createTable(tableName, (table) => {
+exports.up = async knex => {
+    await knex.schema.createTable(tableName, table => {
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
-        table.uuid('profile_id').notNullable()
-            .references('id').inTable('profiles')
+        table
+            .uuid('profile_id')
+            .notNullable()
+            .references('id')
+            .inTable('profiles')
             .onDelete('CASCADE');
         table.string('job_type');
         table.string('work_mode');
@@ -18,8 +17,11 @@ exports.up = async (knex) => {
         table.jsonb('conditions');
         table.jsonb('experiences');
         table.jsonb('certificates');
+        table.jsonb('custom_sections');
         table.timestamps(false, true);
         table.dateTime('deleted_at').defaultTo(null);
+
+        table.index('profile_id');
     });
 
     await knex.raw(`
@@ -30,4 +32,4 @@ exports.up = async (knex) => {
     `);
 };
 
-exports.down = (knex) => knex.schema.dropTable(tableName);
+exports.down = knex => knex.schema.dropTable(tableName);
