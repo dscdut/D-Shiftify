@@ -10,7 +10,6 @@ exports.seed = async knex => {
         const numDevices = (index % 3) + 1;
         for (let i = 0; i < numDevices && i < devices.length; i++) {
             jobDevices.push({
-                id: knex.raw('uuid_generate_v4()'),
                 job_id: job.id,
                 device_id: devices[(index + i) % devices.length].id,
                 created_at: knex.fn.now(),

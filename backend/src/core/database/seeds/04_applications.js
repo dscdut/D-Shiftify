@@ -1,5 +1,3 @@
-import logger from '@utils/logger.js';
-
 class ApplicationsSeeder {
     constructor(knex) {
         this.knex = knex;
@@ -18,7 +16,7 @@ class ApplicationsSeeder {
 
     async getJobs() {
         return this.knex('jobs')
-            .where('status', 'ACTIVE')
+            .where('status', 'open')
             .select('id')
             .limit(2);
     }
@@ -39,13 +37,13 @@ class ApplicationsSeeder {
 
         const candidate = await this.getCandidateData();
         if (!candidate) {
-            logger.error('No candidate CV found, skipping applications seed');
+            console.log('No candidate CV found, skipping applications seed');
             return;
         }
 
         const jobs = await this.getJobs();
         if (jobs.length === 0) {
-            logger.error('No jobs found, skipping applications seed');
+            console.log('No jobs found, skipping applications seed');
             return;
         }
 

@@ -19,9 +19,13 @@ exports.seed = async knex => {
     const participants = [];
     const messages = [];
 
-    candidates.forEach((candidate, index) => {
+    for (let index = 0; index < candidates.length; index++) {
+        const candidate = candidates[index];
         const recruiter = recruiters[index % recruiters.length];
-        const conversationId = knex.raw('uuid_generate_v4()');
+
+        // Generate UUID once and reuse it
+        const conversationIdResult = await knex.raw('SELECT uuid_generate_v4() as id');
+        const conversationId = conversationIdResult.rows[0].id;
 
         conversations.push({
             id: conversationId,
@@ -68,9 +72,11 @@ exports.seed = async knex => {
             updated_at: knex.fn.now(),
             deleted_at: null,
         });
-    });
+    }
 
-    await knex('conversations').insert(conversations);
-    await knex('participants').insert(participants);
-    await knex('messages').insert(messages);
+    if (conversations.length > 0) {
+        await knex('conversations').insert(conversations);
+        await knex('participants').insert(participants);
+        await knex('messages').insert(messages);
+    }
 };

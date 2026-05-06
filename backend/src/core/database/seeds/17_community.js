@@ -7,8 +7,12 @@ exports.seed = async knex => {
     const communityPosts = [];
     const comments = [];
 
-    users.forEach((user, index) => {
-        const postId = knex.raw('uuid_generate_v4()');
+    for (let index = 0; index < users.length; index++) {
+        const user = users[index];
+
+        // Generate UUID once and reuse it
+        const postIdResult = await knex.raw('SELECT uuid_generate_v4() as id');
+        const postId = postIdResult.rows[0].id;
 
         communityPosts.push({
             id: postId,
@@ -59,8 +63,10 @@ exports.seed = async knex => {
                 deleted_at: null,
             });
         }
-    });
+    }
 
-    await knex('community_posts').insert(communityPosts);
-    await knex('comments').insert(comments);
+    if (communityPosts.length > 0) {
+        await knex('community_posts').insert(communityPosts);
+        await knex('comments').insert(comments);
+    }
 };
