@@ -8,27 +8,16 @@ const ROLES = [
     },
 ];
 
-class RolesSeeder {
-    constructor(knex) {
-        this.knex = knex;
-    }
+exports.seed = async knex => {
+    await knex('roles').del();
 
-    buildRoles() {
-        return ROLES.map(role => ({
-            id: this.knex.raw('gen_random_uuid()'),
-            name: role.name,
-            description: role.description,
-            created_at: this.knex.fn.now(),
-            updated_at: this.knex.fn.now(),
-        }));
-    }
+    const roles = ROLES.map(role => ({
+        id: knex.raw('uuid_generate_v4()'),
+        name: role.name,
+        description: role.description,
+        created_at: knex.fn.now(),
+        updated_at: knex.fn.now(),
+    }));
 
-    async seed() {
-        await this.knex('roles').del();
-        await this.knex('roles').insert(this.buildRoles());
-    }
-}
-
-export async function seed(knex) {
-    return new RolesSeeder(knex).seed();
-}
+    await knex('roles').insert(roles);
+};
