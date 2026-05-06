@@ -24,19 +24,6 @@ exports.up = async knex => {
         table.dateTime('deleted_at');
     });
 
-    await knex
-        .raw(
-            `
-        ALTER TABLE ${tableName}
-        ADD COLUMN location geography;
-    `,
-        )
-        .catch(() => {
-            console.log(
-                'PostGIS not available, skipping geography column for training_centers',
-            );
-        });
-
     await knex.raw(`
         CREATE TRIGGER update_timestamp
         BEFORE UPDATE ON ${tableName}

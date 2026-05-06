@@ -14,7 +14,7 @@ class VoiceLogsSeeder {
 
     async getJobId() {
         const job = await this.knex('jobs')
-            .where('status', 'active')
+            .where('status', 'open')
             .select('id')
             .first();
         return job?.id;
