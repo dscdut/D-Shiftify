@@ -26,7 +26,11 @@ export const useLoginAuth = () => {
       const { access_token, refresh_token, user } = response.data
       setToken(access_token, refresh_token)
       setUserToLS(user)
-      navigate(isEqual(user.role, ROLE_ADMIN) || isEqual(user.role, ROLE_EMPLOYEE) ? ROUTE.ADMIN.DASHBOARD : ROUTE.HOME)
+      navigate(
+        isEqual(user.role, ROLE_ADMIN) || isEqual(user.role, ROLE_EMPLOYEE)
+          ? `${ROUTE.ADMIN.ROOT}/${ROUTE.ADMIN.DASHBOARD}`
+          : ROUTE.PUBLIC.HOME
+      )
       toastifyCommon.success('Đăng nhập thành công')
     },
     onError: (error: AxiosError) => {
@@ -41,7 +45,7 @@ export const useRegisterAuth = () => {
     mutationKey: [MUTATION_KEYS.register],
     mutationFn: (data: z.infer<typeof RegisterSchema>) => authApi.register(data),
     onSuccess: (_, variables) => {
-      navigate(ROUTE.AUTH.VERIFY_ACCOUNT_EMAIL, { state: { email: variables.email } })
+      navigate(ROUTE.PUBLIC.VERIFY_ACCOUNT_EMAIL, { state: { email: variables.email } })
       toastifyCommon.success('Đăng ký thành công')
     },
     onError: (error: AxiosError) => {
@@ -57,7 +61,7 @@ export const useVerifyAccountEmail = () => {
     mutationFn: (data: z.infer<typeof VerifyAccountEmailSchema>) => authApi.verifyEmail(data),
     onSuccess: () => {
       toastifyCommon.success('Email verified successfully! 🎉')
-      navigate(ROUTE.AUTH.LOGIN)
+      navigate(ROUTE.PUBLIC.LOGIN)
     },
     onError: (error: AxiosError) => handleError(error, 'Failed to verify email')
   })

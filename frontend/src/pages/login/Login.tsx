@@ -182,7 +182,7 @@ export default function Login() {
                   </Label>
                 </div>
                 <Link
-                  to={ROUTE.AUTH.FORGOT_PASSWORD}
+                  to={ROUTE.PUBLIC.FORGOT_PASSWORD}
                   className='text-sm text-indigo-600 hover:text-indigo-800 hover:underline'
                 >
                   Quên mật khẩu?
@@ -201,7 +201,10 @@ export default function Login() {
 
               <motion.p variants={itemVariants} className='text-sm text-center text-gray-600'>
                 Chưa có tài khoản?{' '}
-                <Link to='/register' className='font-medium text-indigo-600 hover:text-indigo-800 hover:underline'>
+                <Link
+                  to={ROUTE.PUBLIC.REGISTER}
+                  className='font-medium text-indigo-600 hover:text-indigo-800 hover:underline'
+                >
                   Đăng ký ngay
                 </Link>
               </motion.p>

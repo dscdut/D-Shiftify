@@ -100,7 +100,7 @@ const PageNotFound = () => {
           transition={{ delay: 0.4, duration: 0.5 }}
         >
           <Link
-            to={ROUTE.HOME}
+            to={ROUTE.PUBLIC.HOME}
             className='inline-flex gap-2 items-center px-8 py-4 mt-8 text-lg font-semibold text-white bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-lg shadow-lg transition-all group hover:scale-105 hover:shadow-xl dark:from-indigo-500 dark:via-purple-500 dark:to-pink-500'
           >
             <motion.svg

@@ -11,7 +11,7 @@ interface ProtectedRouteProps {
   redirectPath?: string
 }
 
-const ProtectedRoute = ({ children, redirectPath = ROUTE.AUTH.LOGIN }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children, redirectPath = ROUTE.PUBLIC.LOGIN }: ProtectedRouteProps) => {
   const { isAuthenticated } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
@@ -19,7 +19,7 @@ const ProtectedRoute = ({ children, redirectPath = ROUTE.AUTH.LOGIN }: Protected
   useEffect(() => {
     const accessToken = getAccessTokenFromLS()
     if (!accessToken) {
-      navigate(ROUTE.HOME, { replace: true })
+      navigate(ROUTE.PUBLIC.HOME, { replace: true })
     }
   }, [location.pathname, navigate])
 

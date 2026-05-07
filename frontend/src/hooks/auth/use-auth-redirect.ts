@@ -11,7 +11,7 @@ export const useAuthRedirect = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate(ROUTE.HOME)
+      navigate(ROUTE.PUBLIC.HOME)
     }
   }, [isAuthenticated, navigate])
 }
