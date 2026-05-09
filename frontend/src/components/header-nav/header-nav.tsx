@@ -85,7 +85,7 @@ const Header = () => {
                     <div className='space-y-2'>
                       <div className='border-b border-gray-200 dark:border-gray-800'>
                         <Button variant='ghost' className='flex justify-start items-center w-full'>
-                          <Link to={ROUTE.PROFILE.ROOT} className='flex items-center'>
+                          <Link to={ROUTE.COMMON_PRIVATE.ACCOUNT_SETTINGS} className='flex items-center'>
                             <User className='mr-2 w-4 h-4' />
                             {tAuth('auth.profile')}
                           </Link>
@@ -125,7 +125,7 @@ const Header = () => {
                     <div className='space-y-2'>
                       <div className='border-b border-gray-200 dark:border-gray-800'>
                         <Button variant='ghost' className='flex justify-start items-center w-full'>
-                          <Link to={ROUTE.PROFILE.ROOT} className='flex items-center'>
+                          <Link to={ROUTE.COMMON_PRIVATE.ACCOUNT_SETTINGS} className='flex items-center'>
                             <User className='mr-2 w-4 h-4' />
                             {tAuth('auth.profile')}
                           </Link>
@@ -146,10 +146,10 @@ const Header = () => {
                 variant='outline'
                 className='px-4 py-2 font-medium text-gray-900 rounded-md border border-gray-200 transition-all duration-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-blue-500'
               >
-                <Link to={ROUTE.AUTH.LOGIN}>{tAuth('auth.login')}</Link>
+                <Link to={ROUTE.PUBLIC.LOGIN}>{tAuth('auth.login')}</Link>
               </Button>
               <Button className='px-4 py-2 font-medium text-white bg-blue-600 rounded-md transition-all duration-200 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 focus-visible:ring-2 focus-visible:ring-blue-500'>
-                <Link to={ROUTE.AUTH.REGISTER}>{tAuth('auth.register')}</Link>
+                <Link to={ROUTE.PUBLIC.REGISTER}>{tAuth('auth.register')}</Link>
               </Button>
             </div>
           )}
@@ -194,12 +194,12 @@ const Header = () => {
                   variant='outline'
                   className='px-4 py-2 font-medium text-gray-900 rounded-md border border-gray-200 transition-all duration-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-blue-500'
                 >
-                  <Link to={ROUTE.AUTH.LOGIN} onClick={() => setMenuOpen(false)}>
+                  <Link to={ROUTE.PUBLIC.LOGIN} onClick={() => setMenuOpen(false)}>
                     {tAuth('auth.login')}
                   </Link>
                 </Button>
                 <Button className='px-4 py-2 font-medium text-white bg-blue-600 rounded-md transition-all duration-200 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 focus-visible:ring-2 focus-visible:ring-blue-500'>
-                  <Link to={ROUTE.AUTH.REGISTER} onClick={() => setMenuOpen(false)}>
+                  <Link to={ROUTE.PUBLIC.REGISTER} onClick={() => setMenuOpen(false)}>
                     {tAuth('auth.register')}
                   </Link>
                 </Button>
