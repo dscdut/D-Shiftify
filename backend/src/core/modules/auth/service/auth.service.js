@@ -50,8 +50,8 @@ class Service {
             throw new UnAuthorizedException('Email or password is incorrect');
         }
 
-        const accessToken = this.jwtService.sign(JwtPayload({ id: user.id, roles: [user.role] }));
-        const refreshToken = await this.#createRefreshToken(user.id);
+        const { id: ref, token: refreshToken } = await this.#createRefreshToken(user.id);
+        const accessToken = this.jwtService.sign(JwtPayload({ id: user.id, roles: [user.role] }, ref));
 
         return {
             access_token: accessToken,
@@ -114,10 +114,15 @@ class Service {
             throw error;
         }
 
+        const { id: ref, token: accessTokenString } = await this.#createRefreshToken(userId);
+        const accessToken = this.jwtService.sign(JwtPayload({ id: userId, roles: [registerDto.role] }, ref));
+
         return {
             user_id: userId,
             email: registerDto.email,
             role: registerDto.role,
+            access_token: accessToken,
+            refresh_token: accessTokenString,
         };
     }
 
@@ -134,8 +139,8 @@ class Service {
 
         await this.refreshTokenRepository.revokeToken(tokenRecord.id);
 
-        const accessToken = this.jwtService.sign(JwtPayload({ id: user.id, roles: [user.role] }));
-        const newRefreshToken = await this.#createRefreshToken(user.id);
+        const { id: ref, token: newRefreshToken } = await this.#createRefreshToken(user.id);
+        const accessToken = this.jwtService.sign(JwtPayload({ id: user.id, roles: [user.role] }, ref));
 
         return {
             access_token: accessToken,
@@ -189,12 +194,34 @@ class Service {
         };
     }
 
+    // ============================
+    // API 6: LOGOUT
+    // ============================
+    // Luong xu ly:
+    //   1. Tim refresh token trong DB
+    //   2. Neu tim thay, revoke token do
+    //   3. Tra ve thong bao thanh cong (luon tra ve 200 ke ca khong tim thay de bao mat)
+    async logout(logoutDto) {
+        const tokenRecord = await this.refreshTokenRepository.findValidToken(logoutDto.refresh_token);
+
+        if (tokenRecord) {
+            await this.refreshTokenRepository.revokeToken(tokenRecord.id);
+        }
+
+        return {
+            message: 'Dang xuat thanh cong.',
+        };
+    }
+
     async #createRefreshToken(userId) {
         // Tao chuoi ngau nhien 32 bytes (64 ky tu hex) cho Refresh Token
         const token = crypto.randomBytes(32).toString('hex');
         const expiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL_MS);
-        await this.refreshTokenRepository.createToken(userId, token, expiresAt);
-        return token;
+        const [record] = await this.refreshTokenRepository.createToken(userId, token, expiresAt);
+        return {
+            id: record.id || record,
+            token: record.token || token
+        };
     }
 }
 
