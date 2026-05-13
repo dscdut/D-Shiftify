@@ -4,7 +4,7 @@ import { UserDataService } from 'core/modules/user/services/userData.service';
 import { joinUserRoles } from 'core/utils/userFilter';
 import { BcryptService } from './bcrypt.service';
 import { JwtService } from './jwt.service';
-import { UserRepository } from '../../user/user.repository';
+import { UserRepository } from '../../user/repository/user.repository';
 import { UnAuthorizedException } from '../../../../packages/httpException';
 
 class Service {
