@@ -13,25 +13,17 @@ class Controller {
   };
 
   findById = async req => {
-    const data = await this.service.findById(req.params.id);
+    const data = await this.service.getCvById(req.params.id);
 
     return ValidHttpResponse.toOkResponse(data);
   };
 
-  updateOne = async req => {
-    const data = await this.service.updateOne(
-      req.params.id,
-      req.body,
-    );
+  updateCV = async req => {
+    const data = await this.service.updateCV(req.params.id, req.body);
 
     return ValidHttpResponse.toOkResponse(data);
   };
 
-  deleteOne = async req => {
-    const data = await this.service.deleteOne(req.params.id);
-
-    return ValidHttpResponse.toOkResponse(data);
-  };
 }
 
 export const CVController = new Controller();

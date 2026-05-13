@@ -14,6 +14,19 @@ class Repository extends DataRepository {
         }
         return queryBuilder;
     }
+
+    deleteByProfileId(profile_id, trx = null) {
+
+        const queryBuilder = this.query()
+            .where('profile_id', profile_id)
+            .delete();
+
+        if (trx) {
+            queryBuilder.transacting(trx);
+        }
+
+        return queryBuilder;
+    }
 }
 
 export const UserDeviceRepository = new Repository('user_devices');

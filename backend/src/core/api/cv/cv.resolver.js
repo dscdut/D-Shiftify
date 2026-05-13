@@ -28,11 +28,6 @@ export const CVResolver = Module.builder()
             method: 'put',
             body: 'UpdateCVDto',
             interceptors: [UpdateCVInterceptor],
-            controller: CVController.updateOne,
-        },
-        {
-            route: '/:id',
-            method: 'delete',
-            controller: CVController.deleteOne,
+            controller: CVController.updateCV,
         },
     ]);

@@ -19,6 +19,12 @@ class Repository extends DataRepository {
         ];
     }
 
+    createCV(cvData) {
+        return this.query()
+            .insert(cvData)
+            .returning(this.baseSelect());
+    }
+
     findById(id) {
         return this.query()
             .innerJoin('profiles', 'profiles.id', 'cvs.profile_id')
@@ -38,28 +44,6 @@ class Repository extends DataRepository {
             .first();
     }
 
-    createCV(cvData) {
-        return this.query()
-            .insert(cvData)
-            .returning(this.baseSelect());
-    }
-
-    findAll(profileId) {
-        return this.query()
-            .where('profile_id', profileId)
-            .whereNull('deleted_at')
-            .select([
-                'id',
-                'profile_id as profileId',
-                'job_type as jobType',
-                'work_mode as workMode',
-                'mobility',
-                'expected_job as expectedJob',
-                'created_at as createdAt',
-                'updated_at as updatedAt',
-            ]);
-    }
-
     updateCV(id, cvData) {
         return this.query()
             .where('id', id)
@@ -70,27 +54,7 @@ class Repository extends DataRepository {
             })
             .returning(this.baseSelect());
     }
-
-    softDelete(id) {
-        return this.query()
-            .where('id', id)
-            .whereNull('deleted_at')
-            .update({
-                deleted_at: new Date(),
-                updated_at: new Date(),
-            })
-            .returning([
-                'id',
-                'expected_job as expectedJob',
-                'deleted_at as deletedAt',
-            ]);
-    }
-
-    forceDelete(id) {
-        return this.query()
-            .where('id', id)
-            .del();
-    }
+    
 }
 
 export const CVRepository = new Repository('cvs');
