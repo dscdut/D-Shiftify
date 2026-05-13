@@ -133,8 +133,9 @@ export class SwaggerDocument {
                     name: pattern,
                     in: 'path',
                     schema: {
-                        type: 'integer',
-                        format: 'int64',
+                        // type: 'integer',
+                        // format: 'int64',
+                        type: 'string'
                     },
                     required: true,
                 });
