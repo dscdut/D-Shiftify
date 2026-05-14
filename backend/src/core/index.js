@@ -22,6 +22,7 @@ Sentry.init({
         .applyGlobalFilters([new SecurityFilter()])
         .applyResolver(ModuleResolver)
         .applySwagger(ApiDocument)
+        .applyScalar(ApiDocument)
         .applyGlobalFilters([new HttpExceptionFilter(), new InvalidUrlFilter()])
         .applySentryError(Sentry)
         .run();

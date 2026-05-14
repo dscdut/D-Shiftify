@@ -1,11 +1,13 @@
 // @ts-check
+import { apiReference } from '@scalar/express-api-reference';
+import { connectDatabase } from 'core/database';
 import * as express from 'express';
 import methodOverride from 'method-override';
 import swaggerUi from 'swagger-ui-express';
-import { connectDatabase } from 'core/database';
-import { InvalidResolver, InvalidFilter } from '../common/exceptions/system';
 import { logger } from '../../packages/logger';
+import { InvalidFilter, InvalidResolver } from '../common/exceptions/system';
 import { NODE_ENV } from '../env';
+import { ScalarConfig } from './scalar.config';
 
 /**
  * @typedef Filter
@@ -18,6 +20,10 @@ export class AppBundle {
     BASE_PATH = '/api';
 
     BASE_PATH_SWAGGER = '/docs';
+
+    BASE_PATH_OPENAPI = '/openapi.json';
+
+    BASE_PATH_SCALAR = '/scalar';
 
     static builder() {
         AppBundle.logger.info('App is starting bundling');
@@ -62,12 +68,24 @@ export class AppBundle {
     }
 
     applySwagger(swaggerBuilder) {
+        this.app.get(this.BASE_PATH_OPENAPI, (req, res) => {
+            res.json(swaggerBuilder.instance);
+        });
+
         this.app.use(
             this.BASE_PATH_SWAGGER,
             swaggerUi.serve,
             swaggerUi.setup(swaggerBuilder.instance),
         );
         logger.info('Building swagger');
+
+        return this;
+    }
+
+    applyScalar() {
+        this.app.use(this.BASE_PATH_SCALAR, apiReference(ScalarConfig));
+
+        logger.info('Building scalar api reference');
 
         return this;
     }

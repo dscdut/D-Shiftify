@@ -10,6 +10,7 @@ import http from 'http';
 import app from '../index';
 import { PORT } from '../env';
 import { logger } from '../../packages/logger';
+import { initializeChatGateway } from '../modules/chat';
 
 const dubugHelper = debug('mongoose:server');
 
@@ -45,6 +46,7 @@ app.set('port', port);
  */
 
 const server = http.createServer(app);
+initializeChatGateway(server);
 /**
  * Event listener for HTTP server "error" event.
  */
