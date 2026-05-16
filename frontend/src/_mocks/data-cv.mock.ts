@@ -1,4 +1,4 @@
-import { type CvSelectOption } from '@/models/cv/types'
+import { type CvRecord, type CvSelectOption, type DisabilityOptionsResponse } from '@/models/interface/cv.interfaces'
 
 export const FALLBACK_STATUSES: CvSelectOption[] = [
   { id: 'complete_visual_impairment', label: 'Khiếm thị hoàn toàn' },
@@ -54,3 +54,56 @@ export const FALLBACK_CERTIFICATIONS: CvSelectOption[] = [
   { id: 'mos', label: 'Chứng chỉ tin học (MOS/IC3)' },
   { id: 'vocational', label: 'Chứng chỉ nghề' }
 ]
+
+export const mockDisabilityOptions: DisabilityOptionsResponse = {
+  statuses: FALLBACK_STATUSES,
+  genders: FALLBACK_GENDERS,
+  disabilityTypes: FALLBACK_STATUSES,
+  disabilityLevels: FALLBACK_STATUSES,
+  workTimes: FALLBACK_WORK_TIMES,
+  workModes: FALLBACK_WORK_MODES,
+  softSkillOptions: FALLBACK_SOFT_SKILLS,
+  hardSkillOptions: FALLBACK_HARD_SKILLS,
+  workConditions: FALLBACK_WORK_CONDITIONS,
+  equipment: FALLBACK_EQUIPMENT,
+  certifications: FALLBACK_CERTIFICATIONS
+}
+
+export const mockCvRecord: CvRecord = {
+  id: 'mock-cv-001',
+  avatarUrl: '',
+  fullName: 'Nguyễn Văn A',
+  birthday: '01/01/1990',
+  address: 'Quận 1, TP. Hồ Chí Minh',
+  gender: 'male',
+  phone: '+84 900 123 456',
+  email: 'abc123456@gmail.com',
+  disabilityStatus: 'partial_visual_impairment',
+  disabilityTypes: ['partial_visual_impairment'],
+  disabilityLevel: 'partial_visual_impairment',
+  supportNeeds: '',
+  experience: '',
+  companyName: '',
+  jobTitle: '',
+  contributionStart: '',
+  contributionEnd: '',
+  workTime: 'full_time',
+  workMode: 'online',
+  education: '',
+  schoolName: '',
+  major: '',
+  achievement: '',
+  educationStart: '',
+  educationEnd: '',
+  certifications: '',
+  softSkills: '',
+  hardSkills: '',
+  careerGoals: '',
+  workConditions: [],
+  availableEquipment: [],
+  workExperiences: [],
+  audioReviewUrl: '',
+  status: 'draft',
+  updatedAt: new Date().toISOString(),
+  previewScore: 86
+}

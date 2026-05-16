@@ -8,108 +8,14 @@ import {
   type CvRecord,
   type DisabilityOptionsResponse,
   type UploadAvatarResponse
-} from '@/models/cv/types'
-import { FALLBACK_CERTIFICATIONS } from '@/_mocks/data-cv.mock'
+} from '@/models/interface/cv.interfaces'
+import { mockCvRecord, mockDisabilityOptions } from '@/_mocks/data-cv.mock'
 
 const API_CV_URL = '/cv'
 const API_DISABILITY_OPTIONS_URL = '/cv/disability-options'
 const API_UPLOAD_AVATAR_URL = '/uploads'
 const API_PREVIEW_CV_URL = '/cv/preview'
 const MOCK_DELAY_IN_MS = 450
-
-const mockDisabilityOptions: DisabilityOptionsResponse = {
-  statuses: [
-    { id: 'complete_visual_impairment', label: 'Khiếm thị hoàn toàn' },
-    { id: 'partial_visual_impairment', label: 'Khiếm thị không hoàn toàn' },
-    { id: 'other', label: 'Khác...' }
-  ],
-  genders: [
-    { id: 'male', label: 'Nam' },
-    { id: 'female', label: 'Nữ' }
-  ],
-  disabilityTypes: [
-    { id: 'complete_visual_impairment', label: 'Khiếm thị hoàn toàn' },
-    { id: 'partial_visual_impairment', label: 'Khiếm thị không hoàn toàn' },
-    { id: 'other', label: 'Khác...' }
-  ],
-  disabilityLevels: [
-    { id: 'complete_visual_impairment', label: 'Khiếm thị hoàn toàn' },
-    { id: 'partial_visual_impairment', label: 'Khiếm thị không hoàn toàn' },
-    { id: 'other', label: 'Khác...' }
-  ],
-  workTimes: [
-    { id: 'full_time', label: 'Toàn thời gian' },
-    { id: 'part_time', label: 'Bán thời gian' },
-    { id: 'flexible', label: 'Linh hoạt' }
-  ],
-  workModes: [
-    { id: 'online', label: 'Trực tuyến' },
-    { id: 'onsite', label: 'Trực tiếp' },
-    { id: 'hybrid', label: 'Kết hợp' }
-  ],
-  softSkillOptions: [
-    { id: 'communication', label: 'Giao tiếp' },
-    { id: 'teamwork', label: 'Làm việc nhóm' },
-    { id: 'problem_solving', label: 'Giải quyết vấn đề' }
-  ],
-  hardSkillOptions: [
-    { id: 'office', label: 'Tin học văn phòng' },
-    { id: 'customer_service', label: 'Chăm sóc khách hàng' },
-    { id: 'data_entry', label: 'Nhập liệu' }
-  ],
-  workConditions: [
-    { id: 'remote', label: 'Làm việc từ xa' },
-    { id: 'flexible_hours', label: 'Thời gian linh hoạt' },
-    { id: 'accessible_workplace', label: 'Không gian làm việc dễ tiếp cận' },
-    { id: 'quiet_space', label: 'Không gian yên tĩnh' }
-  ],
-  equipment: [
-    { id: 'screen_reader', label: 'Trình đọc màn hình' },
-    { id: 'captioning', label: 'Phụ đề trực tiếp' },
-    { id: 'ergonomic_desk', label: 'Bàn ghế công thái học' },
-    { id: 'assistive_keyboard', label: 'Bàn phím hỗ trợ' }
-  ],
-  certifications: FALLBACK_CERTIFICATIONS
-}
-
-const mockCvRecord: CvRecord = {
-  id: 'mock-cv-001',
-  avatarUrl: '',
-  fullName: 'Nguyễn Văn A',
-  birthday: '01/01/1990',
-  address: 'Quận 1, TP. Hồ Chí Minh',
-  gender: 'male',
-  phone: '+84 900 123 456',
-  email: 'abc123456@gmail.com',
-  disabilityStatus: 'partial_visual_impairment',
-  disabilityTypes: ['partial_visual_impairment'],
-  disabilityLevel: 'partial_visual_impairment',
-  supportNeeds: '',
-  experience: '',
-  companyName: '',
-  jobTitle: '',
-  contributionStart: '',
-  contributionEnd: '',
-  workTime: 'full_time',
-  workMode: 'online',
-  education: '',
-  schoolName: '',
-  major: '',
-  achievement: '',
-  educationStart: '',
-  educationEnd: '',
-  certifications: '',
-  softSkills: '',
-  hardSkills: '',
-  careerGoals: '',
-  workConditions: [],
-  availableEquipment: [],
-  workExperiences: [],
-  audioReviewUrl: '',
-  status: 'draft',
-  updatedAt: new Date().toISOString(),
-  previewScore: 86
-}
 
 const withMockDelay = async <T>(data: T): Promise<T> => {
   await new Promise((resolve) => {

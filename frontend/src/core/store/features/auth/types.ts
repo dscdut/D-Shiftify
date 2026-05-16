@@ -1,4 +1,4 @@
-import { type LoginResponse } from '@/models/interface/auth.interface'
+import { type LoginResponse } from '@/models/interface/auth.interfaces'
 
 export interface AuthState {
   user: LoginResponse['user'] | null

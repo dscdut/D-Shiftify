@@ -2,7 +2,7 @@ import { create } from 'zustand'
 
 import { getPersistedAuth } from '@/core/shared/auth'
 import { clearLS } from '@/core/shared/storage'
-import { type LoginResponse } from '@/models/interface/auth.interface'
+import { type LoginResponse } from '@/models/interface/auth.interfaces'
 
 import { type AuthState, type AuthStore } from './types'
 

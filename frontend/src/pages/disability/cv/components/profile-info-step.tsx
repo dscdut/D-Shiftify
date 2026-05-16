@@ -10,7 +10,7 @@ import {
   FALLBACK_WORK_TIMES
 } from '@/_mocks/data-cv.mock'
 import { type CvFormValues } from '@/core/zod/cv.zod'
-import { type DisabilityOptionsResponse } from '@/models/cv/types'
+import { type DisabilityOptionsResponse } from '@/models/interface/cv.interfaces'
 
 import { profileWidthClassName, getErrorMessage } from './constants'
 import {

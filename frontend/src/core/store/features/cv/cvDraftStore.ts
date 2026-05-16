@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 import { type CvFormValues } from '@/core/zod/cv.zod'
-import { type CvPreviewResponse } from '@/models/cv/types'
+import { type CvPreviewResponse } from '@/models/interface/cv.interfaces'
 
 export type CvDraftMode = 'create' | 'edit'
 

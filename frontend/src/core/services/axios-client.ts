@@ -10,7 +10,7 @@ import {
   removeRefreshTokenFromLS,
   setAccessTokenToLS
 } from '@/core/shared/storage'
-import { type LoginResponse } from '@/models/interface/auth.interface'
+import { type LoginResponse } from '@/models/interface/auth.interfaces'
 
 const controllers = new Map<string, AbortController>()
 let isRefreshing = false

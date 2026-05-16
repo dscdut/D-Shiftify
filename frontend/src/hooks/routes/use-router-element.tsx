@@ -14,7 +14,7 @@ import { ROUTE } from '@/core/constants/path'
 const HomePage = lazy(() => import('@/pages/home'))
 const Login = lazy(() => import('@/pages/auth/login'))
 const Register = lazy(() => import('@/pages/auth/register'))
-const VerifyAcountEmail = lazy(() => import('@/pages/verify-account-email/VerifyAcountEmail'))
+const VerifyAccountEmail = lazy(() => import('@/pages/auth/verify-account-email'))
 const AccountSettingsPage = lazy(() => import('@/pages/account/settings'))
 const CallPage = lazy(() => import('@/pages/communication/call'))
 const VideoCallPage = lazy(() => import('@/pages/communication/video-call'))
@@ -56,7 +56,7 @@ export default function useRoutesElements() {
         <Route path={ROUTE.PUBLIC.HOME} element={<HomePage />} />
         <Route path={ROUTE.PUBLIC.LOGIN} element={<Login />} />
         <Route path={ROUTE.PUBLIC.REGISTER} element={<Register />} />
-        <Route path={ROUTE.PUBLIC.VERIFY_ACCOUNT_EMAIL} element={<VerifyAcountEmail />} />
+        <Route path={ROUTE.PUBLIC.VERIFY_ACCOUNT_EMAIL} element={<VerifyAccountEmail />} />
 
         {/* Client protected routes */}
         <Route element={<ProtectedRoute redirectPath={ROUTE.PUBLIC.LOGIN} />}>

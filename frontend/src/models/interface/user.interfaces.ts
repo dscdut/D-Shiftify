@@ -1,4 +1,4 @@
-import { type UserRole } from '@/models/user/types'
+import { UserRole } from "../type/user.types"
 
 export interface User {
   id: string
@@ -14,4 +14,11 @@ export interface UserProfile extends User {
   phone?: string
   address?: string
   bio?: string
+}
+
+export interface UserResponseType {
+  id: string
+  name: string
+  email: string
+  role: string
 }

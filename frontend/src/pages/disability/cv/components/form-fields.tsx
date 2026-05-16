@@ -11,7 +11,7 @@ import {
 import { DatePicker } from '@/components/ui/date-picker'
 import { cn } from '@/core/lib/utils'
 import { type CvFormValues } from '@/core/zod/cv.zod'
-import { type CvSelectOption } from '@/models/cv/types'
+import { type CvSelectOption } from '@/models/interface/cv.interfaces'
 
 import { inputClassName, roundedInputClassName } from './constants'
 import { VoiceButton } from './voice-button'

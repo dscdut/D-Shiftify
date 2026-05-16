@@ -8,7 +8,7 @@ import FileUpload from '@/components/upload-file/file-upload'
 import toastifyCommon from '@/core/lib/toastify-common'
 import { type CvFormValues } from '@/core/zod/cv.zod'
 import { useUploadCvAvatar } from '@/hooks/tanstack-query/cv/use-query-cv'
-import { type DisabilityOptionsResponse } from '@/models/cv/types'
+import { type DisabilityOptionsResponse } from '@/models/interface/cv.interfaces'
 
 import { contentWidthClassName, getErrorMessage } from './constants'
 import { FieldError, RadioCardGroup, TextFieldWithVoice } from './form-fields'

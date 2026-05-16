@@ -1,3 +1,27 @@
+import { User } from "./user.interfaces"
+
+export interface TokenResponse {
+  access_token: string
+  refresh_token: string
+}
+
+export interface LoginRequest {
+  email: string
+  password: string
+}
+
+export interface RegisterRequest {
+  email: string
+  password: string
+  confirm_password: string
+}
+
+export interface AuthState {
+  isAuthenticated: boolean
+  user: User | null
+  loading: boolean
+}
+
 export interface APIResponse<T> {
   data: T
   message: string
@@ -16,7 +40,6 @@ export interface LoginResponse {
   refresh_token: string
 }
 
-// define the Account interface
 export interface Account {
   email?: string
   password?: string
@@ -25,7 +48,6 @@ export interface Account {
   phone?: string
 }
 
-// define the RegisterReponse interface
 export interface RegisterReponse {
   name: string
   email: string

@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { handleApiError } from '@/core/helpers/error-handler'
 import toastifyCommon from '@/core/lib/toastify-common'
 import { cvApi } from '@/core/services/cv.service'
-import { type CvPayload, type CvRecord } from '@/models/cv/types'
+import { type CvPayload, type CvRecord } from '@/models/interface/cv.interfaces'
 
 const CV_QUERY_KEYS = {
   all: ['cv'] as const,

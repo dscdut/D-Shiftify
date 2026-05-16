@@ -12,12 +12,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp'
 import { ROUTE } from '@/core/constants/path'
-import { VerifyAccountEmailSchema } from '@/core/zod/verify-account-email.zod'
+import { containerVariants, itemVariants } from '@/core/lib/variant/style-variant'
+import { VerifyAccountEmailSchema } from '@/core/zod'
 import { useResendVerificationCode, useVerifyAccountEmail } from '@/hooks/tanstack-query/auth/use-query-auth'
-import { containerVariants, itemVariants } from '@/styles/variant/style-variant'
+
 const RESEND_COUNTDOWN = 60
 
-export default function VerifyEmail() {
+export default function VerifyAccountEmail() {
   const location = useLocation()
   const [countdown, setCountdown] = useState<number>(RESEND_COUNTDOWN)
   const [canResend, setCanResend] = useState<boolean>(false)

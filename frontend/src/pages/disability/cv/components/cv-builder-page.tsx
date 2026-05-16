@@ -11,7 +11,7 @@ import { cn } from '@/core/lib/utils'
 import { useCvDraftStore, type CvDraftMode } from '@/core/store/features/cv/cvDraftStore'
 import { DEFAULT_CV_FORM_VALUES, CvSchema, type CvFormValues } from '@/core/zod/cv.zod'
 import { useCvDetail, useDisabilityOptions } from '@/hooks/tanstack-query/cv/use-query-cv'
-import { type CvRecord } from '@/models/cv/types'
+import { type CvRecord } from '@/models/interface/cv.interfaces'
 
 import { contentWidthClassName } from './constants'
 import { PersonalInfoStep } from './personal-info-step'
