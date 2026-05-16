@@ -7,14 +7,14 @@ import { UserRepository } from '../../user/user.repository';
 import { RefreshTokenRepository } from '../repository/refresh-token.repository';
 import { PasswordResetTokenRepository } from '../repository/password-reset-token.repository';
 import { EXPIRE_DAYS } from '../../../env';
+import { REFRESH_TOKEN_TTL_MS } from '../../../config/auth.config';
 import {
     UnAuthorizedException,
     DuplicateException,
     BadRequestException,
 } from '../../../../packages/httpException';
 
-// 30 ngay * 24 gio * 60 phut * 60 giay * 1000ms
-const REFRESH_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
 
 function parseTtlToSeconds(ttl) {
     if (!ttl) return 86400; // Mac dinh 1 ngay (86400 giay)
@@ -108,22 +108,22 @@ class Service {
                 phone: registerDto.phone,
             }).transacting(trx);
 
+            const { id: ref, token: refreshToken } = await this.#createRefreshToken(userId, trx);
             await trx.commit();
+
+            const accessToken = this.jwtService.sign(JwtPayload({ id: userId, roles: [registerDto.role] }, ref));
+
+            return {
+                user_id: userId,
+                email: registerDto.email,
+                role: registerDto.role,
+                access_token: accessToken,
+                refresh_token: refreshToken,
+            };
         } catch (error) {
             await trx.rollback();
             throw error;
         }
-
-        const { id: ref, token: accessTokenString } = await this.#createRefreshToken(userId);
-        const accessToken = this.jwtService.sign(JwtPayload({ id: userId, roles: [registerDto.role] }, ref));
-
-        return {
-            user_id: userId,
-            email: registerDto.email,
-            role: registerDto.role,
-            access_token: accessToken,
-            refresh_token: accessTokenString,
-        };
     }
 
     async refresh(refreshDto) {
@@ -137,15 +137,22 @@ class Service {
             throw new UnAuthorizedException('User not found');
         }
 
-        await this.refreshTokenRepository.revokeToken(tokenRecord.id);
+        const trx = await getTransaction();
+        try {
+            await this.refreshTokenRepository.revokeToken(tokenRecord.id, trx);
+            const { id: ref, token: newRefreshToken } = await this.#createRefreshToken(user.id, trx);
+            await trx.commit();
 
-        const { id: ref, token: newRefreshToken } = await this.#createRefreshToken(user.id);
-        const accessToken = this.jwtService.sign(JwtPayload({ id: user.id, roles: [user.role] }, ref));
+            const accessToken = this.jwtService.sign(JwtPayload({ id: user.id, roles: [user.role] }, ref));
 
-        return {
-            access_token: accessToken,
-            refresh_token: newRefreshToken,
-        };
+            return {
+                access_token: accessToken,
+                refresh_token: newRefreshToken,
+            };
+        } catch (error) {
+            await trx.rollback();
+            throw error;
+        }
     }
 
     async forgotPassword(forgotPasswordDto) {
@@ -153,7 +160,7 @@ class Service {
 
         if (!user) {
             return {
-                message: 'Neu email ton tai trong he thong, ma OTP se duoc gui den email cua ban.',
+                message: 'If the email exists in the system, an OTP code will be sent to your email.',
             };
         }
 
@@ -166,14 +173,17 @@ class Service {
 
         // TODO: Send OTP via email when email service is integrated
         return {
-            message: 'Neu email ton tai trong he thong, ma OTP se duoc gui den email cua ban.',
+            message: 'If the email exists in the system, an OTP code will be sent to your email.',
         };
     }
 
     async resetPassword(resetPasswordDto) {
-        const tokenRecord = await this.passwordResetTokenRepository.findValidToken(resetPasswordDto.otp);
+        const tokenRecord = await this.passwordResetTokenRepository.findValidToken(
+            resetPasswordDto.otp,
+            resetPasswordDto.email,
+        );
         if (!tokenRecord) {
-            throw new BadRequestException('Ma OTP khong hop le hoac da het han.');
+            throw new BadRequestException('The OTP code is invalid or has expired.');
         }
 
         const newPasswordHash = this.bcryptService.hash(resetPasswordDto.new_password);
@@ -190,7 +200,7 @@ class Service {
         }
 
         return {
-            message: 'Mat khau da duoc thay doi thanh cong. Ban co the dang nhap ngay bay gio.',
+            message: 'Password has been changed successfully. You can log in now.',
         };
     }
 
@@ -209,15 +219,15 @@ class Service {
         }
 
         return {
-            message: 'Dang xuat thanh cong.',
+            message: 'Logout successful.',
         };
     }
 
-    async #createRefreshToken(userId) {
+    async #createRefreshToken(userId, trx = null) {
         // Tao chuoi ngau nhien 32 bytes (64 ky tu hex) cho Refresh Token
         const token = crypto.randomBytes(32).toString('hex');
         const expiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL_MS);
-        const [record] = await this.refreshTokenRepository.createToken(userId, token, expiresAt);
+        const [record] = await this.refreshTokenRepository.createToken(userId, token, expiresAt, trx);
         return {
             id: record.id || record,
             token: record.token || token

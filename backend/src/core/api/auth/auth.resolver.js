@@ -1,10 +1,9 @@
 import {
     LoginInterceptor,
     RegisterInterceptor,
-    RefreshInterceptor,
+
     ForgotPasswordInterceptor,
     ResetPasswordInterceptor,
-    LogoutInterceptor,
 } from 'core/modules/auth';
 import { Module } from 'packages/handler/Module';
 import { AuthController } from './auth.controller';
@@ -33,8 +32,6 @@ export const AuthResolver = Module.builder()
         {
             route: '/refresh',
             method: 'post',
-            interceptors: [RefreshInterceptor],
-            body: 'RefreshDto',
             controller: AuthController.refresh,
         },
         {
@@ -54,8 +51,6 @@ export const AuthResolver = Module.builder()
         {
             route: '/logout',
             method: 'post',
-            interceptors: [LogoutInterceptor],
-            body: 'LogoutDto',
             controller: AuthController.logout,
         },
     ]);
