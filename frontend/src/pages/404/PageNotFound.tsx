@@ -5,7 +5,7 @@ import { ROUTE } from '@/core/constants/path'
 
 const PageNotFound = () => {
   return (
-    <div className='flex relative flex-col justify-center items-center min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900'>
+    <div className='flex relative flex-col justify-center items-center min-h-screen bg-workspace-gradient dark:from-gray-900 dark:via-gray-800 dark:to-gray-900'>
       {/* Animated background elements */}
       <motion.div
         className='overflow-hidden absolute inset-0'
@@ -25,7 +25,7 @@ const PageNotFound = () => {
               x: '-50%',
               y: '-50%',
               background: `radial-gradient(circle, ${
-                i % 2 === 0 ? 'rgba(99, 102, 241, 0.15)' : 'rgba(168, 85, 247, 0.15)'
+                i % 2 === 0 ? 'rgba(0, 64, 128, 0.14)' : 'rgba(234, 244, 255, 0.55)'
               } 0%, transparent 70%)`
             }}
             animate={{
@@ -47,7 +47,7 @@ const PageNotFound = () => {
       {[...Array(20)].map((_, i) => (
         <motion.div
           key={`particle-${i}`}
-          className='absolute w-2 h-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full'
+          className='absolute w-2 h-2 bg-brand-primary rounded-full'
           style={{
             top: `${Math.random() * 100}%`,
             left: `${Math.random() * 100}%`
@@ -78,9 +78,7 @@ const PageNotFound = () => {
             duration: 1
           }}
         >
-          <h1 className='text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400'>
-            404
-          </h1>
+          <h1 className='text-9xl font-bold text-brand-primary dark:text-blue-300'>404</h1>
         </motion.div>
 
         <motion.div
@@ -88,10 +86,8 @@ const PageNotFound = () => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
         >
-          <h2 className='mt-4 text-3xl font-semibold text-gray-800 dark:text-gray-200'>Oops! Page not found</h2>
-          <p className='mt-2 text-lg text-gray-600 dark:text-gray-400'>
-            The page you're looking for doesn't exist or has been moved.
-          </p>
+          <h2 className='mt-4 text-3xl font-semibold text-gray-800 dark:text-gray-200'>Không tìm thấy trang</h2>
+          <p className='mt-2 text-lg text-gray-600 dark:text-gray-400'>Trang bạn đang tìm kiếm không tồn tại.</p>
         </motion.div>
 
         <motion.div
@@ -101,7 +97,7 @@ const PageNotFound = () => {
         >
           <Link
             to={ROUTE.PUBLIC.HOME}
-            className='inline-flex gap-2 items-center px-8 py-4 mt-8 text-lg font-semibold text-white bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-lg shadow-lg transition-all group hover:scale-105 hover:shadow-xl dark:from-indigo-500 dark:via-purple-500 dark:to-pink-500'
+            className='inline-flex gap-2 items-center px-8 py-4 mt-8 text-lg font-semibold text-white bg-brand-primary rounded-lg shadow-lg transition-all group hover:scale-105 hover:bg-brand-primary-hover hover:shadow-xl'
           >
             <motion.svg
               xmlns='http://www.w3.org/2000/svg'
@@ -120,7 +116,7 @@ const PageNotFound = () => {
             >
               <path strokeLinecap='round' strokeLinejoin='round' d='M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18' />
             </motion.svg>
-            <span>Back to Home</span>
+            <span>Quay lại Trang chủ</span>
           </Link>
         </motion.div>
       </div>

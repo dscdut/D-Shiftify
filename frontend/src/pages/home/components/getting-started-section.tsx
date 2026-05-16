@@ -27,7 +27,7 @@ export const GettingStartedSection = () => {
   const { t } = useTranslation('home')
 
   return (
-    <section id='getting-started' className='py-20 bg-gray-50 dark:bg-gray-900'>
+    <section id='getting-started' className='py-20 bg-brand-bg-end dark:bg-gray-900'>
       <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='text-center mb-16'>
           <h2 className='text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4'>
@@ -46,11 +46,11 @@ export const GettingStartedSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className='bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg'
+              className='bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-brand-border/70'
             >
               <div className='flex items-start'>
-                <div className='w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mr-4'>
-                  <step.icon className='w-6 h-6 text-blue-600 dark:text-blue-400' />
+                <div className='w-12 h-12 bg-brand-bg-end dark:bg-blue-900 rounded-lg flex items-center justify-center mr-4'>
+                  <step.icon className='w-6 h-6 text-brand-primary dark:text-blue-400' />
                 </div>
                 <div>
                   <h3 className='text-xl font-semibold text-gray-900 dark:text-white mb-2'>

@@ -6,13 +6,13 @@ export const HeroSection = () => {
 
   return (
     <section id='hero' className='relative min-h-screen flex items-center justify-center overflow-hidden'>
-      <div className='absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900' />
+      <div className='absolute inset-0 bg-workspace-gradient dark:from-gray-900 dark:via-gray-800 dark:to-gray-900' />
 
       <div className='absolute inset-0 overflow-hidden'>
         {[...Array(20)].map((_, i) => (
           <motion.div
             key={i}
-            className='absolute w-2 h-2 bg-blue-500/20 dark:bg-blue-400/20 rounded-full'
+            className='absolute w-2 h-2 bg-brand-primary/20 dark:bg-blue-400/20 rounded-full'
             initial={{
               x: Math.random() * window.innerWidth,
               y: Math.random() * window.innerHeight,
@@ -49,7 +49,7 @@ export const HeroSection = () => {
               href='#getting-started'
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className='px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors'
+              className='px-8 py-3 bg-brand-primary text-white rounded-lg font-semibold hover:bg-brand-primary-hover transition-colors'
             >
               {t('home.hero.getStarted')}
             </motion.a>

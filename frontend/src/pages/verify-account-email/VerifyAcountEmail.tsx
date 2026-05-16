@@ -71,7 +71,7 @@ export default function VerifyEmail() {
   }, [form, resendCode])
 
   return (
-    <div className='flex justify-center w-full min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50'>
+    <div className='flex justify-center w-full min-h-screen bg-workspace-gradient'>
       <motion.div
         initial={{ opacity: 0, x: -100 }}
         animate={{ opacity: 1, x: 0 }}
@@ -96,7 +96,7 @@ export default function VerifyEmail() {
           </motion.div>
           <motion.h1
             variants={itemVariants}
-            className='text-5xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600'
+            className='text-5xl font-semibold text-brand-primary'
           >
             Verify Your Account
           </motion.h1>
@@ -117,7 +117,7 @@ export default function VerifyEmail() {
                           placeholder='Enter your email'
                           type='email'
                           {...field}
-                          className='transition-all duration-300 focus:ring-2 focus:ring-indigo-500'
+                          className='transition-all duration-300 focus:ring-2 focus:ring-brand-primary'
                           disabled
                         />
                       </FormControl>
@@ -159,7 +159,7 @@ export default function VerifyEmail() {
               <motion.div variants={itemVariants} className='flex flex-col space-y-4'>
                 <Button
                   loading={isVerifying}
-                  className='w-full text-white bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg transition-all duration-300 hover:from-indigo-700 hover:to-purple-700 hover:shadow-xl'
+                  className='w-full text-white bg-brand-primary shadow-lg transition-all duration-300 hover:bg-brand-primary-hover hover:shadow-xl'
                   type='submit'
                 >
                   Verify Email
@@ -172,7 +172,7 @@ export default function VerifyEmail() {
                     disabled={!canResend || isResending}
                     className={`${
                       canResend && !isResending
-                        ? 'text-indigo-600 hover:text-indigo-700 hover:underline'
+                        ? 'text-brand-primary hover:text-brand-primary-hover hover:underline'
                         : 'text-gray-400 cursor-not-allowed'
                     } transition-colors duration-300`}
                   >
@@ -185,7 +185,7 @@ export default function VerifyEmail() {
                 Already verified?&nbsp;
                 <Link
                   to={ROUTE.PUBLIC.LOGIN}
-                  className='text-indigo-600 transition-colors duration-300 hover:text-indigo-700 hover:underline'
+                  className='text-brand-primary transition-colors duration-300 hover:text-brand-primary-hover hover:underline'
                 >
                   Sign in
                 </Link>

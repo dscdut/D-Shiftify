@@ -3,7 +3,6 @@ import axios, { HttpStatusCode } from 'axios'
 import { AUTH_ENDPOINTS } from '@/core/configs/consts'
 import config from '@/core/configs/env'
 import isEqual from '@/core/configs/is-equal'
-import { authApi } from '@/core/services/auth.service'
 import {
   getAccessTokenFromLS,
   getRefreshTokenFromLS,
@@ -11,6 +10,7 @@ import {
   removeRefreshTokenFromLS,
   setAccessTokenToLS
 } from '@/core/shared/storage'
+import { type LoginResponse } from '@/models/interface/auth.interface'
 
 const controllers = new Map<string, AbortController>()
 let isRefreshing = false
@@ -33,6 +33,21 @@ const axiosClient = axios.create({
     'Content-Type': 'application/json'
   }
 })
+
+const refreshTokenClient = axios.create({
+  baseURL: config.baseUrl,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+
+const refreshAccessToken = async (refreshToken: string) => {
+  const response = await refreshTokenClient.post<LoginResponse>('/auth/refresh-token', {
+    refresh_token: refreshToken
+  })
+
+  return response.data
+}
 
 axiosClient.interceptors.request.use(
   (config) => {
@@ -110,7 +125,7 @@ axiosClient.interceptors.response.use(
           return Promise.reject(error)
         }
 
-        const { access_token } = await authApi.refreshToken(refresh_token)
+        const { access_token } = await refreshAccessToken(refresh_token)
         setAccessTokenToLS(access_token)
         originalRequest.headers.Authorization = `Bearer ${access_token}`
         processQueue(null, access_token)

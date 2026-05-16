@@ -21,7 +21,7 @@ export const LanguageSwitcher = () => {
     <div className='relative' ref={ref}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className='flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors'
+        className='flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-brand-bg-end hover:text-brand-primary dark:hover:bg-gray-800 rounded-lg transition-colors'
         aria-label={t('common.language')}
       >
         <span>{LANGUAGES[i18n.language as Language]?.flag}</span>
@@ -35,7 +35,7 @@ export const LanguageSwitcher = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className='absolute right-0 mt-2 w-48 rounded-lg bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'
+            className='absolute right-0 mt-2 w-48 rounded-lg bg-white dark:bg-gray-800 shadow-lg ring-1 ring-brand-border ring-opacity-100 focus:outline-none'
           >
             <div className='py-1' role='menu' aria-orientation='vertical'>
               {Object.entries(LANGUAGES).map(([code, { name, flag }]) => (
@@ -44,8 +44,8 @@ export const LanguageSwitcher = () => {
                   onClick={() => handleLanguageChange(code as Language)}
                   className={`flex items-center gap-2 w-full px-4 py-2 text-sm ${
                     i18n.language === code
-                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-                      : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      ? 'bg-brand-bg-end dark:bg-gray-700 text-brand-primary dark:text-white'
+                      : 'text-gray-700 dark:text-gray-200 hover:bg-brand-bg-start hover:text-brand-primary dark:hover:bg-gray-700'
                   }`}
                   role='menuitem'
                 >

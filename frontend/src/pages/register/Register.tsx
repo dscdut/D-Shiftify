@@ -54,7 +54,7 @@ export default function Register() {
   const toggleConfirmPasswordVisibility = () => setIsConfirmPasswordVisible((prev) => !prev)
 
   return (
-    <div className='flex justify-center w-full min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50'>
+    <div className='flex justify-center w-full min-h-screen bg-workspace-gradient'>
       <div className='flex justify-between items-center px-4 mx-auto my-8 w-full max-w-7xl'>
         {/* Left side - Features */}
         <motion.div
@@ -83,7 +83,7 @@ export default function Register() {
               <motion.div
                 key={feature.title}
                 variants={itemVariants}
-                className='flex flex-col p-6 bg-white rounded-xl shadow-md transition-shadow duration-300 hover:shadow-lg'
+                className='flex flex-col p-6 bg-white rounded-xl shadow-md border border-brand-border transition-shadow duration-300 hover:shadow-lg'
               >
                 <h3 className='mb-2 text-lg font-semibold text-gray-900'>{feature.title}</h3>
                 <p className='text-gray-600'>{feature.description}</p>
@@ -112,7 +112,7 @@ export default function Register() {
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className='flex flex-col p-8 space-y-6 w-full max-w-md bg-white rounded-2xl shadow-lg'
+          className='flex flex-col p-8 space-y-6 w-full max-w-md bg-white/95 rounded-2xl shadow-lg border border-brand-border'
         >
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
             <Logo />
@@ -230,15 +230,15 @@ export default function Register() {
               <motion.div variants={itemVariants} className='flex items-center space-x-2'>
                 <Checkbox id='terms' className='w-4 h-4' />
                 <Label htmlFor='terms' className='text-sm text-gray-600 cursor-pointer'>
-                  Tôi đồng ý với các <span className='text-indigo-600'>Điều khoản</span> và{' '}
-                  <span className='text-indigo-600'>Chính sách bảo mật</span>
+                  Tôi đồng ý với các <span className='text-brand-primary'>Điều khoản</span> và{' '}
+                  <span className='text-brand-primary'>Chính sách bảo mật</span>
                 </Label>
               </motion.div>
 
               <motion.div variants={itemVariants}>
                 <Button
                   loading={isPending}
-                  className='w-full text-white bg-indigo-600 transition-all duration-300 hover:bg-indigo-700 hover:shadow-lg'
+                  className='w-full text-white bg-brand-primary transition-all duration-300 hover:bg-brand-primary-hover hover:shadow-lg'
                   type='submit'
                 >
                   Tạo tài khoản
@@ -249,7 +249,7 @@ export default function Register() {
                 Đã có tài khoản?{' '}
                 <Link
                   to={ROUTE.PUBLIC.LOGIN}
-                  className='font-medium text-indigo-600 hover:text-indigo-800 hover:underline'
+                  className='font-medium text-brand-primary hover:text-brand-primary-hover hover:underline'
                 >
                   Đăng nhập ngay
                 </Link>

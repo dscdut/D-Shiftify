@@ -53,7 +53,7 @@ export const TechStackSection = () => {
                 >
                   <div className='flex flex-col items-center'>
                     <div className='w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mb-2 sm:mb-3 md:mb-4'>
-                      <tech.icon className={`w-full h-full ${tech.color}`} />
+                      <tech.icon className='w-full h-full text-brand-primary' />
                     </div>
                     <span className='text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 text-center'>
                       {tech.name}
