@@ -1,40 +1,43 @@
 import { AuthService } from '../../modules/auth/service/auth.service';
-import { LoginDto, RegisterDto, RefreshDto, ForgotPasswordDto, ResetPasswordDto, LogoutDto } from '../../modules/auth';
+import { LoginDto, RegisterDto, ForgotPasswordDto, ResetPasswordDto } from '../../modules/auth';
 import { ValidHttpResponse } from '../../../packages/handler/response/validHttp.response';
-import { NODE_ENV } from '../../env';
-
-const cookieOptions = {
-    httpOnly: true,
-    secure: NODE_ENV === 'production',
-    sameSite: 'lax',
-};
-
-const ACCESS_TOKEN_MAX_AGE = 24 * 60 * 60 * 1000; // 1 day
-const REFRESH_TOKEN_MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30 days
+import { cookieOptions, ACCESS_TOKEN_MAX_AGE, REFRESH_TOKEN_TTL_MS } from '../../config/auth.config';
+import { UnAuthorizedException } from '../../../packages/httpException';
 
 class Controller {
     constructor() {
         this.service = AuthService;
     }
 
+    #setTokenCookies = (res, data) => {
+        res.cookie('access_token', data.access_token, { ...cookieOptions, maxAge: ACCESS_TOKEN_MAX_AGE });
+        res.cookie('refresh_token', data.refresh_token, { ...cookieOptions, maxAge: REFRESH_TOKEN_TTL_MS });
+    };
+
+    #clearTokenCookies = res => {
+        res.clearCookie('access_token', cookieOptions);
+        res.clearCookie('refresh_token', cookieOptions);
+    };
+
     login = async (req, res) => {
         const data = await this.service.login(LoginDto(req.body));
-        res.cookie('access_token', data.access_token, { ...cookieOptions, maxAge: ACCESS_TOKEN_MAX_AGE });
-        res.cookie('refresh_token', data.refresh_token, { ...cookieOptions, maxAge: REFRESH_TOKEN_MAX_AGE });
+        this.#setTokenCookies(res, data);
         return ValidHttpResponse.toOkResponse(data);
     };
 
     register = async (req, res) => {
         const data = await this.service.register(RegisterDto(req.body));
-        res.cookie('access_token', data.access_token, { ...cookieOptions, maxAge: ACCESS_TOKEN_MAX_AGE });
-        res.cookie('refresh_token', data.refresh_token, { ...cookieOptions, maxAge: REFRESH_TOKEN_MAX_AGE });
+        this.#setTokenCookies(res, data);
         return ValidHttpResponse.toOkResponse(data);
     };
 
     refresh = async (req, res) => {
-        const data = await this.service.refresh(RefreshDto(req.body));
-        res.cookie('access_token', data.access_token, { ...cookieOptions, maxAge: ACCESS_TOKEN_MAX_AGE });
-        res.cookie('refresh_token', data.refresh_token, { ...cookieOptions, maxAge: REFRESH_TOKEN_MAX_AGE });
+        const refreshToken = req.cookies?.refresh_token;
+        if (!refreshToken) {
+            throw new UnAuthorizedException('Refresh token is missing');
+        }
+        const data = await this.service.refresh({ refresh_token: refreshToken });
+        this.#setTokenCookies(res, data);
         return ValidHttpResponse.toOkResponse(data);
     };
 
@@ -49,9 +52,12 @@ class Controller {
     };
 
     logout = async (req, res) => {
-        const data = await this.service.logout(LogoutDto(req.body));
-        res.clearCookie('access_token', cookieOptions);
-        res.clearCookie('refresh_token', cookieOptions);
+        const refreshToken = req.cookies?.refresh_token;
+        if (!refreshToken) {
+            throw new UnAuthorizedException('Refresh token is missing');
+        }
+        const data = await this.service.logout({ refresh_token: refreshToken });
+        this.#clearTokenCookies(res);
         return ValidHttpResponse.toOkResponse(data);
     };
 }

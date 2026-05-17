@@ -1,6 +1,5 @@
 import { ProfileRepository } from '../repository/profile.repository';
 import { DeviceRepository } from '../repository/device.repository';
-import { UserRepository } from '../../user/user.repository';
 import { BcryptService } from '../../auth/service/bcrypt.service';
 import connection, { getTransaction } from 'core/database';
 import {
@@ -13,7 +12,6 @@ class Service {
     constructor() {
         this.profileRepository = ProfileRepository;
         this.deviceRepository = DeviceRepository;
-        this.userRepository = UserRepository;
         this.bcryptService = BcryptService;
     }
 
@@ -33,6 +31,7 @@ class Service {
             phone: profile.phone,
             disability_status: profile.disability_status,
             created_at: profile.created_at,
+            updated_at: profile.updated_at,
             devices,
         };
     }
@@ -105,6 +104,7 @@ class Service {
 
             await connection('profiles')
                 .where('user_id', userId)
+                .whereNull('deleted_at')
                 .update({ deleted_at: connection.fn.now() })
                 .transacting(trx);
 
@@ -141,7 +141,11 @@ class Service {
         const newDeviceIds = addDevicesDto.device_ids.filter(id => !currentDeviceIds.includes(id));
 
         if (newDeviceIds.length > 0) {
-            await this.deviceRepository.addDevicesToProfile(profile.id, newDeviceIds);
+            try {
+                await this.deviceRepository.addDevicesToProfile(profile.id, newDeviceIds);
+            } catch (error) {
+                if (error.code !== '23505') throw error;
+            }
         }
 
         return {
