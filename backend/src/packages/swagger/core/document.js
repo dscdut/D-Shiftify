@@ -133,7 +133,7 @@ export class SwaggerDocument {
                     name: pattern,
                     in: 'path',
                     schema: {
-                        type: 'integer',
+                        type: 'string',
                         format: 'int64',
                     },
                     required: true,
