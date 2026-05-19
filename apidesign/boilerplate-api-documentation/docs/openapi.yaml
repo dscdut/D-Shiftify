@@ -501,7 +501,7 @@ paths:
       tags:
         - authentication
       summary: User login
-      description: Authenticate a user and return access and refresh tokens.
+      description: Authenticate a user and return access and refresh tokens. Also sets HTTP-only cookies (`access_token` and `refresh_token`).
       operationId: login
       requestBody:
         description: User credentials
@@ -526,103 +526,102 @@ paths:
                   description: User's account password.
       responses:
         "200":
-          description: User logged in successfully
+          description: User logged in successfully. Response also sets cookies.
           content:
             application/json:
               schema:
                 type: object
                 required:
-                  - status
-                  - message
-                  - data
+                  - access_token
+                  - refresh_token
+                  - expires_in
+                  - user
                 properties:
-                  status:
+                  access_token:
                     type: string
-                    example: "success"
-                  message:
+                    description: JWT token for authenticated requests.
+                    example: "eyJhbGci..."
+                  refresh_token:
                     type: string
-                    example: User logged in successfully
-                  data:
+                    description: Token used to obtain a new access token.
+                    example: "def456..."
+                  expires_in:
+                    type: integer
+                    description: Expiration time of access token in seconds.
+                    example: 86400
+                  user:
                     type: object
                     required:
-                      - access_token
-                      - refresh_token
-                      - expires_in
-                      - user
+                      - id
+                      - email
+                      - role
+                      - full_name
                     properties:
-                      access_token:
+                      id:
                         type: string
-                        description: JWT token for authenticated requests.
-                        example: "eyJhbGci..."
-                      refresh_token:
+                        format: uuid
+                        example: "550e8400-e29b-41d4-a716-446655440000"
+                      email:
                         type: string
-                        description: Token used to obtain a new access token.
-                        example: "def456..."
-                      expires_in:
-                        type: integer
-                        description: Expiration time of access token in seconds.
-                        example: 3600
-                      user:
-                        type: object
-                        required:
-                          - id
-                          - email
-                          - role
-                          - full_name
-                        properties:
-                          id:
-                            type: string
-                            format: uuid
-                            example: "550e8400-e29b-41d4-a716-446655440000"
-                          email:
-                            type: string
-                            example: user@example.com
-                          role:
-                            type: string
-                            example: candidate
-                          full_name:
-                            type: string
-                            example: Nguyen Van A
+                        example: user@example.com
+                      role:
+                        type: string
+                        example: candidate
+                      full_name:
+                        type: string
+                        nullable: true
+                        example: Nguyen Van A
         "400":
           description: Validation Error
           content:
             application/json:
               schema:
                 type: object
-                required: [status, message]
+                required: [status, code, message]
                 properties:
                   status:
+                    type: integer
+                    example: 400
+                  code:
                     type: string
-                    example: "error"
+                    example: "BAD_REQUEST"
                   message:
                     type: string
-                    example: Email and password are required
+                    example: "Email and password are required"
         "401":
           description: Unauthorized - Invalid credentials
           content:
             application/json:
               schema:
                 type: object
+                required: [status, code, message]
                 properties:
                   status:
+                    type: integer
+                    example: 401
+                  code:
                     type: string
-                    example: "error"
+                    example: "UNAUTHORIZED"
                   message:
                     type: string
-                    example: Invalid email or password
+                    example: "Email or password is incorrect"
         "500":
           description: Internal Server Error
           content:
             application/json:
               schema:
                 type: object
+                required: [status, code, message]
                 properties:
                   status:
+                    type: integer
+                    example: 500
+                  code:
                     type: string
-                    example: "error"
+                    example: "INTERNAL"
                   message:
                     type: string
-                    example: Server error during authentication
+                    example: "Server error during authentication"
 
   /auth/v1/register:
     post:
@@ -631,7 +630,8 @@ paths:
       summary: Register a new account
       description: |
         Endpoint for creating a new user account. 
-        Supports various roles: candidate, recruiter, training_center, and admin.
+        Supports roles: candidate, recruiter, training_center (admin is not self-registerable).
+        Also sets HTTP-only cookies (`access_token` and `refresh_token`).
       operationId: register
       requestBody:
         description: User registration details
@@ -655,15 +655,15 @@ paths:
                 phone:
                   type: string
                   example: "0987654321"
-                  description: "User phone number. Must be unique."
+                  description: "User phone number. Must be unique, 10-11 digits."
                 password:
                   type: string
                   format: password
                   example: SecurePassword123
-                  description: "Minimum 8 characters, at least one uppercase, one lowercase, and one number."
+                  description: "Minimum 8 characters."
                 role:
                   type: string
-                  enum: [candidate, recruiter, training_center, admin]
+                  enum: [candidate, recruiter, training_center]
                   example: candidate
                   description: "The intended role of the user within the platform."
                 full_name:
@@ -672,53 +672,52 @@ paths:
                   description: "Full legal name of the user."
       responses:
         "200":
-          description: User registered successfully
+          description: User registered successfully. Response also sets cookies.
           content:
             application/json:
               schema:
                 type: object
                 required:
-                  - status
-                  - message
-                  - data
+                  - user_id
+                  - email
+                  - role
+                  - access_token
+                  - refresh_token
                 properties:
-                  status:
+                  user_id:
                     type: string
-                    example: "success"
-                  message:
+                    format: uuid
+                    example: "550e8400-e29b-41d4-a716-446655440000"
+                  email:
                     type: string
-                    example: User registered successfully
-                  data:
-                    type: object
-                    required:
-                      - user_id
-                      - email
-                      - role
-                    properties:
-                      user_id:
-                        type: string
-                        format: uuid
-                        example: "550e8400-e29b-41d4-a716-446655440000"
-                      email:
-                        type: string
-                        example: user@example.com
-                      role:
-                        type: string
-                        example: candidate
+                    example: user@example.com
+                  role:
+                    type: string
+                    example: candidate
+                  access_token:
+                    type: string
+                    example: "eyJhbGci..."
+                  refresh_token:
+                    type: string
+                    example: "def456..."
         "400":
           description: Validation Error (Invalid format or missing fields)
           content:
             application/json:
               schema:
                 type: object
+                required: [status, code, message]
                 properties:
                   status:
+                    type: integer
+                    example: 400
+                  code:
                     type: string
-                    example: "error"
+                    example: "BAD_REQUEST"
                   message:
                     type: string
-                    example: Validation failed
-                  errors:
+                    example: "Validation failed"
+                  detail:
                     type: array
                     items:
                       type: string
@@ -729,91 +728,84 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [status, code, message]
                 properties:
                   status:
+                    type: integer
+                    example: 409
+                  code:
                     type: string
-                    example: "error"
+                    example: "DUPLICATED"
                   message:
                     type: string
-                    example: User already exists
+                    example: "Email already in use"
         "500":
           description: Internal Server Error
           content:
             application/json:
               schema:
                 type: object
+                required: [status, code, message]
                 properties:
                   status:
+                    type: integer
+                    example: 500
+                  code:
                     type: string
-                    example: "error"
+                    example: "INTERNAL"
                   message:
                     type: string
-                    example: Internal server error occurred
+                    example: "Internal server error occurred"
 
   /auth/v1/refresh:
     post:
       tags:
         - authentication
       summary: Refresh authentication tokens
-      description: Get a new access token using a valid refresh token.
+      description: Get a new access token and refresh token. Requires `refresh_token` HTTP-only cookie.
       operationId: refreshTokens
-      requestBody:
-        description: Refresh token payload
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - refresh_token
-              properties:
-                refresh_token:
-                  type: string
-                  example: "def456..."
-                  description: "The refresh token provided during login."
+      security: []
+      parameters:
+        - name: refresh_token
+          in: cookie
+          required: true
+          schema:
+            type: string
+          description: "The refresh token passed in the Cookies."
       responses:
         "200":
-          description: Tokens refreshed successfully
+          description: Tokens refreshed successfully. Response also sets cookies.
           content:
             application/json:
               schema:
                 type: object
                 required:
-                  - status
-                  - message
-                  - data
+                  - access_token
+                  - refresh_token
                 properties:
-                  status:
+                  access_token:
                     type: string
-                    example: "success"
-                  message:
+                    example: "new-eyJhbGci..."
+                  refresh_token:
                     type: string
-                    example: "Tokens refreshed successfully"
-                  data:
-                    type: object
-                    required:
-                      - access_token
-                      - refresh_token
-                    properties:
-                      access_token:
-                        type: string
-                        example: "new-eyJhbGci..."
-                      refresh_token:
-                        type: string
-                        example: "new-def456..."
+                    example: "new-def456..."
         "401":
           description: Invalid refresh token
           content:
             application/json:
               schema:
                 type: object
+                required: [status, code, message]
                 properties:
                   status:
+                    type: integer
+                    example: 401
+                  code:
                     type: string
-                    example: "error"
+                    example: "UNAUTHORIZED"
                   message:
                     type: string
-                    example: Refresh token is invalid or expired
+                    example: "Refresh token is invalid or expired"
 
   /auth/v1/forgot-password:
     post:
@@ -822,7 +814,7 @@ paths:
       summary: Request password reset
       description: |
         Endpoint to request a password reset code. 
-        A code or link will be sent to the provided email if it exists in the system.
+        A 6-digit OTP code will be sent to the provided email if it exists in the system.
       operationId: forgotPassword
       requestBody:
         description: Registered user email
@@ -841,62 +833,51 @@ paths:
                   description: "The email address associated with the account."
       responses:
         "200":
-          description: Reset code sent successfully
+          description: Reset code request handled successfully
           content:
             application/json:
               schema:
                 type: object
                 required:
-                  - status
                   - message
                 properties:
-                  status:
-                    type: string
-                    example: "success"
                   message:
                     type: string
-                    example: "The code has been sent to your email. Please check the email box!"
-        "404":
-          description: Email not found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: "error"
-                  message:
-                    type: string
-                    example: Email address not found
+                    example: "If the email exists in the system, an OTP code will be sent to your email."
 
   /auth/v1/reset-password:
     post:
       tags:
         - authentication
       summary: Reset user password
-      description: Update the password for an account using a valid reset token.
+      description: Update the password for an account using a valid email, 6-digit OTP code, and new password.
       operationId: resetPassword
       requestBody:
-        description: Token and new password details
+        description: Email, OTP code, and new password
         required: true
         content:
           application/json:
             schema:
               type: object
               required:
-                - token
+                - email
+                - otp
                 - new_password
               properties:
-                token:
+                email:
                   type: string
-                  example: "reset-token-from-email"
-                  description: "The reset token received via email."
+                  format: email
+                  example: "user@example.com"
+                  description: "The email address associated with the account."
+                otp:
+                  type: string
+                  example: "123456"
+                  description: "The 6-digit OTP verification code received via email."
                 new_password:
                   type: string
                   format: password
                   example: "NewSecurePassword123"
-                  description: "The new password for the account."
+                  description: "The new password for the account (minimum 8 characters)."
       responses:
         "200":
           description: Password reset successful
@@ -905,28 +886,74 @@ paths:
               schema:
                 type: object
                 required:
-                  - status
                   - message
                 properties:
-                  status:
-                    type: string
-                    example: "success"
                   message:
                     type: string
-                    example: "Mat khau da duoc thay doi thanh cong. Ban co the dang nhap ngay bay gio."
+                    example: "Password has been changed successfully. You can log in now."
         "400":
-          description: Invalid token or password
+          description: Invalid OTP or password format
           content:
             application/json:
               schema:
                 type: object
+                required: [status, code, message]
                 properties:
                   status:
+                    type: integer
+                    example: 400
+                  code:
                     type: string
-                    example: "error"
+                    example: "BAD_REQUEST"
                   message:
                     type: string
-                    example: "Ma xac thuc khong hop le hoac mat khau khong dung yeu cau."
+                    example: "The OTP code is invalid or has expired."
+
+  /auth/v1/logout:
+    post:
+      tags:
+        - authentication
+      summary: User logout
+      description: Revoke the active refresh token and clear the authentication cookies. Requires `refresh_token` HTTP-only cookie.
+      operationId: logout
+      security: []
+      parameters:
+        - name: refresh_token
+          in: cookie
+          required: true
+          schema:
+            type: string
+          description: "The refresh token passed in the Cookies."
+      responses:
+        "200":
+          description: Logout successful. Response clears cookies.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                properties:
+                  message:
+                    type: string
+                    example: "Logout successful."
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, code, message]
+                properties:
+                  status:
+                    type: integer
+                    example: 401
+                  code:
+                    type: string
+                    example: "UNAUTHORIZED"
+                  message:
+                    type: string
+                    example: "Refresh token is missing"
 
   # --- Profile ---
   /profile/v1/me:
