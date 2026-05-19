@@ -17,61 +17,61 @@ export const techStack = [
   {
     name: 'React',
     icon: SiReact,
-    color: 'text-blue-500'
+    color: 'text-brand-primary'
   },
   {
     name: 'TypeScript',
     icon: SiTypescript,
-    color: 'text-blue-600'
+    color: 'text-brand-primary'
   },
   {
     name: 'TailwindCSS',
     icon: SiTailwindcss,
-    color: 'text-cyan-500'
+    color: 'text-brand-primary'
   },
   {
     name: 'Vite',
     icon: SiVite,
-    color: 'text-purple-500'
+    color: 'text-brand-primary'
   },
   {
     name: 'React Query',
     icon: SiReactquery,
-    color: 'text-[#f59e0b]'
+    color: 'text-brand-primary'
   },
   {
     name: 'Jest',
     icon: SiJest,
-    color: 'text-red-600'
+    color: 'text-brand-primary'
   },
   {
     name: 'ESLint',
     icon: SiEslint,
-    color: 'text-purple-600'
+    color: 'text-brand-primary'
   },
   {
     name: 'Prettier',
     icon: SiPrettier,
-    color: 'text-pink-500'
+    color: 'text-brand-primary'
   },
   {
     name: 'Git',
     icon: SiGit,
-    color: 'text-orange-500'
+    color: 'text-brand-primary'
   },
   {
     name: 'GitHub',
     icon: SiGithub,
-    color: 'text-gray-900 dark:text-white'
+    color: 'text-brand-primary'
   },
   {
     name: 'Shadcn/UI',
     icon: SiShadcnui,
-    color: 'text-black'
+    color: 'text-brand-primary'
   },
   {
     name: 'Vercel',
     icon: SiVercel,
-    color: 'text-gray-900 dark:text-white'
+    color: 'text-brand-primary'
   }
 ]

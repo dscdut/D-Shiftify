@@ -2,6 +2,7 @@ import { lazy } from 'react'
 
 import { Route, Routes, useLocation } from 'react-router-dom'
 
+import DisabilityLayout from '@/app/layout/disability-layout'
 import LayoutClient from '@/app/layout/layout-client'
 import LayoutMain from '@/app/layout/layout-main'
 import SuspenseProvider from '@/app/providers/suspense-provider'
@@ -13,7 +14,7 @@ import { ROUTE } from '@/core/constants/path'
 const HomePage = lazy(() => import('@/pages/home'))
 const Login = lazy(() => import('@/pages/auth/login'))
 const Register = lazy(() => import('@/pages/auth/register'))
-const VerifyAcountEmail = lazy(() => import('@/pages/verify-account-email/VerifyAcountEmail'))
+const VerifyAccountEmail = lazy(() => import('@/pages/auth/verify-account-email'))
 const AccountSettingsPage = lazy(() => import('@/pages/account/settings'))
 const CallPage = lazy(() => import('@/pages/communication/call'))
 const VideoCallPage = lazy(() => import('@/pages/communication/video-call'))
@@ -28,9 +29,8 @@ const DisabilityApplicationsPage = lazy(() => import('@/pages/disability/applica
 const DisabilityProfilePage = lazy(() => import('@/pages/disability/profile'))
 const DisabilityProfileUpdatePage = lazy(() => import('@/pages/disability/profile/update'))
 const DisabilityCvPage = lazy(() => import('@/pages/disability/cv'))
-const DisabilityCvCreatePage = lazy(() => import('@/pages/disability/cv/create'))
 const DisabilityCvEditPage = lazy(() => import('@/pages/disability/cv/edit'))
-const DisabilityCvUpdatePage = lazy(() => import('@/pages/disability/cv/update'))
+const DisabilityCvPreviewPage = lazy(() => import('@/pages/disability/cv/preview'))
 const BusinessDashboardPage = lazy(() => import('@/pages/business/dashboard'))
 const BusinessMessagesPage = lazy(() => import('@/pages/business/messages'))
 const BusinessCandidatesPage = lazy(() => import('@/pages/business/candidates'))
@@ -56,10 +56,25 @@ export default function useRoutesElements() {
         <Route path={ROUTE.PUBLIC.HOME} element={<HomePage />} />
         <Route path={ROUTE.PUBLIC.LOGIN} element={<Login />} />
         <Route path={ROUTE.PUBLIC.REGISTER} element={<Register />} />
-        <Route path={ROUTE.PUBLIC.VERIFY_ACCOUNT_EMAIL} element={<VerifyAcountEmail />} />
+        <Route path={ROUTE.PUBLIC.VERIFY_ACCOUNT_EMAIL} element={<VerifyAccountEmail />} />
 
         {/* Client protected routes */}
         <Route element={<ProtectedRoute redirectPath={ROUTE.PUBLIC.LOGIN} />}>
+          <Route path={ROUTE.DISABILITY.ROOT} element={<DisabilityLayout />}>
+            <Route path={ROUTE.DISABILITY.DASHBOARD} element={<DisabilityDashboardPage />} />
+            <Route path={ROUTE.DISABILITY.NOTIFICATIONS} element={<DisabilityNotificationsPage />} />
+            <Route path={ROUTE.DISABILITY.NOTIFICATION_DETAIL} element={<DisabilityNotificationDetailPage />} />
+            <Route path={ROUTE.DISABILITY.MESSAGES} element={<DisabilityMessagesPage />} />
+            <Route path={ROUTE.DISABILITY.JOBS} element={<DisabilityJobsPage />} />
+            <Route path={ROUTE.DISABILITY.JOB_DETAIL} element={<DisabilityJobDetailPage />} />
+            <Route path={ROUTE.DISABILITY.JOB_MATCH_DETAIL} element={<DisabilityJobMatchDetailPage />} />
+            <Route path={ROUTE.DISABILITY.APPLICATIONS} element={<DisabilityApplicationsPage />} />
+            <Route path={ROUTE.DISABILITY.PROFILE} element={<DisabilityProfilePage />} />
+            <Route path={ROUTE.DISABILITY.PROFILE_UPDATE} element={<DisabilityProfileUpdatePage />} />
+            <Route path={ROUTE.DISABILITY.CV} element={<DisabilityCvPage />} />
+            <Route path={ROUTE.DISABILITY.CV_PREVIEW} element={<DisabilityCvPreviewPage />} />
+            <Route path={ROUTE.DISABILITY.CV_EDIT} element={<DisabilityCvEditPage />} />
+          </Route>
           <Route element={<LayoutClient />}>
             <Route path={ROUTE.COMMON_PRIVATE.ACCOUNT_SETTINGS} element={<AccountSettingsPage />} />
             <Route path={ROUTE.COMMON_PRIVATE.CALL} element={<CallPage />} />
@@ -74,10 +89,6 @@ export default function useRoutesElements() {
             <Route path={ROUTE.DISABILITY.APPLICATIONS} element={<DisabilityApplicationsPage />} />
             <Route path={ROUTE.DISABILITY.PROFILE} element={<DisabilityProfilePage />} />
             <Route path={ROUTE.DISABILITY.PROFILE_UPDATE} element={<DisabilityProfileUpdatePage />} />
-            <Route path={ROUTE.DISABILITY.CV} element={<DisabilityCvPage />} />
-            <Route path={ROUTE.DISABILITY.CV_CREATE} element={<DisabilityCvCreatePage />} />
-            <Route path={ROUTE.DISABILITY.CV_EDIT} element={<DisabilityCvEditPage />} />
-            <Route path={ROUTE.DISABILITY.CV_UPDATE} element={<DisabilityCvUpdatePage />} />
             <Route path={ROUTE.BUSINESS.DASHBOARD} element={<BusinessDashboardPage />} />
             <Route path={ROUTE.BUSINESS.MESSAGES} element={<BusinessMessagesPage />} />
             <Route path={ROUTE.BUSINESS.CANDIDATES} element={<BusinessCandidatesPage />} />

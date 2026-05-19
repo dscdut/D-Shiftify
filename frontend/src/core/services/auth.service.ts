@@ -8,7 +8,7 @@ import {
   type LoginApiResponse,
   type RegisterReponse,
   type VerifyEmailRes
-} from '@/models/interface/auth.interface'
+} from '@/models/interface/auth.interfaces'
 
 const API_LOGIN_URL = '/auth/login'
 const API_REGISTER_URL = '/auth/register'

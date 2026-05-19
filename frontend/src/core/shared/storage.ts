@@ -3,7 +3,7 @@ import {
   REFRESH_TOKEN_LOCAL_STORAGE_KEY,
   USER_LOCAL_STORAGE_KEY
 } from '@/core/helpers/common'
-import { type UserResponseType } from '@/models/interface/user.interface'
+import { type UserResponseType } from '@/models/interface/user.interfaces'
 
 export const LocalStorageEventTarget = new EventTarget()
 export const setAccessTokenToLS = (access_token: string) =>

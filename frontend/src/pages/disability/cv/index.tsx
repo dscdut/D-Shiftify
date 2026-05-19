@@ -1,5 +1,5 @@
-import PlaceholderPage from '@/pages/_shared/placeholder-page'
+import CvBuilderPage from './components/cv-builder-page'
 
 export default function DisabilityCvPage() {
-  return <PlaceholderPage title='CV Page' description='View and manage CV information for job applications.' />
+  return <CvBuilderPage mode='create' />
 }

@@ -39,7 +39,7 @@ const Header = () => {
   const handleLogout = () => logout()
 
   return (
-    <header className='fixed top-0 left-0 z-50 w-full border-b border-gray-200 backdrop-blur bg-white/80 dark:bg-gray-900/80 dark:border-gray-800'>
+    <header className='fixed top-0 left-0 z-50 w-full border-b border-brand-border backdrop-blur bg-gradient-to-r from-brand-bg-start/95 to-brand-bg-end/95 dark:bg-gray-900/80 dark:border-gray-800'>
       <nav className='container flex justify-between items-center px-4 py-3 mx-auto'>
         <Logo />
         <ul className='hidden gap-6 items-center md:flex'>
@@ -47,7 +47,7 @@ const Header = () => {
             <li key={link.to}>
               <button
                 onClick={(e) => handleSmoothScroll(e, link.to)}
-                className='px-2 py-1 font-medium text-gray-700 bg-transparent rounded border-none transition-colors cursor-pointer dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
+                className='px-2 py-1 font-medium text-gray-700 bg-transparent rounded border-none transition-colors cursor-pointer dark:text-gray-200 hover:text-brand-primary dark:hover:text-brand-bg-end focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary'
                 tabIndex={0}
                 aria-label={t(`home.${link.labelKey}`)}
               >
@@ -68,7 +68,7 @@ const Header = () => {
                   <div
                     role='button'
                     tabIndex={0}
-                    className='relative w-10 h-10 rounded-full cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
+                    className='relative w-10 h-10 rounded-full cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary'
                   >
                     <Avatar className='w-10 h-10'>
                       <AvatarImage src={'/images/avatar.png'} alt={user?.name} />
@@ -108,7 +108,7 @@ const Header = () => {
                   <div
                     role='button'
                     tabIndex={0}
-                    className='relative w-10 h-10 rounded-full cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
+                    className='relative w-10 h-10 rounded-full cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary'
                   >
                     <Avatar className='w-10 h-10'>
                       <AvatarImage src={'/images/avatar.png'} alt={user?.name} />
@@ -144,11 +144,11 @@ const Header = () => {
             <div className='hidden gap-2 items-center md:flex'>
               <Button
                 variant='outline'
-                className='px-4 py-2 font-medium text-gray-900 rounded-md border border-gray-200 transition-all duration-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-blue-500'
+                className='px-4 py-2 font-medium rounded-md transition-all duration-200 focus-visible:ring-2 focus-visible:ring-brand-primary'
               >
                 <Link to={ROUTE.PUBLIC.LOGIN}>{tAuth('auth.login')}</Link>
               </Button>
-              <Button className='px-4 py-2 font-medium text-white bg-blue-600 rounded-md transition-all duration-200 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 focus-visible:ring-2 focus-visible:ring-blue-500'>
+              <Button className='px-4 py-2 font-medium text-white bg-brand-primary rounded-md transition-all duration-200 hover:bg-brand-primary-hover focus-visible:ring-2 focus-visible:ring-brand-primary'>
                 <Link to={ROUTE.PUBLIC.REGISTER}>{tAuth('auth.register')}</Link>
               </Button>
             </div>
@@ -157,7 +157,7 @@ const Header = () => {
 
         {/* Mobile menu button */}
         <button
-          className='flex justify-center items-center p-2 rounded md:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
+          className='flex justify-center items-center p-2 rounded md:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary'
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
           onClick={() => setMenuOpen(!menuOpen)}
         >
@@ -171,7 +171,7 @@ const Header = () => {
 
       {/* Mobile nav menu */}
       {menuOpen && (
-        <div className='absolute left-0 top-full w-full bg-white border-b border-gray-200 shadow-lg md:hidden dark:bg-gray-900 dark:border-gray-800 animate-fade-in'>
+        <div className='absolute left-0 top-full w-full bg-white border-b border-brand-border shadow-lg md:hidden dark:bg-gray-900 dark:border-gray-800 animate-fade-in'>
           <ul className='flex flex-col gap-2 p-4'>
             {navLinks.map((link) => (
               <li key={link.to}>
@@ -180,7 +180,7 @@ const Header = () => {
                     handleSmoothScroll(e, link.to)
                     setMenuOpen(false)
                   }}
-                  className='px-2 py-2 w-full font-medium text-left text-gray-700 bg-transparent rounded border-none transition-colors cursor-pointer dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
+                  className='px-2 py-2 w-full font-medium text-left text-gray-700 bg-transparent rounded border-none transition-colors cursor-pointer dark:text-gray-200 hover:text-brand-primary dark:hover:text-brand-bg-end focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary'
                   tabIndex={0}
                   aria-label={t(`home.${link.labelKey}`)}
                 >
@@ -192,13 +192,13 @@ const Header = () => {
               <div className='flex flex-col gap-2'>
                 <Button
                   variant='outline'
-                  className='px-4 py-2 font-medium text-gray-900 rounded-md border border-gray-200 transition-all duration-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-blue-500'
+                  className='px-4 py-2 font-medium rounded-md transition-all duration-200 focus-visible:ring-2 focus-visible:ring-brand-primary'
                 >
                   <Link to={ROUTE.PUBLIC.LOGIN} onClick={() => setMenuOpen(false)}>
                     {tAuth('auth.login')}
                   </Link>
                 </Button>
-                <Button className='px-4 py-2 font-medium text-white bg-blue-600 rounded-md transition-all duration-200 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 focus-visible:ring-2 focus-visible:ring-blue-500'>
+                <Button className='px-4 py-2 font-medium text-white bg-brand-primary rounded-md transition-all duration-200 hover:bg-brand-primary-hover focus-visible:ring-2 focus-visible:ring-brand-primary'>
                   <Link to={ROUTE.PUBLIC.REGISTER} onClick={() => setMenuOpen(false)}>
                     {tAuth('auth.register')}
                   </Link>

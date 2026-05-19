@@ -7,7 +7,7 @@ import { TechStackSection } from '@/pages/home/components/tech-stack-section'
 
 const HomePage = () => {
   return (
-    <div className='min-h-screen bg-white dark:bg-gray-900'>
+    <div className='min-h-screen bg-workspace-gradient dark:bg-gray-900'>
       <Header />
       <main>
         <HeroSection />

@@ -247,8 +247,11 @@ The architecture is designed to ensure:
 │   │   └── vi/
 │   │
 │   ├── models/               # TypeScript interfaces/types
-│   │   ├── user.ts
-│   │   └── api.ts
+│   │   ├── interface/
+│   │   │   ├── auth.interfaces.ts
+│   │   │   └── cv.interfaces.ts
+│   │   └── type/
+│   │       └── common.types.ts
 │   │
 │   ├── pages/                # Page components
 │   │   ├── 404/
@@ -381,13 +384,14 @@ Responsibilities:
 
 ## 9.6 `src/models/`
 
-Contains shared TypeScript interfaces and types.
+Contains shared TypeScript interfaces and types, organized cleanly into `interface/` and `type/`.
 
 Examples:
 
 ```txt
-src/models/user.ts
-src/models/api.ts
+src/models/interface/cv.interfaces.ts
+src/models/interface/auth.interfaces.ts
+src/models/type/common.types.ts
 ```
 
 ---
@@ -579,14 +583,14 @@ job.service.ts
 
 ## Models
 
-Shared interfaces and types belong inside `models/`.
+Shared interfaces and types belong inside `models/`, separated into `interface/` and `type/`.
 
 Examples:
 
 ```txt
-user.ts
-api.ts
-job.ts
+cv.interfaces.ts
+auth.interfaces.ts
+common.types.ts
 ```
 
 ---

@@ -28,9 +28,10 @@ const DISABILITY = {
   PROFILE: '/disability/profile',
   PROFILE_UPDATE: '/disability/profile/update',
   CV: '/disability/cv',
-  CV_CREATE: '/disability/cv/create',
+  CV_PREVIEW: '/disability/cv/preview',
   CV_EDIT: '/disability/cv/edit/:id',
-  CV_UPDATE: '/disability/cv/update'
+  CV_UPDATE: '/disability/cv/update',
+  ROOT: '/'
 } as const
 
 // Business routes: private routes for business users and recruiters.

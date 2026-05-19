@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 
 import { ROUTE } from '@/core/constants/path'
-import { type TSidebarLinks } from '@/models/types/general.type'
+import { type TSidebarLinks } from '@/models/type/general.types'
 
 export const sidebarLinks: TSidebarLinks[] = [
   {

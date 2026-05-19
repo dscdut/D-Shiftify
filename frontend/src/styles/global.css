@@ -17,13 +17,37 @@
 @layer base {
   :root {
     --radius: 0.5rem;
+    --primary: #004080;
+    --primary-hover: #003466;
+    --bg-start: #f8fbff;
+    --bg-end: #eaf4ff;
+    --border: #cfe3f7;
+    --surface: #ffffff;
+    --font-workspace: 'Google Sans', 'Product Sans', 'Inter', 'Roboto', 'Arial', sans-serif;
+  }
+
+  html {
+    font-family: var(--font-workspace);
+    background: var(--workspace-bg-start);
+  }
+
+  body {
+    min-height: 100vh;
+    margin: 0;
+    background: linear-gradient(135deg, var(--workspace-bg-start) 0%, var(--workspace-bg-end) 100%);
+    color: #102033;
+    font-family: var(--font-workspace);
+    font-weight: 400;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
   }
 }
 
-body {
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
-}
 /* box shadown */
 .box-shadow {
   box-shadow:
@@ -34,12 +58,7 @@ body {
 .gradient-background {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to bottom left,
-    rgba(255, 107, 129, 0.2),
-    rgba(155, 89, 182, 0.2),
-    rgba(52, 152, 219, 0.2)
-  );
+  background: linear-gradient(135deg, rgba(248, 251, 255, 0.9), rgba(234, 244, 255, 0.9));
   filter: blur(20px);
   opacity: 0.5;
   z-index: 0;

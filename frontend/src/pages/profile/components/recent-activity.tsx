@@ -11,7 +11,7 @@ export default function RecentActivity() {
         <div className='space-y-4'>
           {[1, 2, 3].map((item) => (
             <div key={item} className='flex items-start gap-4'>
-              <div className='mt-2 h-2 w-2 rounded-full bg-blue-500' />
+              <div className='mt-2 h-2 w-2 rounded-full bg-brand-primary' />
               <div className='flex-1 space-y-1'>
                 <p className='text-sm font-medium'>Activity {item}</p>
                 <p className='text-sm text-gray-500 dark:text-gray-400'>

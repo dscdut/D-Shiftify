@@ -1,16 +1,21 @@
 :root {
   /* Light mode variables */
-  --background-primary: #ffffff;
-  --background-secondary: #f9fafb;
-  --background-tertiary: #f3f4f6;
+  --brand-primary: #004080;
+  --brand-primary-hover: #003466;
+  --brand-background-start: #F8FBFF;
+  --brand-background-end: #EAF4FF;
 
-  --text-primary: #111827;
-  --text-secondary: #4b5563;
-  --text-tertiary: #6b7280;
+  --background-primary: #F8FBFF;
+  --background-secondary: #EAF4FF;
+  --background-tertiary: #D9ECFF;
 
-  --border-primary: #e5e7eb;
-  --border-secondary: #d1d5db;
-  --border-focus: #9ca3af;
+  --text-primary: #102033;
+  --text-secondary: #38536D;
+  --text-tertiary: #49657F;
+
+  --border-primary: #CFE3F7;
+  --border-secondary: #9FC5EA;
+  --border-focus: #004080;
 
   --error-primary: #ef4444;
   --error-secondary: #f87171;

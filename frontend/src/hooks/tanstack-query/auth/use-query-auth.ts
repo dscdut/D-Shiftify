@@ -14,7 +14,7 @@ import { setToken, setUserToLS } from '@/core/shared/storage'
 import { type LoginSchema } from '@/core/zod/login.zod'
 import { type RegisterSchema } from '@/core/zod/register.zod'
 import { type VerifyAccountEmailSchema } from '@/core/zod/verify-account-email.zod'
-import { type LoginApiResponse } from '@/models/interface/auth.interface'
+import { type LoginApiResponse } from '@/models/interface/auth.interfaces'
 const RESEND_COUNTDOWN = 60
 
 export const useLoginAuth = () => {

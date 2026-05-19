@@ -1,5 +1,9 @@
-import PlaceholderPage from '@/pages/_shared/placeholder-page'
+import { useParams } from 'react-router-dom'
+
+import CvBuilderPage from './components/cv-builder-page'
 
 export default function DisabilityCvEditPage() {
-  return <PlaceholderPage title='Edit CV' description='Edit an existing CV for disability user job applications.' />
+  const { id } = useParams()
+
+  return <CvBuilderPage mode='edit' cvId={id} />
 }

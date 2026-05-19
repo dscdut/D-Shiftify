@@ -34,7 +34,7 @@ export default function Profile() {
     <div className='max-w-5xl mx-auto px-4 py-10'>
       <div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
         <Card className='col-span-1 flex flex-col items-center p-0 overflow-hidden'>
-          <div className='w-full h-28 bg-gradient-to-r from-blue-500 to-purple-500 relative flex items-center justify-center'>
+          <div className='w-full h-28 bg-brand-primary relative flex items-center justify-center'>
             <div className='absolute left-1/2 top-full -translate-x-1/2 -translate-y-1/2'>
               <Avatar className='h-24 w-24 border-4 border-white shadow-lg'>
                 <AvatarImage src='/images/avatar.png' alt={user?.name} />
