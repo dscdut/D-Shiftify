@@ -1,7 +1,7 @@
+import { getUserContext } from 'packages/authModel/module/user';
 import { ProfileService } from '../../modules/profile/service/profile.service';
 import { UpdateProfileDto, DeleteAccountDto, AddDevicesDto } from '../../modules/profile';
 import { ValidHttpResponse } from '../../../packages/handler/response/validHttp.response';
-import { getUserContext } from 'packages/authModel/module/user';
 
 class Controller {
     constructor() {
@@ -23,7 +23,7 @@ class Controller {
         const data = await this.service.updateMyProfile(userId, UpdateProfileDto(req.body));
         return ValidHttpResponse.toOkResponse({
             status: 'success',
-            message: 'Cap nhat ho so thanh cong',
+            message: 'Profile updated successfully',
             data,
         });
     };
@@ -46,11 +46,11 @@ class Controller {
         });
     };
 
-    getAssistiveDevices = async req => {
+    getAssistiveDevices = async () => {
         const data = await this.service.getAllAssistiveDevices();
         return ValidHttpResponse.toOkResponse({
             status: 'success',
-            message: 'Danh sach thiet bi ho tro',
+            message: 'Assistive devices retrieved successfully',
             data,
         });
     };

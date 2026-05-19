@@ -1,10 +1,9 @@
+import connection, { getTransaction } from 'core/database';
 import { ProfileRepository } from '../repository/profile.repository';
 import { DeviceRepository } from '../repository/device.repository';
 import { BcryptService } from '../../auth/service/bcrypt.service';
-import connection, { getTransaction } from 'core/database';
 import {
     NotFoundException,
-    UnAuthorizedException,
     BadRequestException,
 } from '../../../../packages/httpException';
 
@@ -91,21 +90,25 @@ class Service {
             throw new NotFoundException('User not found');
         }
 
-        if (!this.bcryptService.compare(deleteDto.password, userWithPassword.password_hash)) {
-            throw new UnAuthorizedException('Password is incorrect');
-        }
+        this.bcryptService.verifyComparison(deleteDto.password, userWithPassword.password_hash, 'Password is incorrect');
 
         const trx = await getTransaction();
         try {
             await connection('users')
                 .where('id', userId)
-                .update({ deleted_at: connection.fn.now() })
+                .update({
+                    deleted_at: connection.fn.now(),
+                    updated_at: connection.fn.now(),
+                })
                 .transacting(trx);
 
             await connection('profiles')
                 .where('user_id', userId)
                 .whereNull('deleted_at')
-                .update({ deleted_at: connection.fn.now() })
+                .update({
+                    deleted_at: connection.fn.now(),
+                    updated_at: connection.fn.now(),
+                })
                 .transacting(trx);
 
             await connection('refresh_tokens')
@@ -121,7 +124,7 @@ class Service {
         }
 
         return {
-            message: 'Tai khoan cua ban da duoc vo hieu hoa.',
+            message: 'Your account has been deactivated.',
         };
     }
 

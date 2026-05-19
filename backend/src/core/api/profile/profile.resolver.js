@@ -9,7 +9,7 @@ import { ProfileController } from './profile.controller';
 
 export const ProfileResolver = Module.builder()
     .addPrefix({
-        prefixPath: '/profile/v1',
+        prefixPath: '/v1/profile',
         tag: 'profile',
         module: 'ProfileModule',
     })
