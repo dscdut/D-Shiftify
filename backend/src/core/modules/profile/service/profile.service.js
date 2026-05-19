@@ -1,6 +1,6 @@
 import connection, { getTransaction } from 'core/database';
 import { ProfileRepository } from '../repository/profile.repository';
-import { DeviceRepository } from '../repository/device.repository';
+import { DeviceRepository } from '../../device/repository/device.repository';
 import { BcryptService } from '../../auth/service/bcrypt.service';
 import {
     NotFoundException,

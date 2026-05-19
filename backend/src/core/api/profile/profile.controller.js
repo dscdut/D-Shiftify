@@ -1,6 +1,7 @@
 import { getUserContext } from 'packages/authModel/module/user';
 import { ProfileService } from '../../modules/profile/service/profile.service';
-import { UpdateProfileDto, DeleteAccountDto, AddDevicesDto } from '../../modules/profile';
+import { UpdateProfileDto, DeleteAccountDto } from '../../modules/profile';
+import { AddDevicesDto } from '../../modules/device';
 import { ValidHttpResponse } from '../../../packages/handler/response/validHttp.response';
 
 class Controller {

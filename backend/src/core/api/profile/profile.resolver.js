@@ -1,8 +1,8 @@
 import {
     UpdateProfileInterceptor,
     DeleteAccountInterceptor,
-    AddDevicesInterceptor,
 } from 'core/modules/profile';
+import { AddDevicesInterceptor } from 'core/modules/device';
 import { Module } from 'packages/handler/Module';
 import { hasCandidateRole } from 'core/modules/auth/guard/role.manager';
 import { ProfileController } from './profile.controller';
