@@ -3,6 +3,7 @@ import { JobController } from './job.controller';
 import { ValidateJobIdInterceptor } from 'core/modules/job';
 import { hasRecruiterRole } from 'core/modules/auth/guard/role.manager';
 import { RecordUuid } from 'core/common/swagger/record-uuid';
+import { PostJobInterceptor } from 'core/modules/job';
 
 export const JobResolver = Module.builder()
     .addPrefix({
@@ -24,6 +25,15 @@ export const JobResolver = Module.builder()
             params: [RecordUuid],
             interceptors: [ValidateJobIdInterceptor],
             controller: JobController.deletedJobById,
+            preAuthorization: true,
+            guards: [hasRecruiterRole]
+        },
+        {
+            route: '/',
+            method: 'post',
+            body: 'PostJobDto',
+            interceptors: [PostJobInterceptor],
+            controller: JobController.createJob,
             preAuthorization: true,
             guards: [hasRecruiterRole]
         }

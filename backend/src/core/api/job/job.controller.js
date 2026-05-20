@@ -1,6 +1,7 @@
 import { JobService } from "../../modules/job/service/job.service";
 import { ValidHttpResponse } from '../../../packages/handler/response/validHttp.response';
 import { getUserContext } from 'packages/authModel/module/user';
+import { PostJobDto } from '../../modules/job/dto';
 
 class Controller {
     constructor() {
@@ -26,6 +27,18 @@ class Controller {
         return ValidHttpResponse.toOkResponse({
             status: 'success',
             message: data.message,
+        });
+    }
+
+    createJob = async req => {
+        const userId = getUserContext(req).payload.id;
+        const data = await this.service.createJob(PostJobDto(req.body), userId);
+        return ValidHttpResponse.toOkResponse({
+            status: 'success',
+            message: data.message,
+            data: {
+                id: data.id,
+            },
         });
     }
 }
