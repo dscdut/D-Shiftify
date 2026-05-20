@@ -1,0 +1,25 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy_Dshiftify_Backend
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            cd ${{ secrets.VPS_PATH }}
+            git pull origin dev
+            npm install
+            npm run build
+            pm2 restart dshiftify-backend || pm2 start npm --name dshiftify-backend -- start
+            pm2 save
