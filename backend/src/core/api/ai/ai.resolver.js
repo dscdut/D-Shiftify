@@ -1,31 +1,17 @@
-import { Router } from 'express';
-import { AIController } from './ai.controller.js';
+import { Module } from 'packages/handler/Module';
+import { AIController } from './ai.controller';
 
-export const AIResolver = {
-  /**
-   * @param {Router} router
-   */
-  resolve: (router) => {
-    const aiRouter = Router();
-
-    /**
-     * @swagger
-     * /ai/match/{profileId}:
-     *   get:
-     *     tags: [AI]
-     *     summary: Lấy danh sách việc làm phù hợp với profile
-     *     parameters:
-     *       - in: path
-     *         name: profileId
-     *         required: true
-     *         schema:
-     *           type: string
-     *     responses:
-     *       200:
-     *         description: Thành công
-     */
-    aiRouter.get('/match/:profileId', AIController.matchForProfile);
-
-    router.use('/ai', aiRouter);
-  }
-};
+export const AIResolver = Module.builder()
+    .addPrefix({
+        prefixPath: '/ai',
+        tag: 'ai',
+        module: 'AIModule'
+    })
+    .register([
+        {
+            route: '/match/:profileId',
+            method: 'get',
+            controller: AIController.matchForProfile,
+            preAuthorization: true
+        }
+    ]);

@@ -53,5 +53,3 @@ jspm_packages/
 
 .idea/
 Dockerfile
-
-yarn.lock

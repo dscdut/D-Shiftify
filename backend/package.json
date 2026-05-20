@@ -19,7 +19,7 @@
         "db:reset": "yarn knex migrate:rollback && yarn knex migrate:latest && yarn knex seed:run"
     },
     "dependencies": {
-        "@google/genai": "latest",
+        "@google/genai": "^2.4.0",
         "@sentry/node": "^7.64.0",
         "axios": "^1.4.0",
         "bcrypt": "^5.0.1",

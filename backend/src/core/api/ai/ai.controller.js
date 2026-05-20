@@ -1,21 +1,16 @@
-import { matchJobsForProfile } from '../../../modules/ai/agents/match/match.agent.js';
+import { ValidHttpResponse } from '../../../packages/handler/response/validHttp.response';
+import { matchJobsForProfile } from '../../modules/ai/agents/match/match.agent';
 
-export const AIController = {
-  /**
-   * GET /api/ai/match/:profileId
-   */
-  matchForProfile: async (req, res, next) => {
-    try {
-      const { profileId } = req.params;
-      const matches = await matchJobsForProfile(profileId);
-      
-      return res.status(200).json({
-        success: true,
-        data: matches,
-        message: 'Tìm việc làm phù hợp thành công.'
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-};
+class Controller {
+    matchForProfile = async req => {
+        const { profileId } = req.params;
+        const matches = await matchJobsForProfile(profileId);
+        return ValidHttpResponse.toOkResponse({
+            success: true,
+            data: matches,
+            message: 'Tìm việc làm phù hợp thành công.'
+        });
+    };
+}
+
+export const AIController = new Controller();
