@@ -1,4 +1,4 @@
-openapi: 3.1.0
+﻿openapi: 3.1.0
 info:
   title: D-Shiftify API & Documentation
   version: 1.0.0
@@ -1325,47 +1325,111 @@ paths:
             schema:
               type: object
               required:
-                - job_type
-                - work_mode
+                - profileId
+                - jobType
+                - workMode
                 - mobility
-                - expected_job
+                - expectedJob
               properties:
-                job_type:
+                profileId:
                   type: string
-                  example: "Full-time"
-                work_mode:
+                  format: uuid
+                  example: "9d83050f-3040-4c04-946e-504d3f34fdea"
+                jobType:
+                  type: string
+                  example: "Fulltime"
+                workMode:
                   type: string
                   example: "Remote"
                 mobility:
                   type: string
-                  example: "Su dung xe lan"
-                expected_job:
+                  example: "Wheelchair"
+                expectedJob:
                   type: string
-                  example: "Nhan vien nhap lieu"
+                  example: "Backend Developer"
+                deviceIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  example:
+                    - "905c9a98-8f51-4296-84b3-d521ece0d1a2"
+                    - "e4a8d1b5-ac6a-455f-8027-aaa1a4489839"
+                    - "9d1dda30-7361-45c3-8b79-db9629888080"
+                skills:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        example: "Communication"
+                      type:
+                        type: string
+                        enum:
+                          - soft_skill
+                          - hard_skill
+                        example: "soft_skill"
+                  example:
+                    - name: "Communication"
+                      type: "soft_skill"
+                    - name: "NodeJS"
+                      type: "hard_skill"
                 conditions:
-                  type: object
-                  properties:
-                    prefer_near_home: { type: boolean, example: true }
-                    prefer_low_traffic: { type: boolean, example: true }
-                    prefer_good_company: { type: boolean, example: true }
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - "Ưu tiên công ty hỗ trợ người khuyết tật"
+                    - "Ưu tiên khu vực ít giao thông"
                 experiences:
                   type: array
                   items:
                     type: object
                     properties:
-                      description: { type: string, example: "Thuc tap sinh tai The Code Origin" }
-                      working_time: { type: string, example: "3 thang" }
-                skills:
-                  type: array
-                  items:
-                    type: string
-                    format: uuid
-                  example: ["uuid-skill-1", "uuid-skill-2"]
+                      description:
+                        type: string
+                        example: "Developed REST APIs using ExpressJS"
+                      company:
+                        type: string
+                        example: "FPT Software"
+                      position:
+                        type: string
+                        example: "Backend Intern"
+                      startDate:
+                        type: string
+                        example: "2024-01"
+                      endDate:
+                        type: string
+                        example: "2024-06"
+                  example:
+                    - description: "Developed REST APIs using ExpressJS"
+                      company: "FPT Software"
+                      position: "Backend Intern"
+                      startDate: "2024-01"
+                      endDate: "2024-06"
                 certificates:
                   type: array
                   items:
                     type: string
-                  example: ["Chung chi Tin hoc van phong A"]
+                  example:
+                    - "IELTS 6.5"
+                customSections:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      title:
+                        type: string
+                        example: "Education"
+                      content:
+                        type: string
+                        example: "Duy Tan University - Software Engineering"
+                  example:
+                    - title: "Education"
+                      content: "Duy Tan University - Software Engineering"
+                    - title: "Career Objective"
+                      content: "Become a backend developer."
       responses:
         "201":
           description: CV created successfully
@@ -1485,50 +1549,139 @@ paths:
                     type: object
                     required:
                       - id
-                      - profile
-                      - job_type
-                      - work_mode
+                      - profileId
+                      - jobType
+                      - workMode
                       - mobility
-                      - expected_job
-                      - updated_at
+                      - expectedJob
+                      - skills
+                      - conditions
+                      - experiences
+                      - certificates
+                      - customSections
+                      - createdAt
+                      - updatedAt
+                      - fullName
+                      - phone
+                      - gender
+                      - disabilityStatus
+                      - email
                     properties:
-                      id: { type: string, format: uuid, example: "8e5e9334-..." }
-                      profile:
-                        type: object
-                        properties:
-                          full_name: { type: string, example: "Pham Hoang Vu" }
-                          disability_status: { type: string, example: "Khiem thinh nhe" }
-                      job_type: { type: string, example: "Full-time" }
-                      work_mode: { type: string, example: "Remote" }
-                      mobility: { type: string, example: "Su dung xe lan" }
-                      expected_job: { type: string, example: "Nhan vien nhap lieu" }
-                      conditions:
-                        type: object
-                        properties:
-                          prefer_near_home: { type: boolean, example: true }
-                          prefer_low_traffic: { type: boolean, example: true }
-                          prefer_good_company: { type: boolean, example: true }
-                      experiences:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            description: { type: string, example: "Thuc tap sinh tai The Code Origin" }
-                            working_time: { type: string, example: "3 thang" }
+                      id:
+                        type: string
+                        format: uuid
+                        example: "702a5921-e145-41e1-9fad-705ec6292f42"
+                      profileId:
+                        type: string
+                        format: uuid
+                        example: "9d83050f-3040-4c04-946e-504d3f34fdea"
+                      jobType:
+                        type: string
+                        example: "Fulltime"
+                      workMode:
+                        type: string
+                        example: "Remote"
+                      mobility:
+                        type: string
+                        example: "Wheelchair"
+                      expectedJob:
+                        type: string
+                        example: "Backend Developer"
                       skills:
                         type: array
                         items:
                           type: object
                           properties:
-                            id: { type: string, example: "uuid-1" }
-                            name: { type: string, example: "Node.js" }
-                            type: { type: string, example: "hard" }
+                            name:
+                              type: string
+                              example: "Communication"
+                            type:
+                              type: string
+                              enum: ["soft_skill", "hard_skill"]
+                              example: "soft_skill"
+                        example:
+                          - name: "Communication"
+                            type: "soft_skill"
+                          - name: "NodeJS"
+                            type: "hard_skill"
+                      conditions:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                          - "Ưu tiên công ty hỗ trợ người khuyết tật"
+                          - "Ưu tiên khu vực ít giao thông"
+                      experiences:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            company:
+                              type: string
+                              example: "FPT Software"
+                            endDate:
+                              type: string
+                              example: "2024-06"
+                            position:
+                              type: string
+                              example: "Backend Intern"
+                            startDate:
+                              type: string
+                              example: "2024-01"
+                            description:
+                              type: string
+                              example: "Developed REST APIs using ExpressJS"
+                        example:
+                          - company: "FPT Software"
+                            endDate: "2024-06"
+                            position: "Backend Intern"
+                            startDate: "2024-01"
+                            description: "Developed REST APIs using ExpressJS"
                       certificates:
                         type: array
                         items:
                           type: string
-                        example: ["Chung chi Tin hoc van phong A"]
-                      updated_at: { type: string, format: date-time, example: "2024-04-15T10:00:00Z" }
+                        example:
+                          - "IELTS 6.5"
+                      customSections:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            title:
+                              type: string
+                              example: "Education"
+                            content:
+                              type: string
+                              example: "Duy Tan University - Software Engineering"
+                        example:
+                          - title: "Education"
+                            content: "Duy Tan University - Software Engineering"
+                          - title: "Career Objective"
+                            content: "Become a backend developer."
+                      createdAt:
+                        type: string
+                        format: date-time
+                        example: "2026-05-13T06:55:23.598Z"
+                      updatedAt:
+                        type: string
+                        format: date-time
+                        example: "2026-05-13T06:55:23.598Z"
+                      fullName:
+                        type: string
+                        example: "Candidate 1"
+                      phone:
+                        type: string
+                        example: "0901000000"
+                      gender:
+                        type: string
+                        example: "male"
+                      disabilityStatus:
+                        type: string
+                        example: "visual_impairment"
+                      email:
+                        type: string
+                        example: "candidate1@example.com"
         "404":
           description: Not Found
           content:
@@ -1683,7 +1836,6 @@ paths:
                 properties:
                   status: { type: string, example: "error" }
                   message: { type: string, example: "Unauthenticated" }
-
   # --- Job ---
   /api/v1/jobs:
     post:

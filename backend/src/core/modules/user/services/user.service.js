@@ -4,7 +4,7 @@ import { UserRoleRepository } from 'core/modules/role/userRole.repository';
 import { joinUserRoles } from 'core/utils/userFilter';
 import { Optional } from '../../../utils';
 import { NotFoundException, DuplicateException, BadRequestException } from '../../../../packages/httpException';
-import { UserRepository } from '../user.repository';
+import { UserRepository } from '../repository/user.repository';
 
 class Service {
     constructor() {
