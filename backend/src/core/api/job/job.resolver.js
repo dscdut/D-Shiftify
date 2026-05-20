@@ -2,6 +2,7 @@ import { Module } from 'packages/handler/Module';
 import { SwaggerDocument } from 'packages/swagger';
 import { JobController } from './job.controller';
 import { ValidateJobIdInterceptor } from 'core/modules/job';
+import { hasRecruiterRole } from 'core/modules/auth/guard/role.manager';
 
 const JobIdParam = SwaggerDocument.ApiParams({
     name: 'id',
@@ -24,4 +25,13 @@ export const JobResolver = Module.builder()
             interceptors: [ValidateJobIdInterceptor],
             controller: JobController.getJobById,
         },
+        {
+            route: '/:id',
+            method: 'delete',
+            params: [JobIdParam],
+            interceptors: [ValidateJobIdInterceptor],
+            controller: JobController.deletedJobById,
+            preAuthorization: true,
+            guards: [hasRecruiterRole]
+        }
     ]);
