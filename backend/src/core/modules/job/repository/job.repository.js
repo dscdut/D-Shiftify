@@ -26,7 +26,6 @@ class Repository extends DataRepository {
             )
             .first();
     }
-
 }
 
 export const JobRepository = new Repository('jobs');
