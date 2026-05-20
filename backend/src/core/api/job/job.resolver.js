@@ -1,15 +1,8 @@
 import { Module } from 'packages/handler/Module';
-import { SwaggerDocument } from 'packages/swagger';
 import { JobController } from './job.controller';
 import { ValidateJobIdInterceptor } from 'core/modules/job';
 import { hasRecruiterRole } from 'core/modules/auth/guard/role.manager';
-
-const JobIdParam = SwaggerDocument.ApiParams({
-    name: 'id',
-    paramsIn: 'path',
-    type: 'string',
-    description: 'Job Id (UUID)',
-});
+import { RecordUuid } from 'core/common/swagger/record-uuid';
 
 export const JobResolver = Module.builder()
     .addPrefix({
@@ -21,14 +14,14 @@ export const JobResolver = Module.builder()
         {
             route: '/:id',
             method: 'get',
-            params: [JobIdParam],
+            params: [RecordUuid],
             interceptors: [ValidateJobIdInterceptor],
             controller: JobController.getJobById,
         },
         {
             route: '/:id',
             method: 'delete',
-            params: [JobIdParam],
+            params: [RecordUuid],
             interceptors: [ValidateJobIdInterceptor],
             controller: JobController.deletedJobById,
             preAuthorization: true,
