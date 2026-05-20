@@ -4,6 +4,7 @@ class Repository extends DataRepository {
     getJobById(jobId) {
         return this.query()
             .where('id', jobId)
+            .where('status', 'open')
             .whereNull('deleted_at')
             .select(
                 'id',
@@ -20,7 +21,6 @@ class Repository extends DataRepository {
                 'longitude',
                 'working_time',
                 'description',
-                'status',
                 'created_at',
                 'updated_at',
             )
