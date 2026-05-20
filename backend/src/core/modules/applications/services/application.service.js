@@ -1,7 +1,9 @@
 import { ApplicationsRepository } from '../repositories/application.repository';
-import { CreateApplicationDto } from '../dto/index';
-import { ConversationService } from 'core/modules/chat/services/conversation.service';
+import { CreateApplicationDto , ApplicationDto } from '../dto/index';
+// import { ConversationService } from 'core/modules/chat/services/conversation.service';
 import { getTransaction } from 'core/database';
+import { APPLICATION_STATUS } from './application.enum';
+import { NotFoundException, DuplicateException, BadRequestException} from 'packages/httpException';
 
 class Service {
     constructor() {
@@ -15,59 +17,60 @@ class Service {
         const existedApplication = await this.repository.findByJobAndCv( data.job_id, data.cv_id );
 
         if (existedApplication) {
-            throw new Error('Application already exists');
+            throw new DuplicateException();
         }
 
         const application =
             await this.repository.createOne({
                 ...data,
-                status: 'applied',
+                status: APPLICATION_STATUS.APPLIED,
             });
 
         return application[0];
     }
 
-    async getApplications(filters = {}) {
+    async getApplications(page, size) {
+        const totalResult = await this.repository.getTotalCount();
+        const total = totalResult?.total ? parseInt(totalResult.total, 10) : 0; 
 
-        return this.repository.findAll(filters);
+        const data = await this.repository.getAll(page, size);
+        return {
+            content: data.map(e => ApplicationDto(e)),
+            total,
+            size
+        };
     }
 
     async getById(id) {
         const application = await this.repository.findById(id);
         
         if (!application) {
-            throw new Error('Application not found');
+            throw new NotFoundException();
         }
         return application;
     }
 
-  async updateStatus(id, status) {
-    const validStatuses = ['applied', 'accepted', 'rejected'];
-
-    if (!validStatuses.includes(status)) {
-        throw new Error(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
-    }
-
-    const trx = await getTransaction();
+    async updateStatus(id, status) {
+        const trx = await getTransaction();
 
         try {
-            //lay thong tin cua application
-            const oldApplication = await this.repository.findById(id);
+            //get application
+            const oldApplication = await this.repository.findById(id,trx);
 
             if (!oldApplication) {
-                throw new Error('Application not found');
+                throw new NotFoundException();
             }
-            //update status cua application
+            //update status application
             const updatedApplication = await this.repository.updateStatus(id,status,trx );
 
             if (!updatedApplication || updatedApplication.length === 0) {
                 throw new Error('Application not found or update failed');
             }
 
-            // tao conversation khi status thanh accept 
-            let conversation = null;
+            // create conversation if status is accepted and old status is not accepted
+             let conversation = null;
 
-            if (status === 'accepted' && oldApplication.status !== 'accepted') {
+            if (status === APPLICATION_STATUS.ACCEPTED && oldApplication.status !== APPLICATION_STATUS.ACCEPTED) {
                 conversation = await ConversationService.createConversationFromApplication(
                     {   
                         status,

@@ -15,8 +15,8 @@ class Repository extends DataRepository {
             ]);
     }
 
-    findById(id) {
-        return this.query()
+    findById(id , trx = null) {
+        const queryBuilder = this.query()
             .join('jobs', 'jobs.id', 'applications.job_id')
             .join('cvs', 'cvs.id', 'applications.cv_id')
             .where('applications.id', id)
@@ -30,9 +30,12 @@ class Repository extends DataRepository {
                 { jobTitle: 'jobs.title' },
             ])
             .first();
+        if (trx) queryBuilder.transacting(trx);
+        return queryBuilder;
     }
 
-    findAll(filters = {}) {
+    getAll(page , size) {
+        const offset = (page - 1) * size;
         const query = this.query()
             .join('jobs', 'jobs.id', 'applications.job_id')
             .join('cvs', 'cvs.id', 'applications.cv_id')
@@ -44,22 +47,23 @@ class Repository extends DataRepository {
                 'applications.status',
                 { createdAt: 'applications.created_at' },
                 { jobTitle: 'jobs.title' },
-            ]);
-
-        if (filters.status) {
-            query.where('applications.status', filters.status);
-        }
-
-        if (filters.jobId) {
-            query.where('applications.job_id', filters.jobId);
-        }
-
-        return query;
+            ]).limit(size).offset(offset);
+        return  query;
+    }
+    getTotalCount() {
+        return this.query()
+            .whereNull('deleted_at')
+            .count('id as total')
+            .first()
+            .then(result => {
+            return result || { total: 0 };
+        });
     }
 
     findByJobAndCv(jobId, cvId) {
 
         return this.query()
+            .whereNull('applications.deleted_at')
             .where({
                 job_id: jobId,
                 cv_id: cvId,
