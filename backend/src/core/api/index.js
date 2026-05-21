@@ -5,7 +5,7 @@ import { HandlerResolver } from '../../packages/handler/HandlerResolver';
 import { AuthResolver } from './auth/auth.resolver';
 import { ProfileResolver } from './profile/profile.resolver';
 import { ApplicationsResolver } from './applications/applications.resolver';
-import { JobResolver } from './job/job.resolver';
+import { JobResolver, AdminJobResolver, RecruiterJobResolver } from './job/job.resolver';
 
 export const ModuleResolver = HandlerResolver
     .builder()
@@ -17,4 +17,6 @@ export const ModuleResolver = HandlerResolver
         ProfileResolver,
         ApplicationsResolver,
         JobResolver,
+        AdminJobResolver,
+        RecruiterJobResolver,
     ]);
