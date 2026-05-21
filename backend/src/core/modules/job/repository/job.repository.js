@@ -27,41 +27,10 @@ class Repository extends DataRepository {
             .first();
     }
 
-    updateJobById(jobId, data, trx = null) {
-        const queryBuilder = this.query()
+    getJobByIdForRecruiter(jobId) {
+        return this.query()
             .where('id', jobId)
             .whereNull('deleted_at')
-            .update(data);
-        if (trx) queryBuilder.transacting(trx);
-        return queryBuilder;
-    }
-
-    #buildGetJobsQuery(filters) {
-        const query = this.query()
-            .where('status', 'open')
-            .whereNull('deleted_at');
-
-        if (filters.search) {
-            query.where('title', 'ilike', `%${filters.search}%`);
-        }
-        if (filters.job_type) {
-            query.where('job_type', filters.job_type);
-        }
-        if (filters.work_mode) {
-            query.where('work_mode', filters.work_mode);
-        }
-        if (filters.location) {
-            query.where('location', 'ilike', `%${filters.location}%`);
-        }
-        if (filters.min_salary) {
-            query.where('salary_min', '>=', filters.min_salary);
-        }
-
-        return query;
-    }
-
-    getJobs(filters, offset, limit) {
-        return this.#buildGetJobsQuery(filters)
             .select(
                 'id',
                 'company_id',
@@ -76,16 +45,79 @@ class Repository extends DataRepository {
                 'latitude',
                 'longitude',
                 'working_time',
+                'description',
+                'status',
                 'created_at',
-                'updated_at'
+                'updated_at',
             )
-            .orderBy('created_at', 'desc')
+            .first();
+    }
+
+    updateJobById(jobId, data, trx = null) {
+        const queryBuilder = this.query()
+            .where('id', jobId)
+            .whereNull('deleted_at')
+            .update(data);
+        if (trx) queryBuilder.transacting(trx);
+        return queryBuilder;
+    }
+
+    #buildGetJobsQuery(filters) {
+        const query = this.query()
+            .leftJoin('companies', 'jobs.company_id', 'companies.id')
+            .where('jobs.status', 'open')
+            .whereNull('jobs.deleted_at');
+
+        if (filters.search) {
+            query.where(builder => {
+                builder.where('jobs.title', 'ilike', `%${filters.search}%`)
+                    .orWhere('companies.name', 'ilike', `%${filters.search}%`);
+            });
+        }
+        if (filters.job_type) {
+            query.where('jobs.job_type', filters.job_type);
+        }
+        if (filters.work_mode) {
+            query.where('jobs.work_mode', filters.work_mode);
+        }
+        if (filters.location) {
+            query.where('jobs.location', 'ilike', `%${filters.location}%`);
+        }
+        if (filters.min_salary) {
+            query.where('jobs.salary_min', '>=', filters.min_salary);
+        }
+
+        return query;
+    }
+
+    getJobs(filters, offset, limit) {
+        return this.#buildGetJobsQuery(filters)
+            .select(
+                'jobs.id',
+                'jobs.company_id',
+                'jobs.title',
+                'jobs.job_type',
+                'jobs.work_mode',
+                'jobs.experience_required',
+                'jobs.skills',
+                'jobs.salary_min',
+                'jobs.salary_max',
+                'jobs.location',
+                'jobs.latitude',
+                'jobs.longitude',
+                'jobs.working_time',
+                'jobs.created_at',
+                'jobs.updated_at',
+                'companies.name as company_name',
+                'companies.logo_url as company_logo_url'
+            )
+            .orderBy('jobs.created_at', 'desc')
             .limit(limit)
             .offset(offset);
     }
 
     async countJobs(filters) {
-        const result = await this.#buildGetJobsQuery(filters).count('* as total').first();
+        const result = await this.#buildGetJobsQuery(filters).count('jobs.id as total').first();
         return parseInt(result.total, 10) || 0;
     }
 
