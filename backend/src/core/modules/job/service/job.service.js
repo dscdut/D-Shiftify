@@ -1,7 +1,7 @@
-import { NotFoundException } from "packages/httpException";
-import { ForbiddenException } from "packages/httpException/ForbiddenException";
-import { JobRepository } from "../repository/job.repository";
-import connection, { getTransaction } from "core/database";
+import { NotFoundException } from 'packages/httpException';
+import { ForbiddenException } from 'packages/httpException/ForbiddenException';
+import connection, { getTransaction } from 'core/database';
+import { JobRepository } from '../repository/job.repository';
 
 class Service {
     constructor() {
@@ -93,7 +93,7 @@ class Service {
             }
 
             await trx.commit();
-            
+
             return {
                 id: jobId,
                 message: 'Job created successfully',
@@ -102,6 +102,47 @@ class Service {
             await trx.rollback();
             throw error;
         }
+    }
+
+    async updateJobById(jobId, data, userId) {
+        const job = await this.jobRepository.getJobById(jobId);
+        if (!job) {
+            throw new NotFoundException('Job not found');
+        }
+
+        const company = await connection('companies')
+            .where('user_id', userId)
+            .whereNull('deleted_at')
+            .first();
+
+        if (!company || job.company_id !== company.id) {
+            throw new ForbiddenException('You do not have permission to update this job');
+        }
+
+        // Stringify skills array of objects for PostgreSQL jsonb column compatibility if present
+        if (data.skills) {
+            data.skills = JSON.stringify(data.skills);
+        }
+
+        const trx = await getTransaction();
+        try {
+            await this.jobRepository.update(
+                jobId,
+                {
+                    ...data,
+                    updated_at: new Date(),
+                },
+                trx,
+            );
+            await trx.commit();
+        } catch (error) {
+            await trx.rollback();
+            throw error;
+        }
+
+        return {
+            message: 'Job updated successfully',
+        };
     }
 }
 

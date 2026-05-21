@@ -26,6 +26,15 @@ class Repository extends DataRepository {
             )
             .first();
     }
+
+    updateJobById(jobId, data, trx = null) {
+        const queryBuilder = this.query()
+            .where('id', jobId)
+            .whereNull('deleted_at')
+            .update(data);
+        if (trx) queryBuilder.transacting(trx);
+        return queryBuilder;
+    }
 }
 
 export const JobRepository = new Repository('jobs');
