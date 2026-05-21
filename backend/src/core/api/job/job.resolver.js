@@ -1,9 +1,9 @@
 import { Module } from 'packages/handler/Module';
-import { JobController } from './job.controller';
-import { ValidateJobIdInterceptor } from 'core/modules/job';
+import { ValidateJobIdInterceptor, PostJobInterceptor, UpdateJobInterceptor } from 'core/modules/job';
 import { hasRecruiterRole } from 'core/modules/auth/guard/role.manager';
 import { RecordUuid } from 'core/common/swagger/record-uuid';
-import { PostJobInterceptor } from 'core/modules/job';
+
+import { JobController } from './job.controller';
 
 export const JobResolver = Module.builder()
     .addPrefix({
@@ -34,6 +34,16 @@ export const JobResolver = Module.builder()
             body: 'PostJobDto',
             interceptors: [PostJobInterceptor],
             controller: JobController.createJob,
+            preAuthorization: true,
+            guards: [hasRecruiterRole]
+        },
+        {
+            route: '/:id',
+            method: 'patch',
+            params: [RecordUuid],
+            body: 'UpdateJobDto',
+            interceptors: [ValidateJobIdInterceptor, UpdateJobInterceptor],
+            controller: JobController.updateJobById,
             preAuthorization: true,
             guards: [hasRecruiterRole]
         }
