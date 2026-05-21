@@ -11,6 +11,7 @@ const PUBLIC = {
 // Common private routes: shared routes accessible after authentication.
 const COMMON_PRIVATE = {
   ACCOUNT_SETTINGS: '/account/settings',
+  CHAT: '/chat',
   CALL: '/call',
   VIDEO_CALL: '/video-call'
 } as const

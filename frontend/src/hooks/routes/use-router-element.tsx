@@ -15,6 +15,7 @@ const Login = lazy(() => import('@/pages/auth/login'))
 const Register = lazy(() => import('@/pages/auth/register'))
 const VerifyAcountEmail = lazy(() => import('@/pages/verify-account-email/VerifyAcountEmail'))
 const AccountSettingsPage = lazy(() => import('@/pages/account/settings'))
+const ChatPage = lazy(() => import('@/pages/communication/chat'))
 const CallPage = lazy(() => import('@/pages/communication/call'))
 const VideoCallPage = lazy(() => import('@/pages/communication/video-call'))
 const DisabilityDashboardPage = lazy(() => import('@/pages/disability/dashboard'))
@@ -57,6 +58,7 @@ export default function useRoutesElements() {
         <Route path={ROUTE.PUBLIC.LOGIN} element={<Login />} />
         <Route path={ROUTE.PUBLIC.REGISTER} element={<Register />} />
         <Route path={ROUTE.PUBLIC.VERIFY_ACCOUNT_EMAIL} element={<VerifyAcountEmail />} />
+        <Route path={ROUTE.COMMON_PRIVATE.CHAT} element={<ChatPage />} />
 
         {/* Client protected routes */}
         <Route element={<ProtectedRoute redirectPath={ROUTE.PUBLIC.LOGIN} />}>
