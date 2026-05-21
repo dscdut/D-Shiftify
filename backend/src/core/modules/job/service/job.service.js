@@ -144,6 +144,15 @@ class Service {
             message: 'Job updated successfully',
         };
     }
+
+    async getJobs(query) {
+        const { page = 1, limit = 10 } = query;
+        const offset = (page - 1) * limit;
+        const data = await this.jobRepository.getJobs(query, offset, limit);
+        const total = await this.jobRepository.countJobs(query);
+
+        return { data, total, page, limit };
+    }
 }
 
 export const JobService = new Service();

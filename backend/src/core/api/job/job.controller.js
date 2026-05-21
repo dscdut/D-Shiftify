@@ -1,7 +1,7 @@
 import { getUserContext } from 'packages/authModel/module/user';
 import { JobService } from '../../modules/job/service/job.service';
 import { ValidHttpResponse } from '../../../packages/handler/response/validHttp.response';
-import { UpdateJobDto, PostJobDto } from '../../modules/job/dto';
+import { UpdateJobDto, PostJobDto, GetJobsDto } from '../../modules/job/dto';
 
 class Controller {
     constructor() {
@@ -50,6 +50,15 @@ class Controller {
         return ValidHttpResponse.toOkResponse({
             status: 'success',
             message: data.message,
+        });
+    }
+
+    getJobs = async req => {
+        const data = await this.service.getJobs(GetJobsDto(req.query));
+        return ValidHttpResponse.toOkResponse({
+            status: 'success',
+            message: 'Get jobs successfully',
+            data,
         });
     }
 }

@@ -1,7 +1,8 @@
 import { Module } from 'packages/handler/Module';
-import { ValidateJobIdInterceptor, PostJobInterceptor, UpdateJobInterceptor } from 'core/modules/job';
+import { ValidateJobIdInterceptor, PostJobInterceptor, UpdateJobInterceptor, GetJobsInterceptor } from 'core/modules/job';
 import { hasRecruiterRole } from 'core/modules/auth/guard/role.manager';
 import { RecordUuid } from 'core/common/swagger/record-uuid';
+import { QueryCriteriaDocument } from 'core/common/swagger/filter';
 
 import { JobController } from './job.controller';
 
@@ -46,5 +47,20 @@ export const JobResolver = Module.builder()
             controller: JobController.updateJobById,
             preAuthorization: true,
             guards: [hasRecruiterRole]
+        },
+        {
+            route: '/',
+            method: 'get',
+            params: [
+                QueryCriteriaDocument.page(),
+                QueryCriteriaDocument.limit(),
+                QueryCriteriaDocument.search('Search by title'),
+                QueryCriteriaDocument.job_type(),
+                QueryCriteriaDocument.work_mode(),
+                QueryCriteriaDocument.location(),
+                QueryCriteriaDocument.min_salary()
+            ],
+            interceptors: [GetJobsInterceptor],
+            controller: JobController.getJobs,
         }
     ]);
