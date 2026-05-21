@@ -54,11 +54,17 @@ class Controller {
     }
 
     getJobs = async req => {
-        const data = await this.service.getJobs(GetJobsDto(req.query));
+        const { data, total, page, limit, total_pages } = await this.service.getJobs(GetJobsDto(req.query));
         return ValidHttpResponse.toOkResponse({
             status: 'success',
             message: 'Get jobs successfully',
             data,
+            meta: {
+                total,
+                page,
+                limit,
+                total_pages,
+            },
         });
     }
 
