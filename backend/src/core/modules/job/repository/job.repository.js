@@ -88,6 +88,105 @@ class Repository extends DataRepository {
         const result = await this.#buildGetJobsQuery(filters).count('* as total').first();
         return parseInt(result.total, 10) || 0;
     }
+
+    #buildGetAdminJobsQuery(filters) {
+        const query = this.query()
+            .leftJoin('companies', 'jobs.company_id', 'companies.id')
+            .whereNull('jobs.deleted_at');
+
+        if (filters.status) {
+            query.where('jobs.status', filters.status);
+        }
+        if (filters.search) {
+            query.where(builder => {
+                builder.where('jobs.title', 'ilike', `%${filters.search}%`)
+                    .orWhere('companies.name', 'ilike', `%${filters.search}%`);
+            });
+        }
+
+        return query;
+    }
+
+    getAdminJobs(filters, offset, limit) {
+        return this.#buildGetAdminJobsQuery(filters)
+            .select(
+                'jobs.id',
+                'jobs.company_id',
+                'jobs.title',
+                'jobs.job_type',
+                'jobs.work_mode',
+                'jobs.experience_required',
+                'jobs.skills',
+                'jobs.salary_min',
+                'jobs.salary_max',
+                'jobs.location',
+                'jobs.latitude',
+                'jobs.longitude',
+                'jobs.working_time',
+                'jobs.status',
+                'jobs.created_at',
+                'jobs.updated_at',
+                'companies.name as company_name',
+                'companies.logo_url as company_logo_url'
+            )
+            .orderBy('jobs.created_at', 'desc')
+            .limit(limit)
+            .offset(offset);
+    }
+
+    async countAdminJobs(filters) {
+        const result = await this.#buildGetAdminJobsQuery(filters)
+            .count('jobs.id as total')
+            .first();
+        return parseInt(result.total, 10) || 0;
+    }
+
+    #buildGetRecruiterJobsQuery(companyId, filters) {
+        const query = this.query()
+            .leftJoin('companies', 'jobs.company_id', 'companies.id')
+            .where('jobs.company_id', companyId)
+            .whereNull('jobs.deleted_at');
+
+        if (filters.status) {
+            query.where('jobs.status', filters.status);
+        }
+
+        return query;
+    }
+
+    getRecruiterJobs(companyId, filters, offset, limit) {
+        return this.#buildGetRecruiterJobsQuery(companyId, filters)
+            .select(
+                'jobs.id',
+                'jobs.company_id',
+                'jobs.title',
+                'jobs.job_type',
+                'jobs.work_mode',
+                'jobs.experience_required',
+                'jobs.skills',
+                'jobs.salary_min',
+                'jobs.salary_max',
+                'jobs.location',
+                'jobs.latitude',
+                'jobs.longitude',
+                'jobs.working_time',
+                'jobs.status',
+                'jobs.created_at',
+                'jobs.updated_at',
+                'companies.name as company_name',
+                'companies.logo_url as company_logo_url'
+            )
+            .orderBy('jobs.created_at', 'desc')
+            .limit(limit)
+            .offset(offset);
+    }
+
+    async countRecruiterJobs(companyId, filters) {
+        const result = await this.#buildGetRecruiterJobsQuery(companyId, filters)
+            .count('jobs.id as total')
+            .first();
+        return parseInt(result.total, 10) || 0;
+    }
 }
 
 export const JobRepository = new Repository('jobs');

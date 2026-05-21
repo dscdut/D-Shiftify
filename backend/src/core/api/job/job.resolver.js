@@ -1,6 +1,6 @@
 import { Module } from 'packages/handler/Module';
-import { ValidateJobIdInterceptor, PostJobInterceptor, UpdateJobInterceptor, GetJobsInterceptor } from 'core/modules/job';
-import { hasRecruiterRole } from 'core/modules/auth/guard/role.manager';
+import { ValidateJobIdInterceptor, PostJobInterceptor, UpdateJobInterceptor, GetJobsInterceptor, GetAdminJobsInterceptor, GetRecruiterJobsInterceptor } from 'core/modules/job';
+import { hasRecruiterRole, hasAdminRole } from 'core/modules/auth/guard/role.manager';
 import { RecordUuid } from 'core/common/swagger/record-uuid';
 import { QueryCriteriaDocument } from 'core/common/swagger/filter';
 
@@ -64,3 +64,49 @@ export const JobResolver = Module.builder()
             controller: JobController.getJobs,
         }
     ]);
+
+export const AdminJobResolver = Module.builder()
+    .addPrefix({
+        prefixPath: '/v1/admin/jobs',
+        tag: 'job',
+        module: 'AdminJobModule',
+    })
+    .register([
+        {
+            route: '/',
+            method: 'get',
+            params: [
+                QueryCriteriaDocument.page(),
+                QueryCriteriaDocument.limit(),
+                QueryCriteriaDocument.search('Search by title or company name'),
+                QueryCriteriaDocument.status('Filter by status (open, closed, paused)'),
+            ],
+            interceptors: [GetAdminJobsInterceptor],
+            controller: JobController.getAdminJobs,
+            preAuthorization: true,
+            guards: [hasAdminRole],
+        }
+    ]);
+
+export const RecruiterJobResolver = Module.builder()
+    .addPrefix({
+        prefixPath: '/v1/recruiter/jobs',
+        tag: 'job',
+        module: 'RecruiterJobModule',
+    })
+    .register([
+        {
+            route: '/',
+            method: 'get',
+            params: [
+                QueryCriteriaDocument.page(),
+                QueryCriteriaDocument.limit(),
+                QueryCriteriaDocument.status('Filter by status (open, closed, paused)'),
+            ],
+            interceptors: [GetRecruiterJobsInterceptor],
+            controller: JobController.getRecruiterJobs,
+            preAuthorization: true,
+            guards: [hasRecruiterRole],
+        }
+    ]);
+

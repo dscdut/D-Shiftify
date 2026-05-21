@@ -1,7 +1,7 @@
 import { getUserContext } from 'packages/authModel/module/user';
 import { JobService } from '../../modules/job/service/job.service';
 import { ValidHttpResponse } from '../../../packages/handler/response/validHttp.response';
-import { UpdateJobDto, PostJobDto, GetJobsDto } from '../../modules/job/dto';
+import { UpdateJobDto, PostJobDto, GetJobsDto, GetAdminJobsDto, GetRecruiterJobsDto } from '../../modules/job/dto';
 
 class Controller {
     constructor() {
@@ -59,6 +59,37 @@ class Controller {
             status: 'success',
             message: 'Get jobs successfully',
             data,
+        });
+    }
+
+    getAdminJobs = async req => {
+        const { data, total, page, limit, totalPages } = await this.service.getAdminJobs(GetAdminJobsDto(req.query));
+        return ValidHttpResponse.toOkResponse({
+            status: 'success',
+            message: 'Get jobs successfully',
+            data,
+            meta: {
+                total,
+                page,
+                limit,
+                total_pages: totalPages,
+            },
+        });
+    }
+
+    getRecruiterJobs = async req => {
+        const userId = getUserContext(req).payload.id;
+        const { data, total, page, limit, totalPages } = await this.service.getRecruiterJobs(GetRecruiterJobsDto(req.query), userId);
+        return ValidHttpResponse.toOkResponse({
+            status: 'success',
+            message: 'Get jobs successfully',
+            data,
+            meta: {
+                total,
+                page,
+                limit,
+                total_pages: totalPages,
+            },
         });
     }
 }

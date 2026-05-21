@@ -70,6 +70,13 @@ export const QueryCriteriaDocument = {
         required: false,
         type: 'int',
         description: desc
+    }),
+    status: (desc = 'Job status (open, closed, paused)') => SwaggerDocument.ApiParams({
+        name: 'status',
+        paramsIn: 'query',
+        required: false,
+        type: 'string',
+        description: desc
     })
 };
 

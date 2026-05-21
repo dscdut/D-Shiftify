@@ -153,6 +153,60 @@ class Service {
 
         return { data, total, page, limit };
     }
+
+    formatJobResponse(job) {
+        return {
+            id: job.id,
+            title: job.title,
+            status: job.status,
+            company: {
+                name: job.company_name,
+                logo_url: job.company_logo_url,
+            },
+            location: job.location,
+            job_type: job.job_type,
+            work_mode: job.work_mode,
+            salary: {
+                min: job.salary_min,
+                max: job.salary_max,
+                currency: 'VND',
+            },
+            created_at: job.created_at,
+        };
+    }
+
+    async getAdminJobs(query) {
+        const { page = 1, limit = 10 } = query;
+        const offset = (page - 1) * limit;
+        const rawData = await this.jobRepository.getAdminJobs(query, offset, limit);
+        const total = await this.jobRepository.countAdminJobs(query);
+        const totalPages = Math.ceil(total / limit) || 0;
+
+        const data = rawData.map(job => this.formatJobResponse(job));
+
+        return { data, total, page, limit, totalPages };
+    }
+
+    async getRecruiterJobs(query, userId) {
+        const company = await connection('companies')
+            .where('user_id', userId)
+            .whereNull('deleted_at')
+            .first();
+
+        if (!company) {
+            throw new ForbiddenException('You must create a company profile first');
+        }
+
+        const { page = 1, limit = 10 } = query;
+        const offset = (page - 1) * limit;
+        const rawData = await this.jobRepository.getRecruiterJobs(company.id, query, offset, limit);
+        const total = await this.jobRepository.countRecruiterJobs(company.id, query);
+        const totalPages = Math.ceil(total / limit) || 0;
+
+        const data = rawData.map(job => this.formatJobResponse(job));
+
+        return { data, total, page, limit, totalPages };
+    }
 }
 
 export const JobService = new Service();
