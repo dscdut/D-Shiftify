@@ -15,6 +15,6 @@ export const ModuleResolver = HandlerResolver
         UserResolver,
         MediaResolver,
         ProfileResolver,
-        ApplicationsResolver
+        ApplicationsResolver,
         JobResolver,
     ]);
