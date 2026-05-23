@@ -2,6 +2,7 @@
 import * as express from 'express';
 import methodOverride from 'method-override';
 import swaggerUi from 'swagger-ui-express';
+import cookieParser from 'cookie-parser';
 import { connectDatabase } from 'core/database';
 import { InvalidResolver, InvalidFilter } from '../common/exceptions/system';
 import { logger } from '../../packages/logger';
@@ -81,6 +82,7 @@ export class AppBundle {
          * Setup basic express
          */
         this.app.use(express.json({ limit: '50mb' }));
+        this.app.use(cookieParser());
         this.app.use(express.urlencoded({ extended: false, limit: '50mb' }));
 
         /**

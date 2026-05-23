@@ -27,6 +27,7 @@ exports.up = async knex => {
             .inTable('assistive_devices')
             .onDelete('CASCADE');
         table.timestamps(false, true);
+        table.dateTime('deleted_at').defaultTo(null);
 
         table.unique(['profile_id', 'device_id']);
         table.index('profile_id');

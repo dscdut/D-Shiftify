@@ -9,6 +9,8 @@ export class SpecificRoleGuard {
 
     canActive(req) {
         const user = getUserContext(req);
-        return user.roles.some(role => role === this.#role);
+        if (!user || !user.roles) return false;
+        const targetRole = typeof this.#role === 'object' && this.#role.name ? this.#role.name : this.#role;
+        return user.roles.some(role => typeof role === 'string' && role.toLowerCase() === targetRole.toLowerCase());
     }
 }

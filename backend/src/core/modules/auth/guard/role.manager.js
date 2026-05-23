@@ -7,3 +7,5 @@ export const hasAdminRole = new SpecificRoleGuard(Role.ADMIN);
 export const hasSuperAdminRole = new SpecificRoleGuard(Role.SUPER_ADMIN);
 
 export const hasAdminOrSuperAdminRole = new UnionRoleGuard(Role.ADMIN.name, Role.SUPER_ADMIN.name);
+
+export const hasCandidateRole = new SpecificRoleGuard('candidate');

@@ -1,6 +1,7 @@
-export const JwtPayload = user => (
+export const JwtPayload = (user, ref) => (
     {
         id: user.id,
-        roles: user.roles
+        roles: user.roles,
+        ref
     }
 );
