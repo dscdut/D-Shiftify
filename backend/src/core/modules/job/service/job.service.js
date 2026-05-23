@@ -171,7 +171,16 @@ class Service {
             job_type: job.job_type,
             work_mode: job.work_mode,
             experience_required: job.experience_required,
-            skills: typeof job.skills === 'string' ? JSON.parse(job.skills) : job.skills,
+            skills: (() => {
+                if (typeof job.skills === 'string') {
+                    try {
+                        return JSON.parse(job.skills);
+                    } catch {
+                        return [];
+                    }
+                }
+                return job.skills;
+            })(),
             salary_min: job.salary_min,
             salary_max: job.salary_max,
             location: job.location,

@@ -26,18 +26,20 @@ ApiDocument.addModel('UpdateJobDto', {
     status: SwaggerDocument.ApiProperty({ type: 'string', enum: ['open', 'closed', 'paused'] }),
 });
 
-export const UpdateJobDto = body => ({
-    title: body.title,
-    job_type: body.job_type,
-    work_mode: body.work_mode,
-    experience_required: body.experience_required,
-    skills: body.skills,
-    salary_min: body.salary_min,
-    salary_max: body.salary_max,
-    location: body.location,
-    latitude: body.latitude,
-    longitude: body.longitude,
-    working_time: body.working_time,
-    description: body.description,
-    status: body.status,
-});
+export const UpdateJobDto = body => {
+    const dto = {};
+    if (body.title !== undefined) dto.title = body.title;
+    if (body.job_type !== undefined) dto.job_type = body.job_type;
+    if (body.work_mode !== undefined) dto.work_mode = body.work_mode;
+    if (body.experience_required !== undefined) dto.experience_required = body.experience_required;
+    if (body.skills !== undefined) dto.skills = body.skills;
+    if (body.salary_min !== undefined) dto.salary_min = body.salary_min;
+    if (body.salary_max !== undefined) dto.salary_max = body.salary_max;
+    if (body.location !== undefined) dto.location = body.location;
+    if (body.latitude !== undefined) dto.latitude = body.latitude;
+    if (body.longitude !== undefined) dto.longitude = body.longitude;
+    if (body.working_time !== undefined) dto.working_time = body.working_time;
+    if (body.description !== undefined) dto.description = body.description;
+    if (body.status !== undefined) dto.status = body.status;
+    return dto;
+};
