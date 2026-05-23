@@ -4,6 +4,7 @@ import { ApiDocument } from 'core/config/swagger.config';
 import { HandlerResolver } from '../../packages/handler/HandlerResolver';
 import { AuthResolver } from './auth/auth.resolver';
 import { ProfileResolver } from './profile/profile.resolver';
+import { ApplicationsResolver } from './applications/applications.resolver';
 
 export const ModuleResolver = HandlerResolver
     .builder()
@@ -13,4 +14,5 @@ export const ModuleResolver = HandlerResolver
         UserResolver,
         MediaResolver,
         ProfileResolver,
+        ApplicationsResolver
     ]);
