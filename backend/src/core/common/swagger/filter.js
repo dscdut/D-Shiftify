@@ -35,6 +35,48 @@ export const QueryCriteriaDocument = {
         required: false,
         type: 'string',
         description: desc
+    }),
+    limit: (desc = 'Max size: 100. Default: 10') => SwaggerDocument.ApiParams({
+        name: 'limit',
+        paramsIn: 'query',
+        required: false,
+        type: 'int',
+        description: desc
+    }),
+    job_type: (desc = 'Job type') => SwaggerDocument.ApiParams({
+        name: 'job_type',
+        paramsIn: 'query',
+        required: false,
+        type: 'string',
+        description: desc
+    }),
+    work_mode: (desc = 'Work mode (remote, onsite, hybrid)') => SwaggerDocument.ApiParams({
+        name: 'work_mode',
+        paramsIn: 'query',
+        required: false,
+        type: 'string',
+        description: desc
+    }),
+    location: (desc = 'Location') => SwaggerDocument.ApiParams({
+        name: 'location',
+        paramsIn: 'query',
+        required: false,
+        type: 'string',
+        description: desc
+    }),
+    min_salary: (desc = 'Minimum salary') => SwaggerDocument.ApiParams({
+        name: 'min_salary',
+        paramsIn: 'query',
+        required: false,
+        type: 'int',
+        description: desc
+    }),
+    status: (desc = 'Job status (open, closed, paused)') => SwaggerDocument.ApiParams({
+        name: 'status',
+        paramsIn: 'query',
+        required: false,
+        type: 'string',
+        description: desc
     })
 };
 
