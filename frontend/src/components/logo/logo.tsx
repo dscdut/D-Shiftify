@@ -5,7 +5,7 @@ import { ROUTE } from '@/core/constants/path'
 
 const Logo = ({ className = '' }) => {
   return (
-    <Link to={ROUTE.HOME}>
+    <Link to={ROUTE.PUBLIC.HOME}>
       <motion.div
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}

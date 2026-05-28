@@ -52,3 +52,6 @@ jspm_packages/
 .fusebox/
 
 .idea/
+Dockerfile
+
+plan/

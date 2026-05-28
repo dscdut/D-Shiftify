@@ -24,5 +24,6 @@ dist-ssr
 *.sln
 *.sw?
 yarn.lock
-
+pnpm-lock.yaml
 /yarn.lock
+.history/

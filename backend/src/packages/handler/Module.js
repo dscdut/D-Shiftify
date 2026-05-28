@@ -104,7 +104,7 @@ export class Module {
 
     #createHandler = controller => async (request, response) => {
         try {
-            const data = await controller(request);
+            const data = await controller(request, response);
             if (!(data instanceof HttpResponse)) {
                 return InValidHttpResponse.toInternalResponse(
                     `${data.constructor.name} is not instance of HttpResponse.`
